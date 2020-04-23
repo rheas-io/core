@@ -1,0 +1,39 @@
+{
+  "name": "@laress/core",
+  "version": "0.0.0",
+  "description": "Laress framework's core server module",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laress-io/core.git"
+  },
+  "keywords": [
+    "laress",
+    "express",
+    "framework",
+    "nodejs",
+    "laravel",
+    "server",
+    "library"
+  ],
+  "scripts": {
+    "tsc": "tsc",
+    "test": "jest",
+    "coverage": "jest --coverage",
+    "copypackage": "cp -rf package.json build/src",
+    "build": "tsc && npm run copypackage",
+    "copypackage_dev": "cp -rf package.json build_dev/src",
+    "build-dev": "tsc --outDir ./build_dev && npm run copypackage_dev"
+  },
+  "devDependencies": {
+    "jest": "^25.4.0",
+    "ts-jest": "^25.4.0",
+    "typescript": "^3.8.3"
+  },
+  "author": "Kalesh Kaladharan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/laress-io/core/issues"
+  },
+  "homepage": "https://github.com/laress-io/core#readme"
+}
