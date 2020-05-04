@@ -126,7 +126,7 @@ export class Container implements IContainer {
      * @param key The binding key to retreive
      * @param defaultValue The default value to return, if no bindings found
      */
-    public get<T = any>(key: string, defaultValue: T | null = null): T | null {
+    public get<T>(key: string, defaultValue: T | null = null): T | null {
 
         if (!this.bindings.hasOwnProperty(key)) {
             return defaultValue === undefined ? null : defaultValue;
