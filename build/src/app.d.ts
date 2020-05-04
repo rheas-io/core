@@ -1,8 +1,8 @@
 /// <reference types="node" />
 import { Container } from "./container";
 import { IApp } from "@laress/contracts/core/app";
-import { KeyValue, ClassOf } from "@laress/contracts";
 import { IncomingMessage, ServerResponse } from "http";
+import { KeyValue, ClassOf } from "@laress/contracts";
 import { IServiceProvider, IConfigManager } from "@laress/contracts/core";
 declare class Application extends Container implements IApp {
     /**

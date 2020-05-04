@@ -7,8 +7,8 @@ import { ConfigManager } from "./configManager";
 import { IApp } from "@laress/contracts/core/app";
 import { IRouter } from "@laress/contracts/routes";
 import { IResponse } from "@laress/contracts/core/response";
-import { KeyValue, ClassOf, IRequest, IDbConnector } from "@laress/contracts";
 import http, { Server, IncomingMessage, ServerResponse } from "http";
+import { KeyValue, ClassOf, IRequest, IDbConnector } from "@laress/contracts";
 import { IServiceProvider, IConfigManager, IServerCreator } from "@laress/contracts/core";
 
 class Application extends Container implements IApp {
