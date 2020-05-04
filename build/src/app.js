@@ -1,124 +1,111 @@
-import path from "path";
-import https, { ServerOptions } from "https";
-import { Str } from "@laress/support";
-import { Container } from "./container";
-import { Request, Response } from "./http";
-import { ConfigManager } from "./configManager";
-import { IApp } from "@laress/contracts/core/app";
-import { KeyValue, ClassOf } from "@laress/contracts";
-import http, { Server, IncomingMessage, ServerResponse } from "http";
-import { IServiceProvider, IConfigManager, IServerCreator } from "@laress/contracts/core";
-
-class Application extends Container implements IApp {
-
-    /**
-     * Stores the root path of the application. This root path is necessary
-     * to load different modules of the application.
-     * 
-     * @var string
-     */
-    protected _rootPath: string;
-
-    /**
-     * Stores the boot status of this service provider.
-     * 
-     * @var boolean
-     */
-    protected _booted: boolean = false;
-
-    /**
-     * Stores the registration status of this service provider.
-     * 
-     * @var boolean
-     */
-    protected _registered: boolean = false;
-
-    /**
-     * Application configurations manager. Handles the parsing and retreival
-     * of configuration files.
-     * 
-     * @var IConfigManager
-     */
-    protected _configManager: IConfigManager | null = null;
-
-    /**
-     * Stores all the service providers of the application.
-     * 
-     * @var object
-     */
-    protected _services: KeyValue<ClassOf<IServiceProvider>> = {};
-
-    /**
-     * Stores the alias of all the registered service providers.
-     * 
-     * @var array
-     */
-    protected _loadedServices: KeyValue<IServiceProvider> = {};
-
-    /**
-     * Stores the alias of all the deferred services, which can be loaded
-     * later.
-     * 
-     * @var array
-     */
-    protected _deferredServices: string[] = [];
-
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var path_1 = __importDefault(require("path"));
+var https_1 = __importDefault(require("https"));
+var support_1 = require("@laress/support");
+var container_1 = require("./container");
+var http_1 = require("./http");
+var configManager_1 = require("./configManager");
+var http_2 = __importDefault(require("http"));
+var Application = /** @class */ (function (_super) {
+    __extends(Application, _super);
     /**
      * Creates a new singleton Laress Application. This class acts as a container
      * where other instances/objects can be mount. The laress server has to be started
      * using startApp method of this class.
-     * 
+     *
      * Before starting the app, a rootpath has to be set.
      */
-    constructor(rootPath: string) {
-        super();
-
-        this._rootPath = rootPath;
-
-        this.registerBaseBindings();
+    function Application(rootPath) {
+        var _this = _super.call(this) || this;
+        /**
+         * Stores the boot status of this service provider.
+         *
+         * @var boolean
+         */
+        _this._booted = false;
+        /**
+         * Stores the registration status of this service provider.
+         *
+         * @var boolean
+         */
+        _this._registered = false;
+        /**
+         * Application configurations manager. Handles the parsing and retreival
+         * of configuration files.
+         *
+         * @var IConfigManager
+         */
+        _this._configManager = null;
+        /**
+         * Stores all the service providers of the application.
+         *
+         * @var object
+         */
+        _this._services = {};
+        /**
+         * Stores the alias of all the registered service providers.
+         *
+         * @var array
+         */
+        _this._loadedServices = {};
+        /**
+         * Stores the alias of all the deferred services, which can be loaded
+         * later.
+         *
+         * @var array
+         */
+        _this._deferredServices = [];
+        _this._rootPath = rootPath;
+        _this.registerBaseBindings();
+        return _this;
     }
-
     /**
      * Registers this app and and config bindings to the container.
      * Also sets the container instance to this object.
      */
-    private registerBaseBindings() {
-
-        Container.setInstance(this);
-
-        this.singleton('app', () => this);
-
-        this.singleton('config', () => this.registerConfigManager());
-    }
-
+    Application.prototype.registerBaseBindings = function () {
+        var _this = this;
+        container_1.Container.setInstance(this);
+        this.singleton('app', function () { return _this; });
+        this.singleton('config', function () { return _this.registerConfigManager(); });
+    };
     /**
      * Registers the configuration manager on the app instance. Configuration
      * manager is reponsible for handling the different configuration files.
-     * 
+     *
      * @return IConfigManager
      */
-    private registerConfigManager(): IConfigManager {
-        const configPath = Str.trimEnd(this.getRootPath(), path.sep) + path.sep + this.get;
-
-        this._configManager = new ConfigManager(configPath);
-
+    Application.prototype.registerConfigManager = function () {
+        var configPath = support_1.Str.trimEnd(this.getRootPath(), path_1.default.sep) + path_1.default.sep + this.get;
+        this._configManager = new configManager_1.ConfigManager(configPath);
         return this._configManager;
-    }
-
+    };
     /**
      * Registers the necessary service providers. Deferred services are
-     * cached in the deferred providers list and are loaded only when a 
-     * binding request is made to the service.
+     * cached in the deferred providers list.
      */
-    public register(): void {
-        if (this.isRegistered()) {
-            return;
-        }
-        //@ts-ignore
-        this._services = this.config('app.providers', this._services);
-
-        for (let alias in this._services) {
-            const service = this._services[alias];
+    Application.prototype.register = function () {
+        var providers = {};
+        providers = this.config('app.providers', providers);
+        for (var alias in providers) {
+            var service = providers[alias];
             // A service can be deferred to load when it is absolutely needed.
             // Such services should have a provides property that states, to which
             // alias it should be loaded.
@@ -132,219 +119,185 @@ class Application extends Container implements IApp {
             }
         }
         this.setRegistered(true);
-    }
-
+    };
     /**
      * Registers a service if it is not a deferrable service and boots the
      * same if the app is already booted.
-     * 
-     * @param name 
-     * @param serviceProvider 
+     *
+     * @param name
+     * @param serviceProvider
      */
-    public registerService(name: string, serviceProvider: IServiceProvider): void {
-
+    Application.prototype.registerService = function (name, serviceProvider) {
         if (this.isServiceLoaded(name)) {
-            throw new Error(`A service '${name}' is already registered. Refer the config/app file for all the services.`);
+            throw new Error("A service '" + name + "' is already registered. Refer the config/app file for all the services.");
         }
-
         serviceProvider.register();
         serviceProvider.setRegistered(true);
-
         this._loadedServices[name] = serviceProvider;
-
-        this._deferredServices = this._deferredServices.filter(serviceName => serviceName !== name);
-
+        this._deferredServices = this._deferredServices.filter(function (serviceName) { return serviceName !== name; });
         if (this.isBooted()) {
             this.bootService(serviceProvider);
         }
-    }
-
+    };
     /**
      * Registers a particular service of the given name.
-     * 
-     * @param name 
+     *
+     * @param name
      */
-    public registerServiceByName(name: string) {
+    Application.prototype.registerServiceByName = function (name) {
         if (this.isServiceLoaded(name)) {
             return;
         }
-        const service: ClassOf<IServiceProvider> = this._services[name];
-
+        var service = this._services[name];
         if (service) {
             this.registerService(name, new service(this));
         }
-    }
-
+    };
     /**
      * Checks if a service by this name is already loaded.
-     * 
-     * @param name 
+     *
+     * @param name
      */
-    public isServiceLoaded(name: string): boolean {
+    Application.prototype.isServiceLoaded = function (name) {
         return !!this._loadedServices[name];
-    }
-
+    };
     /**
      * Checks if the service is a deferred.
-     * 
-     * @param name 
+     *
+     * @param name
      */
-    public isDeferredService(name: string): boolean {
+    Application.prototype.isDeferredService = function (name) {
         return this._deferredServices.includes(name);
-    }
-
+    };
     /**
      * Boots the necessary service providers and boots each one of them.
      * Once that is done, we will update the application booted status. We will register
      * this service provider, if it is not registered yet.
      */
-    public boot(): void {
+    Application.prototype.boot = function () {
         if (this.isBooted()) {
             return;
         }
-
         if (!this.isRegistered()) {
             this.register();
         }
-
-        for (let alias in this._loadedServices) {
+        for (var alias in this._loadedServices) {
             this.bootService(this._loadedServices[alias]);
         }
-
         this.setBooted(true);
-    }
-
+    };
     /**
      * Boots a service provider. If the service is not already registered,
      * it is registered first, before performing the boot.
-     * 
-     * @param service 
+     *
+     * @param service
      */
-    public bootService(service: IServiceProvider): void {
-
+    Application.prototype.bootService = function (service) {
         if (service.isBooted()) {
             return;
         }
-
         if (!service.isRegistered()) {
             service.register();
         }
         service.boot();
         service.setBooted(true);
-    }
-
+    };
     /**
      * Starts the server after registering service providers and listen
      * for requests.
      */
-    public startApp(): void {
-
+    Application.prototype.startApp = function () {
         // Boot the application before starting the server
         this.boot();
-
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
+        this.enableHttpServer();
+        /*
         this.initDbConnection()
             .then(() => this.enableHttpServer())
             .catch(error => {
                 console.error("Error connecting to database. Server not started.");
                 console.error(error);
                 process.exit(1);
-            });
-    }
-
-    public initDbConnection(): Promise<any> {
-        throw new Error("Method not implemented.");
-    }
-
+            });*/
+    };
+    Application.prototype.initDbConnection = function () {
+        //throw new Error("Method not implemented.");
+    };
     /**
      * Request handler. When a new request is received by the core http module,
      * it will send it to this handler. From here, we will pass it to the router.
-     * 
-     * @param req 
-     * @param res 
+     *
+     * @param req
+     * @param res
      */
-    public listenRequests(req: IncomingMessage, res: ServerResponse): void {
-        const request = <Request>req;
-        const response = <Response>res;
-
+    Application.prototype.listenRequests = function (req, res) {
+        var request = req;
+        var response = res;
         response.sendHelloWorld();
-    }
-
+    };
     /**
      * Creates an http server and listens on the port specified in the app
      * configuration file.
-     * 
+     *
      * @return this
      */
-    public enableHttpServer(): IApp {
-        const port = this.normalizePort(this.config('app.port'));
-
-        this.createServer(http.createServer, port);
-
+    Application.prototype.enableHttpServer = function () {
+        var port = this.normalizePort(this.config('app.port'));
+        this.createServer(http_2.default.createServer, port);
         return this;
-    }
-
+    };
     /**
      * Creates an https server and listens on the secure_port defined in the
      * app configuration. Creating an https server also requires providing certificate
      * file paths to the
-     * 
+     *
      * @return this
      */
-    public enableHttpsServer(): IApp {
-        const port = this.normalizePort(this.config('app.secure_port'));
-
-        this.createServer(https.createServer, port);
-
+    Application.prototype.enableHttpsServer = function () {
+        var port = this.normalizePort(this.config('app.secure_port'));
+        this.createServer(https_1.default.createServer, port);
         return this;
-    }
-
+    };
     /**
      * Creates a server using the creator function and listens on the
      * given port.
-     * 
-     * @param creator 
-     * @param port 
+     *
+     * @param creator
+     * @param port
      */
-    private createServer(creator: IServerCreator, port: number, options?: ServerOptions): Server {
+    Application.prototype.createServer = function (creator, port, options) {
+        var _this = this;
         options = Object.assign({}, options, {
-            IncomingMessage: Request,
-            ServerResponse: Response
+            IncomingMessage: http_1.Request,
+            ServerResponse: http_1.Response
         });
-
-        const server = creator(options, this.listenRequests);
-
+        var server = creator(options, this.listenRequests);
         server.listen(port);
-        server.on('listening', () => this.onListening(server));
-        server.on('error', error => this.onError(error, port));
-
+        server.on('listening', function () { return _this.onListening(server); });
+        server.on('error', function (error) { return _this.onError(error, port); });
         return server;
-    }
-
+    };
     /**
      * Convert port inputs into an integer value
-     * 
+     *
      * @param val Port value
      */
-    private normalizePort(val: any) {
+    Application.prototype.normalizePort = function (val) {
         var port = parseInt(val, 10);
-
         return isNaN(port) ? val : (port >= 0 ? port : false);
-    }
-
+    };
     /**
      * Error callback to show pretty human readable error message.
-     * 
-     * @param error 
+     *
+     * @param error
      */
-    private onError(error: any, port: any) {
+    Application.prototype.onError = function (error, port) {
         if (error.syscall !== 'listen') {
             throw error;
         }
         var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
-
         // handle specific listen errors with friendly messages
         switch (error.code) {
             case 'EACCES':
@@ -356,108 +309,95 @@ class Application extends Container implements IApp {
             default:
                 throw error;
         }
-    }
-
+    };
     /**
      * Server connection success callback. Log the connection success messages.
-     * 
-     * @param server 
+     *
+     * @param server
      */
-    private onListening(server: http.Server) {
-        const addr = server.address();
-
+    Application.prototype.onListening = function (server) {
+        var addr = server.address();
         if (addr != null) {
-            const bind = typeof addr == 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+            var bind = typeof addr == 'string' ? 'pipe ' + addr : 'port ' + addr.port;
             console.log('Listening on ' + bind);
         }
-    }
-
+    };
     /**
      * Returns a configuration data for the key.
-     * 
-     * @param key 
-     * @param defaultValue 
+     *
+     * @param key
+     * @param defaultValue
      */
-    public config<T>(key: string, defaultValue?: T): T | null {
+    Application.prototype.config = function (key, defaultValue) {
         if (this._configManager == null) {
             this._configManager = this.registerConfigManager();
         }
-
         return this._configManager.get(key, defaultValue);
-    }
-
+    };
     /**
      * Sets the registration status of this service provider
-     * 
-     * @param status 
+     *
+     * @param status
      */
-    public setRegistered(status: boolean): void {
+    Application.prototype.setRegistered = function (status) {
         this._registered = status;
-    }
-
+    };
     /**
      * Sets the boot status of this service provider
-     * 
-     * @param status 
+     *
+     * @param status
      */
-    public setBooted(status: boolean): void {
+    Application.prototype.setBooted = function (status) {
         this._booted = status;
-    }
-
+    };
     /**
      * Register status of this service provider
-     * 
+     *
      * @return boolean
      */
-    public isRegistered(): boolean {
+    Application.prototype.isRegistered = function () {
         return this._registered;
-    }
-
+    };
     /**
      * Boot status of this service provider
-     * 
+     *
      * @return boolean
      */
-    public isBooted(): boolean {
+    Application.prototype.isBooted = function () {
         return this._booted;
-    }
-
+    };
     /**
      * Gets the root path of the application
-     * 
+     *
      * @return string
      */
-    public getRootPath(): string {
+    Application.prototype.getRootPath = function () {
         return this._rootPath;
-    }
-
+    };
     /**
      * Returns the asset path of the application
-     * 
+     *
      * @return string
      */
-    public getAssetPath(): string {
-        return path.resolve(this._rootPath, '..', 'assets');
-    }
-
+    Application.prototype.getAssetPath = function () {
+        return path_1.default.resolve(this._rootPath, '..', 'assets');
+    };
     /**
      * Returns the laress binding of the specified key. If a binding is not
      * found, we will check for any deferred services and register if one exist.
      * Then we will try to get the binding once again.
-     * 
+     *
      * @param key The binding key to retreive
      * @param defaultValue The default value to return, if no bindings found
      */
-    public get<T = any>(key: string, defaultValue?: T): T | null {
-        const service = super.get(key, defaultValue);
-
+    Application.prototype.get = function (key, defaultValue) {
+        var service = _super.prototype.get.call(this, key, defaultValue);
         if (service === null && this.isDeferredService(key)) {
             this.registerServiceByName(key);
-
             return this.get(key, defaultValue);
         }
         return service;
-    }
-}
-
-export default Application;
+    };
+    return Application;
+}(container_1.Container));
+exports.default = Application;

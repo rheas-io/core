@@ -19,8 +19,6 @@ var Request = /** @class */ (function (_super) {
     function Request() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    Request.prototype.parseUrl = function (url) {
-    };
     return Request;
 }(http_1.IncomingMessage));
 exports.Request = Request;
