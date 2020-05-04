@@ -17,10 +17,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
-var https_1 = __importDefault(require("https"));
 var support_1 = require("@laress/support");
 var container_1 = require("./container");
 var http_1 = require("./http");
+var https_1 = __importDefault(require("https"));
 var configManager_1 = require("./configManager");
 var http_2 = __importDefault(require("http"));
 var Application = /** @class */ (function (_super) {
@@ -99,13 +99,17 @@ var Application = /** @class */ (function (_super) {
     };
     /**
      * Registers the necessary service providers. Deferred services are
-     * cached in the deferred providers list.
+     * cached in the deferred providers list and are loaded only when a
+     * binding request is made to the service.
      */
     Application.prototype.register = function () {
-        var providers = {};
-        providers = this.config('app.providers', providers);
-        for (var alias in providers) {
-            var service = providers[alias];
+        if (this.isRegistered()) {
+            return;
+        }
+        //@ts-ignore
+        this._services = this.config('app.providers', this._services);
+        for (var alias in this._services) {
+            var service = this._services[alias];
             // A service can be deferred to load when it is absolutely needed.
             // Such services should have a provides property that states, to which
             // alias it should be loaded.
@@ -212,7 +216,6 @@ var Application = /** @class */ (function (_super) {
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
-        this.enableHttpServer();
         /*
         this.initDbConnection()
             .then(() => this.enableHttpServer())
@@ -221,9 +224,10 @@ var Application = /** @class */ (function (_super) {
                 console.error(error);
                 process.exit(1);
             });*/
+        this.enableHttpServer();
     };
     Application.prototype.initDbConnection = function () {
-        //throw new Error("Method not implemented.");
+        throw new Error("Method not implemented.");
     };
     /**
      * Request handler. When a new request is received by the core http module,
@@ -235,7 +239,12 @@ var Application = /** @class */ (function (_super) {
     Application.prototype.listenRequests = function (req, res) {
         var request = req;
         var response = res;
-        response.sendHelloWorld();
+        var router = this.get('router');
+        //if (router === null) {
+        //  throw new Error("No router defined for the application. Fix the app providers list");
+        //}
+        //router.processRequest(request, response);
+        response.end("Hello world");
     };
     /**
      * Creates an http server and listens on the port specified in the app
@@ -273,7 +282,7 @@ var Application = /** @class */ (function (_super) {
             IncomingMessage: http_1.Request,
             ServerResponse: http_1.Response
         });
-        var server = creator(options, this.listenRequests);
+        var server = creator(options, this.listenRequests.bind(this));
         server.listen(port);
         server.on('listening', function () { return _this.onListening(server); });
         server.on('error', function (error) { return _this.onError(error, port); });
@@ -391,6 +400,7 @@ var Application = /** @class */ (function (_super) {
      * @param defaultValue The default value to return, if no bindings found
      */
     Application.prototype.get = function (key, defaultValue) {
+        if (defaultValue === void 0) { defaultValue = null; }
         var service = _super.prototype.get.call(this, key, defaultValue);
         if (service === null && this.isDeferredService(key)) {
             this.registerServiceByName(key);

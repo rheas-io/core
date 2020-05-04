@@ -1,11 +1,13 @@
 import path from "path";
-import https, { ServerOptions } from "https";
 import { Str } from "@laress/support";
 import { Container } from "./container";
 import { Request, Response } from "./http";
+import https, { ServerOptions } from "https";
 import { ConfigManager } from "./configManager";
 import { IApp } from "@laress/contracts/core/app";
-import { KeyValue, ClassOf } from "@laress/contracts";
+import { IRouter } from "@laress/contracts/routes";
+import { IResponse } from "@laress/contracts/core/response";
+import { KeyValue, ClassOf, IRequest } from "@laress/contracts";
 import http, { Server, IncomingMessage, ServerResponse } from "http";
 import { IServiceProvider, IConfigManager, IServerCreator } from "@laress/contracts/core";
 
@@ -245,13 +247,15 @@ class Application extends Container implements IApp {
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
+        /*
         this.initDbConnection()
             .then(() => this.enableHttpServer())
             .catch(error => {
                 console.error("Error connecting to database. Server not started.");
                 console.error(error);
                 process.exit(1);
-            });
+            });*/
+        this.enableHttpServer();
     }
 
     public initDbConnection(): Promise<any> {
@@ -266,10 +270,17 @@ class Application extends Container implements IApp {
      * @param res 
      */
     public listenRequests(req: IncomingMessage, res: ServerResponse): void {
-        const request = <Request>req;
-        const response = <Response>res;
+        const request = <IRequest>req;
+        const response = <IResponse>res;
 
-        response.sendHelloWorld();
+        const router: IRouter | null = this.get<IRouter>('router');
+
+        if (router === null) {
+            throw new Error("No router defined for the application. Fix the app providers list");
+        }
+        router.processRequest(request, response);
+
+        response.end();
     }
 
     /**
@@ -314,7 +325,7 @@ class Application extends Container implements IApp {
             ServerResponse: Response
         });
 
-        const server = creator(options, this.listenRequests);
+        const server = creator(options, this.listenRequests.bind(this));
 
         server.listen(port);
         server.on('listening', () => this.onListening(server));
@@ -448,7 +459,7 @@ class Application extends Container implements IApp {
      * @param key The binding key to retreive
      * @param defaultValue The default value to return, if no bindings found
      */
-    public get<T = any>(key: string, defaultValue?: T): T | null {
+    public get<T>(key: string, defaultValue: T | null = null): T | null {
         const service = super.get(key, defaultValue);
 
         if (service === null && this.isDeferredService(key)) {

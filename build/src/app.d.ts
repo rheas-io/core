@@ -72,7 +72,8 @@ declare class Application extends Container implements IApp {
     private registerConfigManager;
     /**
      * Registers the necessary service providers. Deferred services are
-     * cached in the deferred providers list.
+     * cached in the deferred providers list and are loaded only when a
+     * binding request is made to the service.
      */
     register(): void;
     /**
@@ -220,6 +221,6 @@ declare class Application extends Container implements IApp {
      * @param key The binding key to retreive
      * @param defaultValue The default value to return, if no bindings found
      */
-    get<T = any>(key: string, defaultValue?: T): T | null;
+    get<T>(key: string, defaultValue?: T | null): T | null;
 }
 export default Application;

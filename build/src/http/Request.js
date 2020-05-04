@@ -19,6 +19,33 @@ var Request = /** @class */ (function (_super) {
     function Request() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    Request.prototype.isSecure = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.getSchema = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.getHost = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.getPath = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.getPathComponents = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.getFullUrl = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.getQueryString = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.getMethod = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.getRealMethod = function () {
+        throw new Error("Method not implemented.");
+    };
     return Request;
 }(http_1.IncomingMessage));
 exports.Request = Request;
