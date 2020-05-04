@@ -7,7 +7,7 @@ import { ConfigManager } from "./configManager";
 import { IApp } from "@laress/contracts/core/app";
 import { IRouter } from "@laress/contracts/routes";
 import { IResponse } from "@laress/contracts/core/response";
-import { KeyValue, ClassOf, IRequest } from "@laress/contracts";
+import { KeyValue, ClassOf, IRequest, IDbConnector } from "@laress/contracts";
 import http, { Server, IncomingMessage, ServerResponse } from "http";
 import { IServiceProvider, IConfigManager, IServerCreator } from "@laress/contracts/core";
 
@@ -247,19 +247,29 @@ class Application extends Container implements IApp {
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
-        /*
         this.initDbConnection()
             .then(() => this.enableHttpServer())
             .catch(error => {
                 console.error("Error connecting to database. Server not started.");
                 console.error(error);
                 process.exit(1);
-            });*/
-        this.enableHttpServer();
+            });
     }
 
+    /**
+     * Connects to the database connector bound by the keyword "db". An
+     * exception is thrown if no db service is defined. Db services are core
+     * part of the application, so we can't proceed without having one.
+     * 
+     * @return Promise
+     */
     public initDbConnection(): Promise<any> {
-        throw new Error("Method not implemented.");
+        const connector: IDbConnector | null = this.get('db');
+
+        if (connector === null) {
+            throw new Error("No database service is registered. Fix the app providers list");
+        }
+        return connector.connect();
     }
 
     /**
@@ -276,7 +286,7 @@ class Application extends Container implements IApp {
         const router: IRouter | null = this.get<IRouter>('router');
 
         if (router === null) {
-            throw new Error("No router defined for the application. Fix the app providers list");
+            throw new Error("No router service is registered. Fix the app providers list");
         }
         router.processRequest(request, response);
 

@@ -120,6 +120,13 @@ declare class Application extends Container implements IApp {
      * for requests.
      */
     startApp(): void;
+    /**
+     * Connects to the database connector bound by the keyword "db". An
+     * exception is thrown if no db service is defined. Db services are core
+     * part of the application, so we can't proceed without having one.
+     *
+     * @return Promise
+     */
     initDbConnection(): Promise<any>;
     /**
      * Request handler. When a new request is received by the core http module,

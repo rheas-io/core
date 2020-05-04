@@ -211,23 +211,33 @@ var Application = /** @class */ (function (_super) {
      * for requests.
      */
     Application.prototype.startApp = function () {
+        var _this = this;
         // Boot the application before starting the server
         this.boot();
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
-        /*
         this.initDbConnection()
-            .then(() => this.enableHttpServer())
-            .catch(error => {
-                console.error("Error connecting to database. Server not started.");
-                console.error(error);
-                process.exit(1);
-            });*/
-        this.enableHttpServer();
+            .then(function () { return _this.enableHttpServer(); })
+            .catch(function (error) {
+            console.error("Error connecting to database. Server not started.");
+            console.error(error);
+            process.exit(1);
+        });
     };
+    /**
+     * Connects to the database connector bound by the keyword "db". An
+     * exception is thrown if no db service is defined. Db services are core
+     * part of the application, so we can't proceed without having one.
+     *
+     * @return Promise
+     */
     Application.prototype.initDbConnection = function () {
-        throw new Error("Method not implemented.");
+        var connector = this.get('db');
+        if (connector === null) {
+            throw new Error("No database service is registered. Fix the app providers list");
+        }
+        return connector.connect();
     };
     /**
      * Request handler. When a new request is received by the core http module,
@@ -240,11 +250,11 @@ var Application = /** @class */ (function (_super) {
         var request = req;
         var response = res;
         var router = this.get('router');
-        //if (router === null) {
-        //  throw new Error("No router defined for the application. Fix the app providers list");
-        //}
-        //router.processRequest(request, response);
-        response.end("Hello world");
+        if (router === null) {
+            throw new Error("No router service is registered. Fix the app providers list");
+        }
+        router.processRequest(request, response);
+        response.end();
     };
     /**
      * Creates an http server and listens on the port specified in the app
