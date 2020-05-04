@@ -133,5 +133,4 @@ export class Container implements IContainer {
         }
         return this.bindings[key].instance;
     }
-
 }
