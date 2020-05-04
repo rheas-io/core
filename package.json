@@ -17,6 +17,7 @@
     "library"
   ],
   "scripts": {
+    "start":"node ./build/src/index.js",
     "tsc": "tsc",
     "test": "jest",
     "coverage": "jest --coverage",
@@ -26,6 +27,8 @@
     "build-dev": "tsc --outDir ./build_dev && npm run copypackage_dev"
   },
   "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "@types/node": "^13.13.2",
     "jest": "^25.4.0",
     "ts-jest": "^25.4.0",
     "typescript": "^3.8.3"
