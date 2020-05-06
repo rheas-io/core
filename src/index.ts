@@ -1,6 +1,9 @@
-import App from "./app";
-import path from "path";
+import { Application } from "./app";
+import { Container } from "./container";
+import { ServiceProvider } from "./provider";
 
-const app = new App(path.resolve(__dirname));
-
-app.startApp();
+export {
+    Application,
+    Container,
+    ServiceProvider
+}
