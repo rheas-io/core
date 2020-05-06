@@ -420,4 +420,4 @@ var Application = /** @class */ (function (_super) {
     };
     return Application;
 }(container_1.Container));
-exports.default = Application;
+exports.Application = Application;

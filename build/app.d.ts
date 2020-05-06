@@ -4,7 +4,7 @@ import { IApp } from "@laress/contracts/core/app";
 import { IncomingMessage, ServerResponse } from "http";
 import { KeyValue, ClassOf } from "@laress/contracts";
 import { IServiceProvider, IConfigManager } from "@laress/contracts/core";
-declare class Application extends Container implements IApp {
+export declare class Application extends Container implements IApp {
     /**
      * Stores the root path of the application. This root path is necessary
      * to load different modules of the application.
@@ -230,4 +230,3 @@ declare class Application extends Container implements IApp {
      */
     get<T>(key: string, defaultValue?: T | null): T | null;
 }
-export default Application;

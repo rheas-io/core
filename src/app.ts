@@ -11,7 +11,7 @@ import http, { Server, IncomingMessage, ServerResponse } from "http";
 import { KeyValue, ClassOf, IRequest, IDbConnector } from "@laress/contracts";
 import { IServiceProvider, IConfigManager, IServerCreator } from "@laress/contracts/core";
 
-class Application extends Container implements IApp {
+export class Application extends Container implements IApp {
 
     /**
      * Stores the root path of the application. This root path is necessary
@@ -480,5 +480,3 @@ class Application extends Container implements IApp {
         return service;
     }
 }
-
-export default Application;
