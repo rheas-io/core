@@ -2,8 +2,7 @@
 import { Container } from "./container";
 import { IApp } from "@laress/contracts/core/app";
 import { IncomingMessage, ServerResponse } from "http";
-import { KeyValue, ClassOf } from "@laress/contracts";
-import { IServiceProvider, IConfigManager } from "@laress/contracts/core";
+import { IManager, IServiceManager } from "@laress/contracts/core";
 export declare class Application extends Container implements IApp {
     /**
      * Stores the root path of the application. This root path is necessary
@@ -13,43 +12,19 @@ export declare class Application extends Container implements IApp {
      */
     protected _rootPath: string;
     /**
-     * Stores the boot status of this service provider.
-     *
-     * @var boolean
-     */
-    protected _booted: boolean;
-    /**
-     * Stores the registration status of this service provider.
-     *
-     * @var boolean
-     */
-    protected _registered: boolean;
-    /**
      * Application configurations manager. Handles the parsing and retreival
      * of configuration files.
      *
-     * @var IConfigManager
+     * @var IManager
      */
-    protected _configManager: IConfigManager | null;
+    protected _configManager: IManager;
     /**
-     * Stores all the service providers of the application.
+     * Service manager that handles the registering and booting of
+     * all service providers.
      *
-     * @var object
+     * @var IServiceManager
      */
-    protected _services: KeyValue<ClassOf<IServiceProvider>>;
-    /**
-     * Stores the alias of all the registered service providers.
-     *
-     * @var array
-     */
-    protected _loadedServices: KeyValue<IServiceProvider>;
-    /**
-     * Stores the alias of all the deferred services, which can be loaded
-     * later.
-     *
-     * @var array
-     */
-    protected _deferredServices: string[];
+    protected _serviceManager: IServiceManager;
     /**
      * Creates a new singleton Laress Application. This class acts as a container
      * where other instances/objects can be mount. The laress server has to be started
@@ -59,10 +34,16 @@ export declare class Application extends Container implements IApp {
      */
     constructor(rootPath: string);
     /**
+     * Registers the core managers used by the application instance.
+     * ConfigManager and ServiceManager is registered before starting the application
+     * and listening to any requests.
+     */
+    protected registerManagers(): void;
+    /**
      * Registers this app and and config bindings to the container.
      * Also sets the container instance to this object.
      */
-    private registerBaseBindings;
+    protected registerBaseBindings(): void;
     /**
      * Registers the configuration manager on the app instance. Configuration
      * manager is reponsible for handling the different configuration files.
@@ -70,51 +51,6 @@ export declare class Application extends Container implements IApp {
      * @return IConfigManager
      */
     private registerConfigManager;
-    /**
-     * Registers the necessary service providers. Deferred services are
-     * cached in the deferred providers list and are loaded only when a
-     * binding request is made to the service.
-     */
-    register(): void;
-    /**
-     * Registers a service if it is not a deferrable service and boots the
-     * same if the app is already booted.
-     *
-     * @param name
-     * @param serviceProvider
-     */
-    registerService(name: string, serviceProvider: IServiceProvider): void;
-    /**
-     * Registers a particular service of the given name.
-     *
-     * @param name
-     */
-    registerServiceByName(name: string): void;
-    /**
-     * Checks if a service by this name is already loaded.
-     *
-     * @param name
-     */
-    isServiceLoaded(name: string): boolean;
-    /**
-     * Checks if the service is a deferred.
-     *
-     * @param name
-     */
-    isDeferredService(name: string): boolean;
-    /**
-     * Boots the necessary service providers and boots each one of them.
-     * Once that is done, we will update the application booted status. We will register
-     * this service provider, if it is not registered yet.
-     */
-    boot(): void;
-    /**
-     * Boots a service provider. If the service is not already registered,
-     * it is registered first, before performing the boot.
-     *
-     * @param service
-     */
-    bootService(service: IServiceProvider): void;
     /**
      * Starts the server after registering service providers and listen
      * for requests.
@@ -145,8 +81,8 @@ export declare class Application extends Container implements IApp {
     enableHttpServer(): IApp;
     /**
      * Creates an https server and listens on the secure_port defined in the
-     * app configuration. Creating an https server also requires providing certificate
-     * file paths to the
+     * app configuration. Creating an https server also requires a valid ssl
+     * certificate path on the configs.
      *
      * @return this
      */
@@ -183,31 +119,7 @@ export declare class Application extends Container implements IApp {
      * @param key
      * @param defaultValue
      */
-    config<T>(key: string, defaultValue?: T): T | null;
-    /**
-     * Sets the registration status of this service provider
-     *
-     * @param status
-     */
-    setRegistered(status: boolean): void;
-    /**
-     * Sets the boot status of this service provider
-     *
-     * @param status
-     */
-    setBooted(status: boolean): void;
-    /**
-     * Register status of this service provider
-     *
-     * @return boolean
-     */
-    isRegistered(): boolean;
-    /**
-     * Boot status of this service provider
-     *
-     * @return boolean
-     */
-    isBooted(): boolean;
+    config<T>(key: string, defaultValue?: T | null): T | null;
     /**
      * Gets the root path of the application
      *
@@ -221,6 +133,8 @@ export declare class Application extends Container implements IApp {
      */
     getAssetPath(): string;
     /**
+     * @override Container getter
+     *
      * Returns the laress binding of the specified key. If a binding is not
      * found, we will check for any deferred services and register if one exist.
      * Then we will try to get the binding once again.

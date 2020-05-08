@@ -22,6 +22,7 @@ var container_1 = require("./container");
 var http_1 = require("./http");
 var https_1 = __importDefault(require("https"));
 var configManager_1 = require("./configManager");
+var serviceManager_1 = require("./serviceManager");
 var http_2 = __importDefault(require("http"));
 var Application = /** @class */ (function (_super) {
     __extends(Application, _super);
@@ -34,57 +35,27 @@ var Application = /** @class */ (function (_super) {
      */
     function Application(rootPath) {
         var _this = _super.call(this) || this;
-        /**
-         * Stores the boot status of this service provider.
-         *
-         * @var boolean
-         */
-        _this._booted = false;
-        /**
-         * Stores the registration status of this service provider.
-         *
-         * @var boolean
-         */
-        _this._registered = false;
-        /**
-         * Application configurations manager. Handles the parsing and retreival
-         * of configuration files.
-         *
-         * @var IConfigManager
-         */
-        _this._configManager = null;
-        /**
-         * Stores all the service providers of the application.
-         *
-         * @var object
-         */
-        _this._services = {};
-        /**
-         * Stores the alias of all the registered service providers.
-         *
-         * @var array
-         */
-        _this._loadedServices = {};
-        /**
-         * Stores the alias of all the deferred services, which can be loaded
-         * later.
-         *
-         * @var array
-         */
-        _this._deferredServices = [];
         _this._rootPath = rootPath;
+        _this.registerManagers();
         _this.registerBaseBindings();
         return _this;
     }
+    /**
+     * Registers the core managers used by the application instance.
+     * ConfigManager and ServiceManager is registered before starting the application
+     * and listening to any requests.
+     */
+    Application.prototype.registerManagers = function () {
+        this._configManager = this.registerConfigManager();
+        this._serviceManager = new serviceManager_1.ServiceManager(this.config('app.providers') || {});
+    };
     /**
      * Registers this app and and config bindings to the container.
      * Also sets the container instance to this object.
      */
     Application.prototype.registerBaseBindings = function () {
-        var _this = this;
-        container_1.Container.setInstance(this);
-        this.singleton('app', function () { return _this; });
-        this.singleton('config', function () { return _this.registerConfigManager(); });
+        this.instance('app', this);
+        this.instance('config', this._configManager);
     };
     /**
      * Registers the configuration manager on the app instance. Configuration
@@ -93,118 +64,9 @@ var Application = /** @class */ (function (_super) {
      * @return IConfigManager
      */
     Application.prototype.registerConfigManager = function () {
-        var configPath = support_1.Str.trimEnd(this.getRootPath(), path_1.default.sep) + path_1.default.sep + this.get;
+        var configPath = support_1.Str.trimEnd(this.getRootPath(), path_1.default.sep) + path_1.default.sep + 'configs';
         this._configManager = new configManager_1.ConfigManager(configPath);
         return this._configManager;
-    };
-    /**
-     * Registers the necessary service providers. Deferred services are
-     * cached in the deferred providers list and are loaded only when a
-     * binding request is made to the service.
-     */
-    Application.prototype.register = function () {
-        if (this.isRegistered()) {
-            return;
-        }
-        //@ts-ignore
-        this._services = this.config('app.providers', this._services);
-        for (var alias in this._services) {
-            var service = this._services[alias];
-            // A service can be deferred to load when it is absolutely needed.
-            // Such services should have a provides property that states, to which
-            // alias it should be loaded.
-            if ('provide' in service && !this._deferredServices.includes(alias)) {
-                this._deferredServices.push(name);
-            }
-            // If the service doesn't has to be deferred, we will register
-            // them immediately.
-            else {
-                this.registerService(name, new service(this));
-            }
-        }
-        this.setRegistered(true);
-    };
-    /**
-     * Registers a service if it is not a deferrable service and boots the
-     * same if the app is already booted.
-     *
-     * @param name
-     * @param serviceProvider
-     */
-    Application.prototype.registerService = function (name, serviceProvider) {
-        if (this.isServiceLoaded(name)) {
-            throw new Error("A service '" + name + "' is already registered. Refer the config/app file for all the services.");
-        }
-        serviceProvider.register();
-        serviceProvider.setRegistered(true);
-        this._loadedServices[name] = serviceProvider;
-        this._deferredServices = this._deferredServices.filter(function (serviceName) { return serviceName !== name; });
-        if (this.isBooted()) {
-            this.bootService(serviceProvider);
-        }
-    };
-    /**
-     * Registers a particular service of the given name.
-     *
-     * @param name
-     */
-    Application.prototype.registerServiceByName = function (name) {
-        if (this.isServiceLoaded(name)) {
-            return;
-        }
-        var service = this._services[name];
-        if (service) {
-            this.registerService(name, new service(this));
-        }
-    };
-    /**
-     * Checks if a service by this name is already loaded.
-     *
-     * @param name
-     */
-    Application.prototype.isServiceLoaded = function (name) {
-        return !!this._loadedServices[name];
-    };
-    /**
-     * Checks if the service is a deferred.
-     *
-     * @param name
-     */
-    Application.prototype.isDeferredService = function (name) {
-        return this._deferredServices.includes(name);
-    };
-    /**
-     * Boots the necessary service providers and boots each one of them.
-     * Once that is done, we will update the application booted status. We will register
-     * this service provider, if it is not registered yet.
-     */
-    Application.prototype.boot = function () {
-        if (this.isBooted()) {
-            return;
-        }
-        if (!this.isRegistered()) {
-            this.register();
-        }
-        for (var alias in this._loadedServices) {
-            this.bootService(this._loadedServices[alias]);
-        }
-        this.setBooted(true);
-    };
-    /**
-     * Boots a service provider. If the service is not already registered,
-     * it is registered first, before performing the boot.
-     *
-     * @param service
-     */
-    Application.prototype.bootService = function (service) {
-        if (service.isBooted()) {
-            return;
-        }
-        if (!service.isRegistered()) {
-            service.register();
-        }
-        service.boot();
-        service.setBooted(true);
     };
     /**
      * Starts the server after registering service providers and listen
@@ -213,7 +75,7 @@ var Application = /** @class */ (function (_super) {
     Application.prototype.startApp = function () {
         var _this = this;
         // Boot the application before starting the server
-        this.boot();
+        this._serviceManager.boot();
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
@@ -247,12 +109,12 @@ var Application = /** @class */ (function (_super) {
      * @param res
      */
     Application.prototype.listenRequests = function (req, res) {
-        var request = req;
-        var response = res;
         var router = this.get('router');
         if (router === null) {
             throw new Error("No router service is registered. Fix the app providers list");
         }
+        var request = req;
+        var response = res;
         router.processRequest(request, response);
         response.end();
     };
@@ -269,8 +131,8 @@ var Application = /** @class */ (function (_super) {
     };
     /**
      * Creates an https server and listens on the secure_port defined in the
-     * app configuration. Creating an https server also requires providing certificate
-     * file paths to the
+     * app configuration. Creating an https server also requires a valid ssl
+     * certificate path on the configs.
      *
      * @return this
      */
@@ -348,42 +210,8 @@ var Application = /** @class */ (function (_super) {
      * @param defaultValue
      */
     Application.prototype.config = function (key, defaultValue) {
-        if (this._configManager == null) {
-            this._configManager = this.registerConfigManager();
-        }
+        if (defaultValue === void 0) { defaultValue = null; }
         return this._configManager.get(key, defaultValue);
-    };
-    /**
-     * Sets the registration status of this service provider
-     *
-     * @param status
-     */
-    Application.prototype.setRegistered = function (status) {
-        this._registered = status;
-    };
-    /**
-     * Sets the boot status of this service provider
-     *
-     * @param status
-     */
-    Application.prototype.setBooted = function (status) {
-        this._booted = status;
-    };
-    /**
-     * Register status of this service provider
-     *
-     * @return boolean
-     */
-    Application.prototype.isRegistered = function () {
-        return this._registered;
-    };
-    /**
-     * Boot status of this service provider
-     *
-     * @return boolean
-     */
-    Application.prototype.isBooted = function () {
-        return this._booted;
     };
     /**
      * Gets the root path of the application
@@ -402,6 +230,8 @@ var Application = /** @class */ (function (_super) {
         return path_1.default.resolve(this._rootPath, '..', 'assets');
     };
     /**
+     * @override Container getter
+     *
      * Returns the laress binding of the specified key. If a binding is not
      * found, we will check for any deferred services and register if one exist.
      * Then we will try to get the binding once again.
@@ -412,8 +242,10 @@ var Application = /** @class */ (function (_super) {
     Application.prototype.get = function (key, defaultValue) {
         if (defaultValue === void 0) { defaultValue = null; }
         var service = _super.prototype.get.call(this, key, defaultValue);
-        if (service === null && this.isDeferredService(key)) {
-            this.registerServiceByName(key);
+        // If no service is found we will load any deferredServices. If the 
+        // deferred service is loaded, we will try getting the value again from the
+        // Container.
+        if (service === null && this._serviceManager.loadDeferredService(key)) {
             return this.get(key, defaultValue);
         }
         return service;
