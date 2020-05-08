@@ -17,7 +17,7 @@
     "library"
   ],
   "scripts": {
-    "start":"node ./build/src/index.js",
+    "start": "node ./build/src/index.js",
     "tsc": "tsc",
     "test": "jest",
     "coverage": "jest --coverage",
