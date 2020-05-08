@@ -1,5 +1,5 @@
-import { IConfigManager } from "@laress/contracts/core";
-export declare class ConfigManager implements IConfigManager {
+import { IManager } from "@laress/contracts/core";
+export declare class ConfigManager implements IManager {
     /**
      * Configuration folder path
      *

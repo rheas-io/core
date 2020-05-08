@@ -2,9 +2,9 @@ import fs from "fs";
 import path from "path";
 import { Str } from "@laress/support";
 import { AnyObject } from "@laress/contracts";
-import { IConfigManager } from "@laress/contracts/core";
+import { IManager } from "@laress/contracts/core";
 
-export class ConfigManager implements IConfigManager {
+export class ConfigManager implements IManager {
 
     /**
      * Configuration folder path
