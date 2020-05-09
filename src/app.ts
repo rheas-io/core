@@ -9,8 +9,9 @@ import { IApp } from "@laress/contracts/core/app";
 import { IRouter } from "@laress/contracts/routes";
 import { IRequest, IDbConnector } from "@laress/contracts";
 import { IResponse } from "@laress/contracts/core/response";
+import { IServiceManager } from "@laress/contracts/services";
+import { IManager, IServerCreator } from "@laress/contracts/core";
 import http, { Server, IncomingMessage, ServerResponse } from "http";
-import { IManager, IServerCreator, IServiceManager } from "@laress/contracts/core";
 
 export class Application extends Container implements IApp {
 
@@ -65,11 +66,11 @@ export class Application extends Container implements IApp {
      */
     protected registerBaseBindings() {
 
-        this.instance('app', this);
+        this.instance('app', this, true);
 
-        this.instance('config', this._configManager);
+        this.instance('config', this._configManager, true);
 
-        this.instance('services', this._serviceManager);
+        this.instance('services', this._serviceManager, true);
     }
 
     /**

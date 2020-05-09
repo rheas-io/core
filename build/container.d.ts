@@ -1,66 +1,45 @@
-import { InstanceHandler, IContainer } from "@laress/contracts/core";
-/**
- * Laress container stores app specific singleton instances
- * and other service provider bindings. There may be instances
- * where we need to access certain objects from framework
- * methods and as well as implementing application methods. This
- * container facilitates storage of such instances.
- */
+import { KeyValue } from "@laress/contracts";
+import { IContainer, InstanceHandler, IContainerInstance } from "@laress/contracts/container";
 export declare class Container implements IContainer {
     /**
-     * Singleton instance of the laress application
+     * KeyValue mapping of container bindings.
      *
-     * @var IContainer
+     * @var object
      */
-    private static _instance;
+    protected _instances: KeyValue<IContainerInstance>;
     /**
-     * Holds all the laress app bindings. Inorder to avoid polluting
-     * this objects properties, we will be using the bindings object
-     * for storing the bindings
-     */
-    private bindings;
-    /**
-     * Creates a singleton instance of the application if it does not
-     * exist and returns it.
+     * Creates a singleton binding for the key with a resolver.
      *
-     * @returns IContainer
+     * @param name
+     * @param resolver
      */
-    static instance(): IContainer;
+    singleton(name: string, resolver: InstanceHandler): IContainerInstance;
     /**
-     * Sets the global container instance
+     * Creates a binding for the key with a resolver. The resolver will be run only
+     * when the binding is requested.
      *
-     * @param container
+     * @param name
+     * @param resolver
+     * @param singleton
      */
-    static setInstance(container: IContainer): void;
+    bind(name: string, resolver: InstanceHandler, singleton?: boolean): IContainerInstance;
     /**
-     * Binds a singleton class to this container.
-     *
-     * @param name Container binding key
-     * @param callback The value returned by this callback will be bound to the key
-     */
-    singleton<T>(name: string, callback: InstanceHandler<T>): T;
-    /**
-     * Binds an instance to the container for the key "name".
-     * Returns the same instance.
+     * Creates a binding for the key with an object. The passed in object will be returned
+     * when the binding is requested.
      *
      * @param name
      * @param instance
+     * @param singleton
      */
-    instance<T>(name: string, instance: T): T;
+    instance(name: string, instance: any, singleton?: boolean): IContainerInstance;
     /**
-     * Check if the binding is allowed or not and throw an
-     * exception if it is not allowed.
+     * Creates a container instance and adds it to the binding list only if
+     * a binding does not exists or it is not singleton.
      *
      * @param name
+     * @param callback
      */
-    protected validateBindingAllowed(name: string): void;
-    /**
-     * Determine if a binding is modifiable or not. Singleton bindings
-     * should not be modifiable.
-     *
-     * @param name
-     */
-    protected isBindingModifiable(name: string): boolean;
+    protected createInstance(name: string, callback: () => IContainerInstance): IContainerInstance;
     /**
      * Returns the laress binding of the specified key. Or returns null when
      * no binding is found or the defaultValue is not

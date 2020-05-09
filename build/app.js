@@ -32,30 +32,26 @@ var Application = /** @class */ (function (_super) {
      * using startApp method of this class.
      *
      * Before starting the app, a rootpath has to be set.
+     *
+     * Registers the core app managers, ConfigManager and ServiceManager that handles configs
+     * and serviceProviders respectively.
      */
     function Application(rootPath) {
         var _this = _super.call(this) || this;
         _this._rootPath = rootPath;
-        _this.registerManagers();
+        _this._configManager = _this.registerConfigManager();
+        _this._serviceManager = new serviceManager_1.ServiceManager(_this.config('app.providers') || {});
         _this.registerBaseBindings();
         return _this;
     }
-    /**
-     * Registers the core managers used by the application instance.
-     * ConfigManager and ServiceManager is registered before starting the application
-     * and listening to any requests.
-     */
-    Application.prototype.registerManagers = function () {
-        this._configManager = this.registerConfigManager();
-        this._serviceManager = new serviceManager_1.ServiceManager(this.config('app.providers') || {});
-    };
     /**
      * Registers this app and and config bindings to the container.
      * Also sets the container instance to this object.
      */
     Application.prototype.registerBaseBindings = function () {
-        this.instance('app', this);
-        this.instance('config', this._configManager);
+        this.instance('app', this, true);
+        this.instance('config', this._configManager, true);
+        this.instance('services', this._serviceManager, true);
     };
     /**
      * Registers the configuration manager on the app instance. Configuration

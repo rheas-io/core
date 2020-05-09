@@ -1,122 +1,68 @@
 import { KeyValue } from "@laress/contracts";
-import { InstanceHandler, IContainer } from "@laress/contracts/core";
+import { ContainerInstance } from "./containerInstance";
+import { IContainer, InstanceHandler, IContainerInstance } from "@laress/contracts/container";
 
-interface IBinding {
-    type: BindingType,
-    instance: any,
-}
-
-enum BindingType {
-    SINGLETON = 1, OTHER = 2
-}
-
-/**
- * Laress container stores app specific singleton instances
- * and other service provider bindings. There may be instances
- * where we need to access certain objects from framework 
- * methods and as well as implementing application methods. This
- * container facilitates storage of such instances.
- */
 export class Container implements IContainer {
 
     /**
-     * Singleton instance of the laress application
+     * KeyValue mapping of container bindings.
      * 
-     * @var IContainer
+     * @var object
      */
-    private static _instance: IContainer | null = null;
+    protected _instances: KeyValue<IContainerInstance> = {};
 
     /**
-     * Holds all the laress app bindings. Inorder to avoid polluting
-     * this objects properties, we will be using the bindings object
-     * for storing the bindings
-     */
-    private bindings: KeyValue<IBinding> = {};
-
-    /**
-     * Creates a singleton instance of the application if it does not
-     * exist and returns it.
+     * Creates a singleton binding for the key with a resolver.
      * 
-     * @returns IContainer
+     * @param name 
+     * @param resolver 
      */
-    public static instance(): IContainer {
-
-        if (Container._instance === null) {
-            Container._instance = new Container();
-        }
-        return Container._instance;
+    public singleton(name: string, resolver: InstanceHandler): IContainerInstance {
+        return this.bind(name, resolver, true);
     }
 
     /**
-     * Sets the global container instance
+     * Creates a binding for the key with a resolver. The resolver will be run only
+     * when the binding is requested.
      * 
-     * @param container 
+     * @param name 
+     * @param resolver 
+     * @param singleton 
      */
-    public static setInstance(container: IContainer) {
-        Container._instance = container;
+    public bind(name: string, resolver: InstanceHandler, singleton: boolean = false): IContainerInstance {
+        return this.createInstance(name, () => {
+            return ContainerInstance.createFromResolver(this, resolver, singleton);
+        });
     }
 
     /**
-     * Binds a singleton class to this container.
-     * 
-     * @param name Container binding key
-     * @param callback The value returned by this callback will be bound to the key
-     */
-    public singleton<T>(name: string, callback: InstanceHandler<T>): T {
-
-        this.validateBindingAllowed(name);
-
-        let resultInstance = callback(this);
-
-        this.bindings[name] = {
-            type: BindingType.SINGLETON,
-            instance: resultInstance
-        };
-        return resultInstance;
-    }
-
-    /**
-     * Binds an instance to the container for the key "name".
-     * Returns the same instance.
+     * Creates a binding for the key with an object. The passed in object will be returned
+     * when the binding is requested.
      * 
      * @param name 
      * @param instance 
+     * @param singleton 
      */
-    public instance<T>(name: string, instance: T): T {
-
-        this.validateBindingAllowed(name);
-
-        this.bindings[name] = { type: BindingType.OTHER, instance: instance };
-
-        return instance;
+    public instance(name: string, instance: any, singleton: boolean = false): IContainerInstance {
+        return this.createInstance(name, () => {
+            return ContainerInstance.createFromInstance(this, instance, singleton);
+        });
     }
 
     /**
-     * Check if the binding is allowed or not and throw an
-     * exception if it is not allowed.
+     * Creates a container instance and adds it to the binding list only if
+     * a binding does not exists or it is not singleton.
      * 
      * @param name 
+     * @param callback 
      */
-    protected validateBindingAllowed(name: string) {
-        if (!this.isBindingModifiable(name)) {
-            throw new Error("A singleton binding already exists for the key " + name);
+    protected createInstance(name: string, callback: () => IContainerInstance) {
+        let instance: IContainerInstance = this._instances[name];
+
+        if (instance === undefined || !instance.isSingleton()) {
+            instance = callback();
         }
-    }
-
-    /**
-     * Determine if a binding is modifiable or not. Singleton bindings
-     * should not be modifiable.
-     * 
-     * @param name 
-     */
-    protected isBindingModifiable(name: string): boolean {
-
-        if (!this.bindings.hasOwnProperty(name)) {
-            return true;
-        }
-        let binding = this.bindings[name];
-
-        return BindingType.SINGLETON !== binding.type;
+        return this._instances[name] = instance;
     }
 
     /**
@@ -128,9 +74,9 @@ export class Container implements IContainer {
      */
     public get<T>(key: string, defaultValue: T | null = null): T | null {
 
-        if (!this.bindings.hasOwnProperty(key)) {
+        if (!this._instances.hasOwnProperty(key)) {
             return defaultValue === undefined ? null : defaultValue;
         }
-        return this.bindings[key].instance;
+        return this._instances[key].getResolved();
     }
 }

@@ -1,96 +1,67 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var BindingType;
-(function (BindingType) {
-    BindingType[BindingType["SINGLETON"] = 1] = "SINGLETON";
-    BindingType[BindingType["OTHER"] = 2] = "OTHER";
-})(BindingType || (BindingType = {}));
-/**
- * Laress container stores app specific singleton instances
- * and other service provider bindings. There may be instances
- * where we need to access certain objects from framework
- * methods and as well as implementing application methods. This
- * container facilitates storage of such instances.
- */
+var containerInstance_1 = require("./containerInstance");
 var Container = /** @class */ (function () {
     function Container() {
         /**
-         * Holds all the laress app bindings. Inorder to avoid polluting
-         * this objects properties, we will be using the bindings object
-         * for storing the bindings
+         * KeyValue mapping of container bindings.
+         *
+         * @var object
          */
-        this.bindings = {};
+        this._instances = {};
     }
     /**
-     * Creates a singleton instance of the application if it does not
-     * exist and returns it.
+     * Creates a singleton binding for the key with a resolver.
      *
-     * @returns IContainer
+     * @param name
+     * @param resolver
      */
-    Container.instance = function () {
-        if (Container._instance === null) {
-            Container._instance = new Container();
-        }
-        return Container._instance;
+    Container.prototype.singleton = function (name, resolver) {
+        return this.bind(name, resolver, true);
     };
     /**
-     * Sets the global container instance
+     * Creates a binding for the key with a resolver. The resolver will be run only
+     * when the binding is requested.
      *
-     * @param container
+     * @param name
+     * @param resolver
+     * @param singleton
      */
-    Container.setInstance = function (container) {
-        Container._instance = container;
+    Container.prototype.bind = function (name, resolver, singleton) {
+        var _this = this;
+        if (singleton === void 0) { singleton = false; }
+        return this.createInstance(name, function () {
+            return containerInstance_1.ContainerInstance.createFromResolver(_this, resolver, singleton);
+        });
     };
     /**
-     * Binds a singleton class to this container.
-     *
-     * @param name Container binding key
-     * @param callback The value returned by this callback will be bound to the key
-     */
-    Container.prototype.singleton = function (name, callback) {
-        this.validateBindingAllowed(name);
-        var resultInstance = callback(this);
-        this.bindings[name] = {
-            type: BindingType.SINGLETON,
-            instance: resultInstance
-        };
-        return resultInstance;
-    };
-    /**
-     * Binds an instance to the container for the key "name".
-     * Returns the same instance.
+     * Creates a binding for the key with an object. The passed in object will be returned
+     * when the binding is requested.
      *
      * @param name
      * @param instance
+     * @param singleton
      */
-    Container.prototype.instance = function (name, instance) {
-        this.validateBindingAllowed(name);
-        this.bindings[name] = { type: BindingType.OTHER, instance: instance };
-        return instance;
+    Container.prototype.instance = function (name, instance, singleton) {
+        var _this = this;
+        if (singleton === void 0) { singleton = false; }
+        return this.createInstance(name, function () {
+            return containerInstance_1.ContainerInstance.createFromInstance(_this, instance, singleton);
+        });
     };
     /**
-     * Check if the binding is allowed or not and throw an
-     * exception if it is not allowed.
+     * Creates a container instance and adds it to the binding list only if
+     * a binding does not exists or it is not singleton.
      *
      * @param name
+     * @param callback
      */
-    Container.prototype.validateBindingAllowed = function (name) {
-        if (!this.isBindingModifiable(name)) {
-            throw new Error("A singleton binding already exists for the key " + name);
+    Container.prototype.createInstance = function (name, callback) {
+        var instance = this._instances[name];
+        if (instance === undefined || !instance.isSingleton()) {
+            instance = callback();
         }
-    };
-    /**
-     * Determine if a binding is modifiable or not. Singleton bindings
-     * should not be modifiable.
-     *
-     * @param name
-     */
-    Container.prototype.isBindingModifiable = function (name) {
-        if (!this.bindings.hasOwnProperty(name)) {
-            return true;
-        }
-        var binding = this.bindings[name];
-        return BindingType.SINGLETON !== binding.type;
+        return this._instances[name] = instance;
     };
     /**
      * Returns the laress binding of the specified key. Or returns null when
@@ -101,17 +72,11 @@ var Container = /** @class */ (function () {
      */
     Container.prototype.get = function (key, defaultValue) {
         if (defaultValue === void 0) { defaultValue = null; }
-        if (!this.bindings.hasOwnProperty(key)) {
+        if (!this._instances.hasOwnProperty(key)) {
             return defaultValue === undefined ? null : defaultValue;
         }
-        return this.bindings[key].instance;
+        return this._instances[key].getResolved();
     };
-    /**
-     * Singleton instance of the laress application
-     *
-     * @var IContainer
-     */
-    Container._instance = null;
     return Container;
 }());
 exports.Container = Container;

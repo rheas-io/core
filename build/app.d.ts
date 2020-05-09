@@ -1,8 +1,9 @@
 /// <reference types="node" />
 import { Container } from "./container";
 import { IApp } from "@laress/contracts/core/app";
+import { IServiceManager } from "@laress/contracts/services";
+import { IManager } from "@laress/contracts/core";
 import { IncomingMessage, ServerResponse } from "http";
-import { IManager, IServiceManager } from "@laress/contracts/core";
 export declare class Application extends Container implements IApp {
     /**
      * Stores the root path of the application. This root path is necessary
@@ -31,14 +32,11 @@ export declare class Application extends Container implements IApp {
      * using startApp method of this class.
      *
      * Before starting the app, a rootpath has to be set.
+     *
+     * Registers the core app managers, ConfigManager and ServiceManager that handles configs
+     * and serviceProviders respectively.
      */
     constructor(rootPath: string);
-    /**
-     * Registers the core managers used by the application instance.
-     * ConfigManager and ServiceManager is registered before starting the application
-     * and listening to any requests.
-     */
-    protected registerManagers(): void;
     /**
      * Registers this app and and config bindings to the container.
      * Also sets the container instance to this object.
