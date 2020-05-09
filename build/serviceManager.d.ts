@@ -1,5 +1,5 @@
 import { ClassOf, KeyValue } from "@laress/contracts";
-import { IServiceManager, IServiceProvider } from "@laress/contracts/core";
+import { IServiceManager, IServiceProvider } from "@laress/contracts/services";
 export declare class ServiceManager implements IServiceManager {
     /**
      * Stores the boot status of this service provider.

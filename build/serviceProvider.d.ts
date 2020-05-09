@@ -1,5 +1,5 @@
 import { IApp } from "@laress/contracts/core/app";
-import { IServiceProvider } from "@laress/contracts/core";
+import { IServiceProvider } from "@laress/contracts/services";
 export declare class ServiceProvider implements IServiceProvider {
     /**
      * Stores the container instance
