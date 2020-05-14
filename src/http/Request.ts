@@ -1,7 +1,16 @@
 import { IncomingMessage } from "http";
-import { IRequest } from "@laress/contracts";
+import { IRequest } from "@rheas/contracts";
 
 export class Request extends IncomingMessage implements IRequest {
+    boot(app: import("@rheas/contracts/core").IApp): IRequest {
+        throw new Error("Method not implemented.");
+    }
+    app(): import("@rheas/contracts/core").IApp | null {
+        throw new Error("Method not implemented.");
+    }
+    acceptsJson(): boolean {
+        throw new Error("Method not implemented.");
+    }
     isSecure(): boolean {
         throw new Error("Method not implemented.");
     }
@@ -14,7 +23,7 @@ export class Request extends IncomingMessage implements IRequest {
     getPath(): string {
         throw new Error("Method not implemented.");
     }
-    getPathComponents(): import("@laress/contracts/routes/uri").IUriComponent[] {
+    getPathComponents(): import("@rheas/contracts/routes/uri").IUriComponent[] {
         throw new Error("Method not implemented.");
     }
     getFullUrl(): string {

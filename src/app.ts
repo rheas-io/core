@@ -1,16 +1,16 @@
 import path from "path";
-import { Str } from "@laress/support";
+import { Str } from "@rheas/support";
 import { Container } from "./container";
 import { Request, Response } from "./http";
 import https, { ServerOptions } from "https";
 import { ConfigManager } from "./configManager";
 import { ServiceManager } from "./serviceManager";
-import { IApp } from "@laress/contracts/core/app";
-import { IRouter } from "@laress/contracts/routes";
-import { IRequest, IDbConnector } from "@laress/contracts";
-import { IResponse } from "@laress/contracts/core/response";
-import { IServiceManager } from "@laress/contracts/services";
-import { IManager, IServerCreator } from "@laress/contracts/core";
+import { IApp } from "@rheas/contracts/core/app";
+import { IRouter } from "@rheas/contracts/routes";
+import { IRequest, IDbConnector } from "@rheas/contracts";
+import { IResponse } from "@rheas/contracts/core/response";
+import { IServiceManager } from "@rheas/contracts/services";
+import { IManager, IServerCreator } from "@rheas/contracts/core";
 import http, { Server, IncomingMessage, ServerResponse } from "http";
 
 export class Application extends Container implements IApp {
@@ -40,8 +40,8 @@ export class Application extends Container implements IApp {
     protected _serviceManager: IServiceManager;
 
     /**
-     * Creates a new singleton Laress Application. This class acts as a container
-     * where other instances/objects can be mount. The laress server has to be started
+     * Creates a new singleton Rheas Application. This class acts as a container
+     * where other instances/objects can be mount. The rheas server has to be started
      * using startApp method of this class.
      * 
      * Before starting the app, a rootpath has to be set.
@@ -55,7 +55,7 @@ export class Application extends Container implements IApp {
         this._rootPath = rootPath;
 
         this._configManager = this.registerConfigManager();
-        this._serviceManager = new ServiceManager(this.config('app.providers') || {});
+        this._serviceManager = new ServiceManager(this, this.config('app.providers') || {});
 
         this.registerBaseBindings();
     }
@@ -137,9 +137,9 @@ export class Application extends Container implements IApp {
         if (router === null) {
             throw new Error("No router service is registered. Fix the app providers list");
         }
-        const request = <IRequest>req;
-        const response = <IResponse>res;
-        router.processRequest(request, response);
+        let request = <IRequest>req;
+        let response = <IResponse>res;
+        response = router.processRequest(request, response);
 
         response.end();
     }
@@ -275,7 +275,7 @@ export class Application extends Container implements IApp {
     /**
      * @override Container getter
      * 
-     * Returns the laress binding of the specified key. If a binding is not
+     * Returns the rheas binding of the specified key. If a binding is not
      * found, we will check for any deferred services and register if one exist.
      * Then we will try to get the binding once again.
      * 

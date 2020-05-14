@@ -1,4 +1,7 @@
-import { IContainerInstance, IContainer, InstanceHandler } from "@laress/contracts/container";
+import {
+    IContainerInstance,
+    IContainer, InstanceHandler
+} from "@rheas/contracts/container";
 
 export class ContainerInstance implements IContainerInstance {
 

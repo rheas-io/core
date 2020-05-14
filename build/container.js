@@ -64,7 +64,7 @@ var Container = /** @class */ (function () {
         return this._instances[name] = instance;
     };
     /**
-     * Returns the laress binding of the specified key. Or returns null when
+     * Returns the rheas binding of the specified key. Or returns null when
      * no binding is found or the defaultValue is not
      *
      * @param key The binding key to retreive

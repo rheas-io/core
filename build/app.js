@@ -17,7 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
-var support_1 = require("@laress/support");
+var support_1 = require("@rheas/support");
 var container_1 = require("./container");
 var http_1 = require("./http");
 var https_1 = __importDefault(require("https"));
@@ -27,8 +27,8 @@ var http_2 = __importDefault(require("http"));
 var Application = /** @class */ (function (_super) {
     __extends(Application, _super);
     /**
-     * Creates a new singleton Laress Application. This class acts as a container
-     * where other instances/objects can be mount. The laress server has to be started
+     * Creates a new singleton Rheas Application. This class acts as a container
+     * where other instances/objects can be mount. The rheas server has to be started
      * using startApp method of this class.
      *
      * Before starting the app, a rootpath has to be set.
@@ -40,7 +40,7 @@ var Application = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this._rootPath = rootPath;
         _this._configManager = _this.registerConfigManager();
-        _this._serviceManager = new serviceManager_1.ServiceManager(_this.config('app.providers') || {});
+        _this._serviceManager = new serviceManager_1.ServiceManager(_this, _this.config('app.providers') || {});
         _this.registerBaseBindings();
         return _this;
     }
@@ -111,7 +111,7 @@ var Application = /** @class */ (function (_super) {
         }
         var request = req;
         var response = res;
-        router.processRequest(request, response);
+        response = router.processRequest(request, response);
         response.end();
     };
     /**
@@ -228,7 +228,7 @@ var Application = /** @class */ (function (_super) {
     /**
      * @override Container getter
      *
-     * Returns the laress binding of the specified key. If a binding is not
+     * Returns the rheas binding of the specified key. If a binding is not
      * found, we will check for any deferred services and register if one exist.
      * Then we will try to get the binding once again.
      *

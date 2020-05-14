@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { Str } from "@laress/support";
-import { AnyObject } from "@laress/contracts";
-import { IManager } from "@laress/contracts/core";
+import { Str } from "@rheas/support";
+import { AnyObject } from "@rheas/contracts";
+import { IManager } from "@rheas/contracts/core";
 
 export class ConfigManager implements IManager {
 
@@ -88,7 +88,7 @@ export class ConfigManager implements IManager {
      * @param filename 
      */
     private getFilePath(filename: string): string {
-        return this._path + path.sep + filename;
+        return `${this._path + path.sep + filename}.js`;
     }
 
     /**

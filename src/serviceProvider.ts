@@ -1,5 +1,5 @@
-import { IApp } from "@laress/contracts/core/app";
-import { IServiceProvider } from "@laress/contracts/services";
+import { IApp } from "@rheas/contracts/core/app";
+import { IServiceProvider } from "@rheas/contracts/services";
 
 export class ServiceProvider implements IServiceProvider {
 

@@ -1,7 +1,16 @@
-import { ClassOf, KeyValue } from "@laress/contracts";
-import { IServiceManager, IServiceProvider } from "@laress/contracts/services";
+import { ClassOf, KeyValue } from "@rheas/contracts";
+import { IContainer } from "@rheas/contracts/container";
+import { IServiceManager, IServiceProvider } from "@rheas/contracts/services";
 
 export class ServiceManager implements IServiceManager {
+
+    /**
+     * The app container instance which has to be used when resolving
+     * services.
+     * 
+     * @var IContainer
+     */
+    protected _container: IContainer;
 
     /**
      * Stores the boot status of this service provider.
@@ -39,7 +48,13 @@ export class ServiceManager implements IServiceManager {
      */
     protected _deferredServices: string[] = [];
 
-    constructor(providers: KeyValue<ClassOf<IServiceProvider>>) {
+    /**
+     * 
+     * @param container 
+     * @param providers 
+     */
+    constructor(container: IContainer, providers: KeyValue<ClassOf<IServiceProvider>>) {
+        this._container = container;
         this._services = providers;
     }
 
@@ -64,7 +79,7 @@ export class ServiceManager implements IServiceManager {
             // If the service doesn't has to be deferred, we will register
             // them immediately.
             else {
-                this.registerService(name, new service(this));
+                this.registerService(name, new service(this._container));
             }
         }
         this.setRegistered(true);
@@ -107,7 +122,7 @@ export class ServiceManager implements IServiceManager {
         const service: ClassOf<IServiceProvider> = this._services[name];
 
         if (service) {
-            this.registerService(name, new service(this));
+            this.registerService(name, new service(this._container));
         }
     }
 

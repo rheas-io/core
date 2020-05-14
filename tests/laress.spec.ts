@@ -1,3 +1,3 @@
-describe("Laress singleton container test", () => {
+describe("Rheas singleton container test", () => {
 
 });

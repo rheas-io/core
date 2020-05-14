@@ -1,7 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ServiceManager = /** @class */ (function () {
-    function ServiceManager(providers) {
+    /**
+     *
+     * @param container
+     * @param providers
+     */
+    function ServiceManager(container, providers) {
         /**
          * Stores the boot status of this service provider.
          *
@@ -33,6 +38,7 @@ var ServiceManager = /** @class */ (function () {
          * @var array
          */
         this._deferredServices = [];
+        this._container = container;
         this._services = providers;
     }
     /**
@@ -55,7 +61,7 @@ var ServiceManager = /** @class */ (function () {
             // If the service doesn't has to be deferred, we will register
             // them immediately.
             else {
-                this.registerService(name, new service(this));
+                this.registerService(name, new service(this._container));
             }
         }
         this.setRegistered(true);
@@ -90,7 +96,7 @@ var ServiceManager = /** @class */ (function () {
         }
         var service = this._services[name];
         if (service) {
-            this.registerService(name, new service(this));
+            this.registerService(name, new service(this._container));
         }
     };
     /**

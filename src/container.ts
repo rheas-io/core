@@ -1,6 +1,6 @@
-import { KeyValue } from "@laress/contracts";
+import { KeyValue } from "@rheas/contracts";
 import { ContainerInstance } from "./containerInstance";
-import { IContainer, InstanceHandler, IContainerInstance } from "@laress/contracts/container";
+import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 
 export class Container implements IContainer {
 
@@ -66,7 +66,7 @@ export class Container implements IContainer {
     }
 
     /**
-     * Returns the laress binding of the specified key. Or returns null when
+     * Returns the rheas binding of the specified key. Or returns null when
      * no binding is found or the defaultValue is not
      * 
      * @param key The binding key to retreive

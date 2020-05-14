@@ -1,14 +1,10 @@
 {
-  "name": "@laress/core",
-  "version": "0.0.0",
-  "description": "Laress framework's core server module",
+  "name": "@rheas/core",
+  "version": "0.0.1",
+  "description": "Rheas framework's core server module",
   "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/laress-io/core.git"
-  },
   "keywords": [
-    "laress",
+    "rheas",
     "express",
     "framework",
     "nodejs",
@@ -17,7 +13,6 @@
     "library"
   ],
   "scripts": {
-    "start":"node ./build/src/index.js",
     "tsc": "tsc",
     "test": "jest",
     "coverage": "jest --coverage",
@@ -35,8 +30,12 @@
   },
   "author": "Kalesh Kaladharan",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/laress-io/core/issues"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rheas-io/core.git"
   },
-  "homepage": "https://github.com/laress-io/core#readme"
+  "bugs": {
+    "url": "https://github.com/rheas-io/core/issues"
+  },
+  "homepage": "https://github.com/rheas-io/core#readme"
 }

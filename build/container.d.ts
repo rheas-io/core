@@ -1,5 +1,5 @@
-import { KeyValue } from "@laress/contracts";
-import { IContainer, InstanceHandler, IContainerInstance } from "@laress/contracts/container";
+import { KeyValue } from "@rheas/contracts";
+import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 export declare class Container implements IContainer {
     /**
      * KeyValue mapping of container bindings.
@@ -41,7 +41,7 @@ export declare class Container implements IContainer {
      */
     protected createInstance(name: string, callback: () => IContainerInstance): IContainerInstance;
     /**
-     * Returns the laress binding of the specified key. Or returns null when
+     * Returns the rheas binding of the specified key. Or returns null when
      * no binding is found or the defaultValue is not
      *
      * @param key The binding key to retreive

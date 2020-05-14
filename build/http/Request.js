@@ -19,6 +19,15 @@ var Request = /** @class */ (function (_super) {
     function Request() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    Request.prototype.boot = function (app) {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.app = function () {
+        throw new Error("Method not implemented.");
+    };
+    Request.prototype.acceptsJson = function () {
+        throw new Error("Method not implemented.");
+    };
     Request.prototype.isSecure = function () {
         throw new Error("Method not implemented.");
     };

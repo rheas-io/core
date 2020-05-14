@@ -1,8 +1,8 @@
 /// <reference types="node" />
 import { Container } from "./container";
-import { IApp } from "@laress/contracts/core/app";
-import { IServiceManager } from "@laress/contracts/services";
-import { IManager } from "@laress/contracts/core";
+import { IApp } from "@rheas/contracts/core/app";
+import { IServiceManager } from "@rheas/contracts/services";
+import { IManager } from "@rheas/contracts/core";
 import { IncomingMessage, ServerResponse } from "http";
 export declare class Application extends Container implements IApp {
     /**
@@ -27,8 +27,8 @@ export declare class Application extends Container implements IApp {
      */
     protected _serviceManager: IServiceManager;
     /**
-     * Creates a new singleton Laress Application. This class acts as a container
-     * where other instances/objects can be mount. The laress server has to be started
+     * Creates a new singleton Rheas Application. This class acts as a container
+     * where other instances/objects can be mount. The rheas server has to be started
      * using startApp method of this class.
      *
      * Before starting the app, a rootpath has to be set.
@@ -133,7 +133,7 @@ export declare class Application extends Container implements IApp {
     /**
      * @override Container getter
      *
-     * Returns the laress binding of the specified key. If a binding is not
+     * Returns the rheas binding of the specified key. If a binding is not
      * found, we will check for any deferred services and register if one exist.
      * Then we will try to get the binding once again.
      *

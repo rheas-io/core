@@ -1,6 +1,14 @@
-import { ClassOf, KeyValue } from "@laress/contracts";
-import { IServiceManager, IServiceProvider } from "@laress/contracts/services";
+import { ClassOf, KeyValue } from "@rheas/contracts";
+import { IContainer } from "@rheas/contracts/container";
+import { IServiceManager, IServiceProvider } from "@rheas/contracts/services";
 export declare class ServiceManager implements IServiceManager {
+    /**
+     * The app container instance which has to be used when resolving
+     * services.
+     *
+     * @var IContainer
+     */
+    protected _container: IContainer;
     /**
      * Stores the boot status of this service provider.
      *
@@ -32,7 +40,12 @@ export declare class ServiceManager implements IServiceManager {
      * @var array
      */
     protected _deferredServices: string[];
-    constructor(providers: KeyValue<ClassOf<IServiceProvider>>);
+    /**
+     *
+     * @param container
+     * @param providers
+     */
+    constructor(container: IContainer, providers: KeyValue<ClassOf<IServiceProvider>>);
     /**
      * Registers the necessary service providers. Deferred services are
      * cached in the deferred providers list and are loaded only when a

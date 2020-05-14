@@ -1,4 +1,4 @@
-import { IManager } from "@laress/contracts/core";
+import { IManager } from "@rheas/contracts/core";
 export declare class ConfigManager implements IManager {
     /**
      * Configuration folder path

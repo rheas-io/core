@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
-var support_1 = require("@laress/support");
+var support_1 = require("@rheas/support");
 var ConfigManager = /** @class */ (function () {
     function ConfigManager(_path) {
         /**
@@ -69,7 +69,7 @@ var ConfigManager = /** @class */ (function () {
      * @param filename
      */
     ConfigManager.prototype.getFilePath = function (filename) {
-        return this._path + path_1.default.sep + filename;
+        return this._path + path_1.default.sep + filename + ".js";
     };
     /**
      * Checks if a file name is cached or not.

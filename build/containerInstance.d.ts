@@ -1,4 +1,4 @@
-import { IContainerInstance, IContainer, InstanceHandler } from "@laress/contracts/container";
+import { IContainerInstance, IContainer, InstanceHandler } from "@rheas/contracts/container";
 export declare class ContainerInstance implements IContainerInstance {
     /**
      * The parent container. Required to resolve the callback/resolver function.
