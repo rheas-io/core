@@ -137,11 +137,17 @@ export class Application extends Container implements IApp {
         if (router === null) {
             throw new Error("No router service is registered. Fix the app providers list");
         }
-        let request = <IRequest>req;
-        let response = <IResponse>res;
-        response = router.processRequest(request, response);
+        const request = <IRequest>req;
+        const response = <IResponse>res;
 
-        response.end();
+        request.boot(this);
+
+        router.processRequest(request, response)
+            .then(response => response.end())
+            .catch(err => {
+                response.statusCode = 500;
+                response.end(err.message || "Server error");
+            });
     }
 
     /**

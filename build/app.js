@@ -111,8 +111,13 @@ var Application = /** @class */ (function (_super) {
         }
         var request = req;
         var response = res;
-        response = router.processRequest(request, response);
-        response.end();
+        request.boot(this);
+        router.processRequest(request, response)
+            .then(function (response) { return response.end(); })
+            .catch(function (err) {
+            response.statusCode = 500;
+            response.end(err.message || "Server error");
+        });
     };
     /**
      * Creates an http server and listens on the port specified in the app
