@@ -45,7 +45,14 @@ export declare class ServiceManager implements IServiceManager {
      * @param container
      * @param providers
      */
-    constructor(container: IContainer, providers: KeyValue<ClassOf<IServiceProvider>>);
+    constructor(container: IContainer, providers?: KeyValue<ClassOf<IServiceProvider>>);
+    /**
+     * Sets the service providers handled by this manager. Services are not updated
+     * if the manager is already booted.
+     *
+     * @param providers
+     */
+    setProviders(providers: KeyValue<ClassOf<IServiceProvider>>): void;
     /**
      * Registers the necessary service providers. Deferred services are
      * cached in the deferred providers list and are loaded only when a

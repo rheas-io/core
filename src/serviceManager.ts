@@ -53,8 +53,21 @@ export class ServiceManager implements IServiceManager {
      * @param container 
      * @param providers 
      */
-    constructor(container: IContainer, providers: KeyValue<ClassOf<IServiceProvider>>) {
+    constructor(container: IContainer, providers: KeyValue<ClassOf<IServiceProvider>> = {}) {
         this._container = container;
+        this._services = providers;
+    }
+
+    /**
+     * Sets the service providers handled by this manager. Services are not updated
+     * if the manager is already booted.
+     * 
+     * @param providers 
+     */
+    public setProviders(providers: KeyValue<ClassOf<IServiceProvider>>): void {
+        if (this.isBooted()) {
+            return;
+        }
         this._services = providers;
     }
 

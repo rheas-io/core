@@ -7,6 +7,7 @@ var ServiceManager = /** @class */ (function () {
      * @param providers
      */
     function ServiceManager(container, providers) {
+        if (providers === void 0) { providers = {}; }
         /**
          * Stores the boot status of this service provider.
          *
@@ -41,6 +42,18 @@ var ServiceManager = /** @class */ (function () {
         this._container = container;
         this._services = providers;
     }
+    /**
+     * Sets the service providers handled by this manager. Services are not updated
+     * if the manager is already booted.
+     *
+     * @param providers
+     */
+    ServiceManager.prototype.setProviders = function (providers) {
+        if (this.isBooted()) {
+            return;
+        }
+        this._services = providers;
+    };
     /**
      * Registers the necessary service providers. Deferred services are
      * cached in the deferred providers list and are loaded only when a
