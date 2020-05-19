@@ -1,6 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ContainerInstance = /** @class */ (function () {
+    /**
+     * Creates a container instance. The constructor is private and new instance
+     * has to be created using the static functions so that necessary parameters
+     * are loaded during object creation.
+     *
+     * @param container
+     */
     function ContainerInstance(container) {
         /**
          * Flag to determine if this instance is modifiable or not.
@@ -43,6 +50,7 @@ var ContainerInstance = /** @class */ (function () {
     };
     /**
      * @inheritdoc
+     *
      * @return
      */
     ContainerInstance.prototype.resolve = function () {
@@ -62,6 +70,7 @@ var ContainerInstance = /** @class */ (function () {
     };
     /**
      * @inheritdoc
+     *
      * @param resolver
      */
     ContainerInstance.prototype.setResolver = function (resolver) {
@@ -70,6 +79,7 @@ var ContainerInstance = /** @class */ (function () {
     };
     /**
      * @inheritdoc
+     *
      * @param instance
      */
     ContainerInstance.prototype.setInstance = function (instance) {
@@ -78,6 +88,7 @@ var ContainerInstance = /** @class */ (function () {
     };
     /**
      * @inheritdoc
+     *
      * @param status
      */
     ContainerInstance.prototype.setSingleton = function (status) {
@@ -86,6 +97,7 @@ var ContainerInstance = /** @class */ (function () {
     };
     /**
      * @inheritdoc
+     *
      * @return
      */
     ContainerInstance.prototype.isSingleton = function () {
@@ -93,6 +105,7 @@ var ContainerInstance = /** @class */ (function () {
     };
     /**
      * @inheritdoc
+     *
      * @return
      */
     ContainerInstance.prototype.getResolved = function () {

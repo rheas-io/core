@@ -14,7 +14,7 @@ var ServiceProvider = /** @class */ (function () {
          * @var boolean
          */
         this._booted = false;
-        this.app = container;
+        this.container = container;
     }
     /**
      * Register the service within this function. Referencing other services

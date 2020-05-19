@@ -35,6 +35,13 @@ export class ContainerInstance implements IContainerInstance {
      */
     private _resolved: any;
 
+    /**
+     * Creates a container instance. The constructor is private and new instance 
+     * has to be created using the static functions so that necessary parameters 
+     * are loaded during object creation.
+     * 
+     * @param container 
+     */
     private constructor(container: IContainer) {
         this._container = container;
     }
@@ -73,6 +80,7 @@ export class ContainerInstance implements IContainerInstance {
 
     /**
      * @inheritdoc
+     * 
      * @return
      */
     public resolve(): any {
@@ -94,6 +102,7 @@ export class ContainerInstance implements IContainerInstance {
 
     /**
      * @inheritdoc
+     * 
      * @param resolver 
      */
     public setResolver(resolver: InstanceHandler): IContainerInstance {
@@ -104,6 +113,7 @@ export class ContainerInstance implements IContainerInstance {
 
     /**
      * @inheritdoc
+     * 
      * @param instance 
      */
     public setInstance(instance: any): IContainerInstance {
@@ -114,6 +124,7 @@ export class ContainerInstance implements IContainerInstance {
 
     /**
      * @inheritdoc
+     * 
      * @param status 
      */
     public setSingleton(status: boolean): IContainerInstance {
@@ -124,6 +135,7 @@ export class ContainerInstance implements IContainerInstance {
 
     /**
      * @inheritdoc
+     * 
      * @return 
      */
     public isSingleton(): boolean {
@@ -132,6 +144,7 @@ export class ContainerInstance implements IContainerInstance {
 
     /**
      * @inheritdoc
+     * 
      * @return
      */
     public getResolved(): any {

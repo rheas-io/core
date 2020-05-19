@@ -26,6 +26,13 @@ export declare class ContainerInstance implements IContainerInstance {
      * @var any
      */
     private _resolved;
+    /**
+     * Creates a container instance. The constructor is private and new instance
+     * has to be created using the static functions so that necessary parameters
+     * are loaded during object creation.
+     *
+     * @param container
+     */
     private constructor();
     /**
      * Creates an empty instance with no instance/resolver.
@@ -52,6 +59,7 @@ export declare class ContainerInstance implements IContainerInstance {
     static createFromResolver(container: IContainer, resolver: any, singleton?: boolean): IContainerInstance;
     /**
      * @inheritdoc
+     *
      * @return
      */
     resolve(): any;
@@ -61,26 +69,31 @@ export declare class ContainerInstance implements IContainerInstance {
     unresolve(): void;
     /**
      * @inheritdoc
+     *
      * @param resolver
      */
     setResolver(resolver: InstanceHandler): IContainerInstance;
     /**
      * @inheritdoc
+     *
      * @param instance
      */
     setInstance(instance: any): IContainerInstance;
     /**
      * @inheritdoc
+     *
      * @param status
      */
     setSingleton(status: boolean): IContainerInstance;
     /**
      * @inheritdoc
+     *
      * @return
      */
     isSingleton(): boolean;
     /**
      * @inheritdoc
+     *
      * @return
      */
     getResolved(): any;

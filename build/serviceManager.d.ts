@@ -3,8 +3,8 @@ import { IContainer } from "@rheas/contracts/container";
 import { IServiceManager, IServiceProvider } from "@rheas/contracts/services";
 export declare class ServiceManager implements IServiceManager {
     /**
-     * The app container instance which has to be used when resolving
-     * services.
+     * The container instance which has to be used when resolving
+     * services. This can be either App or Request instance.
      *
      * @var IContainer
      */

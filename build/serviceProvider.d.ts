@@ -1,12 +1,12 @@
-import { IApp } from "@rheas/contracts/core/app";
+import { IContainer } from "@rheas/contracts/container";
 import { IServiceProvider } from "@rheas/contracts/services";
 export declare class ServiceProvider implements IServiceProvider {
     /**
      * Stores the container instance
      *
-     * @var IApp
+     * @var IContainer
      */
-    protected app: IApp;
+    protected container: IContainer;
     /**
      * Registered status of the provider.
      *
@@ -19,7 +19,7 @@ export declare class ServiceProvider implements IServiceProvider {
      * @var boolean
      */
     protected _booted: boolean;
-    constructor(container: IApp);
+    constructor(container: IContainer);
     /**
      * Register the service within this function. Referencing other services
      * within this function should be done carefully. It could be possible that

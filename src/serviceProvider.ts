@@ -1,4 +1,4 @@
-import { IApp } from "@rheas/contracts/core/app";
+import { IContainer } from "@rheas/contracts/container";
 import { IServiceProvider } from "@rheas/contracts/services";
 
 export class ServiceProvider implements IServiceProvider {
@@ -6,9 +6,9 @@ export class ServiceProvider implements IServiceProvider {
     /**
      * Stores the container instance
      * 
-     * @var IApp
+     * @var IContainer
      */
-    protected app: IApp;
+    protected container: IContainer;
 
     /**
      * Registered status of the provider.
@@ -24,8 +24,8 @@ export class ServiceProvider implements IServiceProvider {
      */
     protected _booted: boolean = false;
 
-    constructor(container: IApp) {
-        this.app = container;
+    constructor(container: IContainer) {
+        this.container = container;
     }
 
     /**
