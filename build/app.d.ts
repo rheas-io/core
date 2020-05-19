@@ -115,9 +115,8 @@ export declare class Application extends Container implements IApp {
      * Returns a configuration data for the key.
      *
      * @param key
-     * @param defaultValue
      */
-    config<T>(key: string, defaultValue?: T | null): T | null;
+    config(key: string): any;
     /**
      * Gets the root path of the application
      *
@@ -138,7 +137,6 @@ export declare class Application extends Container implements IApp {
      * Then we will try to get the binding once again.
      *
      * @param key The binding key to retreive
-     * @param defaultValue The default value to return, if no bindings found
      */
-    get<T>(key: string, defaultValue?: T | null): T | null;
+    get(key: string): any;
 }

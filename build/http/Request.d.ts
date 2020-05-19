@@ -69,9 +69,8 @@ export declare class Request extends IncomingMessage implements IRequest, IConta
      * @inheritdoc
      *
      * @param key
-     * @param defaultValue
      */
-    get<T>(key: string, defaultValue?: T | null): T | null;
+    get(key: string): any;
     /**
      * Sets the application instance and boots request services
      * and container.
@@ -89,6 +88,10 @@ export declare class Request extends IncomingMessage implements IRequest, IConta
      */
     private loadQuery;
     /**
+     *
+     */
+    private loadBody;
+    /**
      * Loads the request services and boots them.
      *
      * @param app
@@ -101,17 +104,20 @@ export declare class Request extends IncomingMessage implements IRequest, IConta
      */
     app(): IApp | null;
     /**
-     * Gets the method
+     * Gets the request method. This is the method value obtained after
+     * checking method overrides in header, post and query. To get the original
+     * method call getRealMethod().
      *
      * @returns string
      */
     getMethod(): string;
     /**
-     * Returns overridden method if any exists.
+     * Returns overridden method if any exists. The function will throw an
+     * exception if the app
      *
      * @return string
      */
-    protected overriddenMethod(): string;
+    protected overriddenMethod(defaultMethod?: string): string;
     /**
      * Returns the actual request method.
      *

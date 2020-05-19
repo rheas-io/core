@@ -17,7 +17,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_1 = __importDefault(require("url"));
-var routing_1 = require("@rheas/routing");
 var http_1 = require("http");
 var container_1 = require("../container");
 var serviceManager_1 = require("../serviceManager");
@@ -82,11 +81,9 @@ var Request = /** @class */ (function (_super) {
      * @inheritdoc
      *
      * @param key
-     * @param defaultValue
      */
-    Request.prototype.get = function (key, defaultValue) {
-        if (defaultValue === void 0) { defaultValue = null; }
-        return this.container.get(key, defaultValue);
+    Request.prototype.get = function (key) {
+        return this.container.get(key);
     };
     /**
      * Sets the application instance and boots request services
@@ -106,6 +103,7 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.loadRequest = function () {
         this.loadQuery();
+        this.loadBody();
     };
     /**
      * Loads the request query from the url. The result is urldecoded
@@ -113,6 +111,11 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.loadQuery = function () {
         this._query = url_1.default.parse(this.url || "", true).query;
+    };
+    /**
+     *
+     */
+    Request.prototype.loadBody = function () {
     };
     /**
      * Loads the request services and boots them.
@@ -132,7 +135,9 @@ var Request = /** @class */ (function (_super) {
         return this._app;
     };
     /**
-     * Gets the method
+     * Gets the request method. This is the method value obtained after
+     * checking method overrides in header, post and query. To get the original
+     * method call getRealMethod().
      *
      * @returns string
      */
@@ -147,15 +152,22 @@ var Request = /** @class */ (function (_super) {
         return this._method = method;
     };
     /**
-     * Returns overridden method if any exists.
+     * Returns overridden method if any exists. The function will throw an
+     * exception if the app
      *
      * @return string
      */
-    Request.prototype.overriddenMethod = function () {
+    Request.prototype.overriddenMethod = function (defaultMethod) {
+        if (defaultMethod === void 0) { defaultMethod = "POST"; }
         var method = this.headers['X-HTTP-METHOD-OVERRIDE'];
         if (!method) {
+            //TODO
         }
-        if (!routing_1.Route.verbs.includes(method)) {
+        if (typeof method !== 'string' || method.length === 0) {
+            return defaultMethod;
+        }
+        method = method.toUpperCase();
+        if (!['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].includes(method)) {
             throw new errors_1.SuspiciousOperationException("Invalid method requested: " + method);
         }
         return method;

@@ -26,29 +26,25 @@ var ConfigManager = /** @class */ (function () {
      * Gets the application configurations. Configs are requested
      * in filename.config format Config can be chained multiple times.
      *
-     * If no configuration is found, a default value or null is returned.
-     *
      * @param key
-     * @param defaultValue
      */
-    ConfigManager.prototype.get = function (key, defaultValue) {
-        if (defaultValue === void 0) { defaultValue = null; }
+    ConfigManager.prototype.get = function (key) {
         // Return null if the key is null|undefined or the
         // trimmed key length is 0.
         if (key == null || (key = key.trim()).length <= 0) {
-            return defaultValue;
+            return null;
         }
         // Splits the key by '.' character. Configs are requested using
         // filename.config format.
         var _a = key.split('.'), filename = _a[0], configKeys = _a.slice(1);
-        var config = defaultValue;
+        var config = null;
         // Check if the file is already cached or not. If not, we will try to
         // cache the file first. Only if file cache is successfull, we will check
         // for the configuration data.
         if (this.isCachedFile(filename) || this.cacheFile(filename)) {
             config = configKeys.reduce(function (prev, current) { return (prev && prev[current]) ? prev[current] : null; }, this._configs[filename]);
         }
-        return config == null ? defaultValue : config;
+        return config;
     };
     /**
      * Caches all the configuration data in the file

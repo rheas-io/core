@@ -208,11 +208,9 @@ var Application = /** @class */ (function (_super) {
      * Returns a configuration data for the key.
      *
      * @param key
-     * @param defaultValue
      */
-    Application.prototype.config = function (key, defaultValue) {
-        if (defaultValue === void 0) { defaultValue = null; }
-        return this._configManager.get(key, defaultValue);
+    Application.prototype.config = function (key) {
+        return this._configManager.get(key);
     };
     /**
      * Gets the root path of the application
@@ -238,16 +236,14 @@ var Application = /** @class */ (function (_super) {
      * Then we will try to get the binding once again.
      *
      * @param key The binding key to retreive
-     * @param defaultValue The default value to return, if no bindings found
      */
-    Application.prototype.get = function (key, defaultValue) {
-        if (defaultValue === void 0) { defaultValue = null; }
-        var service = _super.prototype.get.call(this, key, defaultValue);
+    Application.prototype.get = function (key) {
+        var service = _super.prototype.get.call(this, key);
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // Container.
         if (service === null && this._serviceManager.loadDeferredService(key)) {
-            return this.get(key, defaultValue);
+            return _super.prototype.get.call(this, key);
         }
         return service;
     };

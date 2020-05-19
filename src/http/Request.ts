@@ -95,10 +95,9 @@ export class Request extends IncomingMessage implements IRequest, IContainer {
      * @inheritdoc
      * 
      * @param key 
-     * @param defaultValue 
      */
-    public get<T>(key: string, defaultValue: T | null = null): T | null {
-        return this.container.get(key, defaultValue);
+    public get(key: string) {
+        return this.container.get(key);
     }
 
     /**
@@ -125,6 +124,8 @@ export class Request extends IncomingMessage implements IRequest, IContainer {
     private loadRequest(): void {
 
         this.loadQuery();
+
+        this.loadBody();
     }
 
     /**
@@ -133,6 +134,13 @@ export class Request extends IncomingMessage implements IRequest, IContainer {
      */
     private loadQuery(): void {
         this._query = url.parse(this.url || "", true).query;
+    }
+
+    /**
+     * 
+     */
+    private loadBody(): void {
+
     }
 
     /**
@@ -186,7 +194,7 @@ export class Request extends IncomingMessage implements IRequest, IContainer {
         let method = <string>this.headers['X-HTTP-METHOD-OVERRIDE'];
 
         if (!method) {
-
+            //TODO
         }
 
         if (typeof method !== 'string' || method.length === 0) {

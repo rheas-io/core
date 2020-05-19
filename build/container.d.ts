@@ -45,7 +45,6 @@ export declare class Container implements IContainer {
      * no binding is found or the defaultValue is not
      *
      * @param key The binding key to retreive
-     * @param defaultValue The default value to return, if no bindings found
      */
-    get<T>(key: string, defaultValue?: T | null): T | null;
+    get(key: string): any;
 }

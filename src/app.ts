@@ -254,10 +254,9 @@ export class Application extends Container implements IApp {
      * Returns a configuration data for the key.
      * 
      * @param key 
-     * @param defaultValue 
      */
-    public config<T>(key: string, defaultValue: T | null = null): T | null {
-        return this._configManager.get(key, defaultValue);
+    public config(key: string) {
+        return this._configManager.get(key);
     }
 
     /**
@@ -286,16 +285,15 @@ export class Application extends Container implements IApp {
      * Then we will try to get the binding once again.
      * 
      * @param key The binding key to retreive
-     * @param defaultValue The default value to return, if no bindings found
      */
-    public get<T>(key: string, defaultValue: T | null = null): T | null {
-        const service = super.get(key, defaultValue);
+    public get(key: string): any {
+        const service = super.get(key);
 
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // Container.
         if (service === null && this._serviceManager.loadDeferredService(key)) {
-            return this.get(key, defaultValue);
+            return super.get(key);
         }
         return service;
     }

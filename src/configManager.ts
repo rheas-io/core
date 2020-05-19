@@ -35,23 +35,20 @@ export class ConfigManager implements IManager {
      * Gets the application configurations. Configs are requested
      * in filename.config format Config can be chained multiple times.
      * 
-     * If no configuration is found, a default value or null is returned.
-     * 
-     * @param key 
-     * @param defaultValue
+     * @param key
      */
-    public get<T>(key: string, defaultValue: T | null = null): T | null {
+    public get(key: string): any {
 
         // Return null if the key is null|undefined or the
         // trimmed key length is 0.
         if (key == null || (key = key.trim()).length <= 0) {
-            return defaultValue;
+            return null;
         }
 
         // Splits the key by '.' character. Configs are requested using
         // filename.config format.
         const [filename, ...configKeys] = key.split('.');
-        let config = defaultValue;
+        let config = null;
 
         // Check if the file is already cached or not. If not, we will try to
         // cache the file first. Only if file cache is successfull, we will check
@@ -63,7 +60,7 @@ export class ConfigManager implements IManager {
             );
         }
 
-        return config == null ? defaultValue : config;
+        return config;
     }
 
     /**

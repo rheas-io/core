@@ -23,12 +23,9 @@ export declare class ConfigManager implements IManager {
      * Gets the application configurations. Configs are requested
      * in filename.config format Config can be chained multiple times.
      *
-     * If no configuration is found, a default value or null is returned.
-     *
      * @param key
-     * @param defaultValue
      */
-    get<T>(key: string, defaultValue?: T | null): T | null;
+    get(key: string): any;
     /**
      * Caches all the configuration data in the file
      *
