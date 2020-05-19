@@ -131,23 +131,26 @@ export class Application extends Container implements IApp {
      * @param req 
      * @param res 
      */
-    public listenRequests(req: IncomingMessage, res: ServerResponse): void {
+    public async listenRequests(req: IncomingMessage, res: ServerResponse): Promise<any> {
         const router: IRouter | null = this.get('router');
 
         if (router === null) {
             throw new Error("No router service is registered. Fix the app providers list");
         }
         const request = <IRequest>req;
-        const response = <IResponse>res;
+        let response = <IResponse>res;
 
         request.boot(this);
 
-        router.processRequest(request, response)
-            .then(response => response.end())
-            .catch(err => {
-                response.statusCode = 500;
-                response.end(err.message || "Server error");
-            });
+        try {
+            response = await router.processRequest(request, response);
+        } catch (err) {
+            response.statusCode = 500;
+            response.setContent(err.message || "Server error");
+        }
+        response = response.prepareResponse(request);
+
+        response.send();
     }
 
     /**
