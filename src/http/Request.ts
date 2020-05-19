@@ -10,7 +10,7 @@ import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 
-export class Request extends IncomingMessage implements IRequest, IContainer {
+export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Stores the app instance.
