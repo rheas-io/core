@@ -1,5 +1,4 @@
 import url from "url";
-import { Route } from "@rheas/routing";
 import { IncomingMessage } from "http";
 import { Container } from "../container";
 import { IApp } from "@rheas/contracts/core";
