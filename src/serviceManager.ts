@@ -87,12 +87,12 @@ export class ServiceManager implements IServiceManager {
             // Such services should have a provides property that states, to which
             // alias it should be loaded.
             if ('provide' in service && !this._deferredServices.includes(alias)) {
-                this._deferredServices.push(name);
+                this._deferredServices.push(alias);
             }
             // If the service doesn't has to be deferred, we will register
             // them immediately.
             else {
-                this.registerService(name, new service(this._container));
+                this.registerService(alias, new service(this._container));
             }
         }
         this.setRegistered(true);
