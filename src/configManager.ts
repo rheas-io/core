@@ -37,12 +37,12 @@ export class ConfigManager implements IManager {
      * 
      * @param key
      */
-    public get(key: string): any {
+    public get(key: string, defaultValue: any = null): any {
 
         // Return null if the key is null|undefined or the
         // trimmed key length is 0.
         if (key == null || (key = key.trim()).length <= 0) {
-            return null;
+            return defaultValue;
         }
 
         // Splits the key by '.' character. Configs are requested using
@@ -60,7 +60,7 @@ export class ConfigManager implements IManager {
             );
         }
 
-        return config;
+        return null == config ? defaultValue : config;
     }
 
     /**

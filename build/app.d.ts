@@ -6,6 +6,12 @@ import { IManager } from "@rheas/contracts/core";
 import { IncomingMessage, ServerResponse } from "http";
 export declare class Application extends Container implements IApp {
     /**
+     * Application instance.
+     *
+     * @var IApp
+     */
+    private static instance;
+    /**
      * Stores the root path of the application. This root path is necessary
      * to load different modules of the application.
      *
@@ -38,6 +44,15 @@ export declare class Application extends Container implements IApp {
      */
     constructor(rootPath: string);
     /**
+     * Returns an application instance. If no instance is available,
+     * creates a new instance with the given root path. If no root path
+     * is given, we will resolve a directory based on the location of this file.
+     *
+     * Generally, this script will be located on project_root/node_modules/rheas/core
+     * Hence, we resolve it three level updwards to find the project root.
+     */
+    static getInstance(rootPath?: string): IApp;
+    /**
      * Registers this app and and config bindings to the container.
      * Also sets the container instance to this object.
      */
@@ -69,7 +84,7 @@ export declare class Application extends Container implements IApp {
      * @param req
      * @param res
      */
-    listenRequests(req: IncomingMessage, res: ServerResponse): void;
+    listenRequests(req: IncomingMessage, res: ServerResponse): Promise<any>;
     /**
      * Creates an http server and listens on the port specified in the app
      * configuration file.
@@ -116,7 +131,7 @@ export declare class Application extends Container implements IApp {
      *
      * @param key
      */
-    config(key: string): any;
+    config(key: string, defaultValue?: any): any;
     /**
      * Gets the root path of the application
      *

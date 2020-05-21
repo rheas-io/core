@@ -28,11 +28,12 @@ var ConfigManager = /** @class */ (function () {
      *
      * @param key
      */
-    ConfigManager.prototype.get = function (key) {
+    ConfigManager.prototype.get = function (key, defaultValue) {
+        if (defaultValue === void 0) { defaultValue = null; }
         // Return null if the key is null|undefined or the
         // trimmed key length is 0.
         if (key == null || (key = key.trim()).length <= 0) {
-            return null;
+            return defaultValue;
         }
         // Splits the key by '.' character. Configs are requested using
         // filename.config format.
@@ -44,7 +45,7 @@ var ConfigManager = /** @class */ (function () {
         if (this.isCachedFile(filename) || this.cacheFile(filename)) {
             config = configKeys.reduce(function (prev, current) { return (prev && prev[current]) ? prev[current] : null; }, this._configs[filename]);
         }
-        return config;
+        return null == config ? defaultValue : config;
     };
     /**
      * Caches all the configuration data in the file

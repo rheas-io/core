@@ -71,10 +71,10 @@ export class Container implements IContainer {
      * 
      * @param key The binding key to retreive
      */
-    public get(key: string) {
+    public get(key: string, defaultValue: any = null) {
 
         if (!this._instances.hasOwnProperty(key)) {
-            return null;
+            return defaultValue;
         }
         return this._instances[key].getResolved();
     }

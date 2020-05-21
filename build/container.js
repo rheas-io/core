@@ -69,9 +69,10 @@ var Container = /** @class */ (function () {
      *
      * @param key The binding key to retreive
      */
-    Container.prototype.get = function (key) {
+    Container.prototype.get = function (key, defaultValue) {
+        if (defaultValue === void 0) { defaultValue = null; }
         if (!this._instances.hasOwnProperty(key)) {
-            return null;
+            return defaultValue;
         }
         return this._instances[key].getResolved();
     };

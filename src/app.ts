@@ -16,6 +16,13 @@ import http, { Server, IncomingMessage, ServerResponse } from "http";
 export class Application extends Container implements IApp {
 
     /**
+     * Application instance.
+     * 
+     * @var IApp
+     */
+    private static instance: IApp;
+
+    /**
      * Stores the root path of the application. This root path is necessary
      * to load different modules of the application.
      * 
@@ -52,12 +59,31 @@ export class Application extends Container implements IApp {
     constructor(rootPath: string) {
         super();
 
+        Application.instance = this;
+
         this._rootPath = rootPath;
 
         this._configManager = this.registerConfigManager();
         this._serviceManager = new ServiceManager(this, this.config('app.providers') || {});
 
         this.registerBaseBindings();
+    }
+
+    /**
+     * Returns an application instance. If no instance is available,
+     * creates a new instance with the given root path. If no root path
+     * is given, we will resolve a directory based on the location of this file.
+     * 
+     * Generally, this script will be located on project_root/node_modules/rheas/core
+     * Hence, we resolve it three level updwards to find the project root.
+     */
+    public static getInstance(rootPath: string = "") {
+        if (!Application.instance) {
+            rootPath = rootPath || path.resolve(__dirname, "../../..");
+
+            Application.instance = new Application(rootPath);
+        }
+        return Application.instance;
     }
 
     /**
@@ -258,8 +284,8 @@ export class Application extends Container implements IApp {
      * 
      * @param key 
      */
-    public config(key: string) {
-        return this._configManager.get(key);
+    public config(key: string, defaultValue: any = null) {
+        return this._configManager.get(key, defaultValue);
     }
 
     /**

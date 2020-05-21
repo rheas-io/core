@@ -25,7 +25,7 @@ export declare class ConfigManager implements IManager {
      *
      * @param key
      */
-    get(key: string): any;
+    get(key: string, defaultValue?: any): any;
     /**
      * Caches all the configuration data in the file
      *

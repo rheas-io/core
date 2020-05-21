@@ -46,5 +46,5 @@ export declare class Container implements IContainer {
      *
      * @param key The binding key to retreive
      */
-    get(key: string): any;
+    get(key: string, defaultValue?: any): any;
 }
