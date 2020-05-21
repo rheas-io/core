@@ -61,9 +61,23 @@ var Request = /** @class */ (function (_super) {
         _this._query = {};
         _this.container = new container_1.Container();
         _this.serviceManager = new serviceManager_1.ServiceManager(_this);
-        _this.loadRequest();
         return _this;
     }
+    /**
+     * Sets the application instance and boots request services and
+     * container.
+     *
+     * The request data like url, query and all the stuff will be available
+     * inside the boot. Process them and store in memory for faster processing
+     *
+     * @param app
+     */
+    Request.prototype.boot = function (app) {
+        this.instance('app', app, true);
+        this.loadRequest();
+        this.loadServices(app);
+        return this;
+    };
     /**
      * Loads the requests query, cookies, headers and post contents.
      */
@@ -83,17 +97,6 @@ var Request = /** @class */ (function (_super) {
      *
      */
     Request.prototype.loadBody = function () {
-    };
-    /**
-     * Sets the application instance and boots request services
-     * and container.
-     *
-     * @param app
-     */
-    Request.prototype.boot = function (app) {
-        this.instance('app', app, true);
-        this.loadServices(app);
-        return this;
     };
     /**
      * Loads the request services and boots them.
@@ -177,6 +180,14 @@ var Request = /** @class */ (function (_super) {
         var schema = this.socket.encrypted ? "https" : "http";
         return schema;
     };
+    /**
+     *
+     *
+     * @returns string
+     */
+    Request.prototype.getPath = function () {
+        return this.url || '/';
+    };
     Request.prototype.params = function () {
         throw new Error("Method not implemented.");
     };
@@ -187,9 +198,6 @@ var Request = /** @class */ (function (_super) {
         throw new Error("Method not implemented.");
     };
     Request.prototype.getHost = function () {
-        throw new Error("Method not implemented.");
-    };
-    Request.prototype.getPath = function () {
         throw new Error("Method not implemented.");
     };
     Request.prototype.getFullUrl = function () {

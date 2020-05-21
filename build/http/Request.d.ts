@@ -58,6 +58,16 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     constructor(socket: any);
     /**
+     * Sets the application instance and boots request services and
+     * container.
+     *
+     * The request data like url, query and all the stuff will be available
+     * inside the boot. Process them and store in memory for faster processing
+     *
+     * @param app
+     */
+    boot(app: IApp): IRequest;
+    /**
      * Loads the requests query, cookies, headers and post contents.
      */
     private loadRequest;
@@ -70,13 +80,6 @@ export declare class Request extends IncomingMessage implements IRequest {
      *
      */
     private loadBody;
-    /**
-     * Sets the application instance and boots request services
-     * and container.
-     *
-     * @param app
-     */
-    boot(app: IApp): IRequest;
     /**
      * Loads the request services and boots them.
      *
@@ -123,11 +126,16 @@ export declare class Request extends IncomingMessage implements IRequest {
      * @returns string
      */
     getSchema(): string;
+    /**
+     *
+     *
+     * @returns string
+     */
+    getPath(): string;
     params(): string[];
     isJson(): boolean;
     acceptsJson(): boolean;
     getHost(): string;
-    getPath(): string;
     getFullUrl(): string;
     getQueryString(): string;
     /**

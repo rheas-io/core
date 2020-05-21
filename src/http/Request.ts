@@ -75,8 +75,25 @@ export class Request extends IncomingMessage implements IRequest {
 
         this.container = new Container();
         this.serviceManager = new ServiceManager(this);
+    }
+    /**
+     * Sets the application instance and boots request services and 
+     * container. 
+     * 
+     * The request data like url, query and all the stuff will be available 
+     * inside the boot. Process them and store in memory for faster processing
+     * 
+     * @param app 
+     */
+    public boot(app: IApp): IRequest {
+
+        this.instance('app', app, true);
 
         this.loadRequest();
+
+        this.loadServices(app);
+
+        return this;
     }
 
     /**
@@ -104,21 +121,6 @@ export class Request extends IncomingMessage implements IRequest {
      */
     private loadBody(): void {
 
-    }
-
-    /**
-     * Sets the application instance and boots request services
-     * and container.
-     * 
-     * @param app 
-     */
-    public boot(app: IApp): IRequest {
-
-        this.instance('app', app, true);
-
-        this.loadServices(app);
-
-        return this;
     }
 
     /**
@@ -220,6 +222,15 @@ export class Request extends IncomingMessage implements IRequest {
         return schema;
     }
 
+    /**
+     * 
+     * 
+     * @returns string
+     */
+    public getPath(): string {
+        return this.url || '/';
+    }
+
     params(): string[] {
         throw new Error("Method not implemented.");
     }
@@ -232,9 +243,6 @@ export class Request extends IncomingMessage implements IRequest {
         throw new Error("Method not implemented.");
     }
     getHost(): string {
-        throw new Error("Method not implemented.");
-    }
-    getPath(): string {
         throw new Error("Method not implemented.");
     }
     getFullUrl(): string {
