@@ -1,4 +1,5 @@
 import url from "url";
+import { mime } from "send";
 import { IncomingMessage } from "http";
 import { Container } from "../container";
 import { IApp } from "@rheas/contracts/core";
@@ -7,16 +8,10 @@ import { IRequest, AnyObject } from "@rheas/contracts";
 import { SuspiciousOperationException } from "../errors";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
+import { ComponentFactory } from "@rheas/routing/uri/uriComponentFactory";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 
 export class Request extends IncomingMessage implements IRequest {
-
-    /**
-     * Stores the app instance.
-     * 
-     * @var IApp
-     */
-    protected _app: IApp | null = null;
 
     /**
      * This request's container manager
@@ -31,6 +26,30 @@ export class Request extends IncomingMessage implements IRequest {
      * @var IServiceManager
      */
     protected serviceManager: IServiceManager;
+
+    /**
+     * The segmented path uri components.
+     * 
+     * @var array
+     */
+    protected _pathComponents: IRequestComponent[] = [];
+
+    /**
+     * Stores request attributes. 
+     * 
+     * Container bindings are restricted in such a way that singleton keys can't 
+     * be replaced. Attributes allow replacing values of a key.
+     * 
+     * @var AnyObject
+     */
+    protected _attributes: AnyObject = {};
+
+    /**
+     * The format in which response has to be sent.
+     * 
+     * @var string
+     */
+    protected _format: string | null = null;
 
     /**
      * The request method.
@@ -56,71 +75,16 @@ export class Request extends IncomingMessage implements IRequest {
 
         this.container = new Container();
         this.serviceManager = new ServiceManager(this);
-    }
-
-    /**
-     * @inheritdoc
-     * 
-     * @param name 
-     * @param resolver 
-     */
-    public singleton(name: string, resolver: InstanceHandler): IContainerInstance {
-        return this.container.singleton(name, resolver);
-    }
-
-    /**
-     * @inheritdoc
-     * 
-     * @param name 
-     * @param resolver 
-     * @param singleton 
-     */
-    public bind(name: string, resolver: InstanceHandler, singleton: boolean = false): IContainerInstance {
-        return this.container.bind(name, resolver, singleton);
-    }
-
-    /**
-     * @inheritdoc
-     * 
-     * @param name 
-     * @param instance 
-     * @param singleton 
-     */
-    public instance<T>(name: string, instance: T, singleton: boolean = false): IContainerInstance {
-        return this.container.instance(name, instance, singleton);
-    }
-
-    /**
-     * @inheritdoc
-     * 
-     * @param key 
-     */
-    public get(key: string) {
-        return this.container.get(key);
-    }
-
-    /**
-     * Sets the application instance and boots request services
-     * and container.
-     * 
-     * @param app 
-     */
-    public boot(app: IApp): IRequest {
 
         this.loadRequest();
-
-        this._app = app;
-        this.instance('app', this._app, true);
-
-        this.loadServices(this._app);
-
-        return this;
     }
 
     /**
      * Loads the requests query, cookies, headers and post contents.
      */
     private loadRequest(): void {
+
+        this._pathComponents = ComponentFactory.createFromRequest(this);
 
         this.loadQuery();
 
@@ -143,6 +107,21 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
+     * Sets the application instance and boots request services
+     * and container.
+     * 
+     * @param app 
+     */
+    public boot(app: IApp): IRequest {
+
+        this.instance('app', app, true);
+
+        this.loadServices(app);
+
+        return this;
+    }
+
+    /**
      * Loads the request services and boots them.
      * 
      * @param app 
@@ -151,15 +130,6 @@ export class Request extends IncomingMessage implements IRequest {
         this.serviceManager.setProviders(app.config('request.providers') || {});
 
         this.serviceManager.boot();
-    }
-
-    /**
-     * Returns the application instance.
-     * 
-     * @returns IApp
-     */
-    public app(): IApp | null {
-        return this._app;
     }
 
     /**
@@ -210,6 +180,17 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
+     * Returns path uri components obtained by splitting the uri by 
+     * forward slash (/)
+     * 
+     * @returns array of request uri components
+     */
+    public getPathComponents(): IRequestComponent[] {
+
+        return this._pathComponents;
+    }
+
+    /**
      * Returns the actual request method.
      * 
      * @returns string
@@ -243,6 +224,10 @@ export class Request extends IncomingMessage implements IRequest {
         throw new Error("Method not implemented.");
     }
 
+    isJson(): boolean {
+        throw new Error("Method not implemented.");
+    }
+
     acceptsJson(): boolean {
         throw new Error("Method not implemented.");
     }
@@ -252,13 +237,112 @@ export class Request extends IncomingMessage implements IRequest {
     getPath(): string {
         throw new Error("Method not implemented.");
     }
-    getPathComponents(): IRequestComponent[] {
-        throw new Error("Method not implemented.");
-    }
     getFullUrl(): string {
         throw new Error("Method not implemented.");
     }
     getQueryString(): string {
         throw new Error("Method not implemented.");
+    }
+
+    /**
+     * Sets the format in which response has to be send.
+     * 
+     * @param format 
+     */
+    public setFormat(format: string): IRequest {
+        this._format = format;
+
+        return this;
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @returns string
+     */
+    public getFormat(defaulValue: string = "html"): string {
+        if (null == this._format) {
+            this._format = this.getAttribute('_format');
+        }
+
+        return null == this._format ? defaulValue : this._format;
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @param format 
+     * @return
+     */
+    public getMimeType(format: string): string | null {
+        return mime.getType(format);
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @param key 
+     * @param value 
+     */
+    public setAttribute(key: string, value: any): IRequest {
+
+        this._attributes[key] = value;
+
+        return this;
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @param key 
+     * @param defaultValue 
+     */
+    public getAttribute(key: string, defaultValue: any = null) {
+
+        if (Object.keys(this._attributes).includes(key)) {
+            return this._attributes[key];
+        }
+        return defaultValue;
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @param name 
+     * @param resolver 
+     */
+    public singleton(name: string, resolver: InstanceHandler): IContainerInstance {
+        return this.container.singleton(name, resolver);
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @param name 
+     * @param resolver 
+     * @param singleton 
+     */
+    public bind(name: string, resolver: InstanceHandler, singleton: boolean = false): IContainerInstance {
+        return this.container.bind(name, resolver, singleton);
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @param name 
+     * @param instance 
+     * @param singleton 
+     */
+    public instance<T>(name: string, instance: T, singleton: boolean = false): IContainerInstance {
+        return this.container.instance(name, instance, singleton);
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @param key 
+     */
+    public get(key: string) {
+        return this.container.get(key);
     }
 }

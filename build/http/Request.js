@@ -17,10 +17,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_1 = __importDefault(require("url"));
+var send_1 = require("send");
 var http_1 = require("http");
 var container_1 = require("../container");
 var serviceManager_1 = require("../serviceManager");
 var errors_1 = require("../errors");
+var uriComponentFactory_1 = require("@rheas/routing/uri/uriComponentFactory");
 var Request = /** @class */ (function (_super) {
     __extends(Request, _super);
     /**
@@ -31,11 +33,26 @@ var Request = /** @class */ (function (_super) {
     function Request(socket) {
         var _this = _super.call(this, socket) || this;
         /**
-         * Stores the app instance.
+         * The segmented path uri components.
          *
-         * @var IApp
+         * @var array
          */
-        _this._app = null;
+        _this._pathComponents = [];
+        /**
+         * Stores request attributes.
+         *
+         * Container bindings are restricted in such a way that singleton keys can't
+         * be replaced. Attributes allow replacing values of a key.
+         *
+         * @var AnyObject
+         */
+        _this._attributes = {};
+        /**
+         * The format in which response has to be sent.
+         *
+         * @var string
+         */
+        _this._format = null;
         /**
          * Stores the urldecoded query parameters of this request.
          *
@@ -44,64 +61,14 @@ var Request = /** @class */ (function (_super) {
         _this._query = {};
         _this.container = new container_1.Container();
         _this.serviceManager = new serviceManager_1.ServiceManager(_this);
+        _this.loadRequest();
         return _this;
     }
-    /**
-     * @inheritdoc
-     *
-     * @param name
-     * @param resolver
-     */
-    Request.prototype.singleton = function (name, resolver) {
-        return this.container.singleton(name, resolver);
-    };
-    /**
-     * @inheritdoc
-     *
-     * @param name
-     * @param resolver
-     * @param singleton
-     */
-    Request.prototype.bind = function (name, resolver, singleton) {
-        if (singleton === void 0) { singleton = false; }
-        return this.container.bind(name, resolver, singleton);
-    };
-    /**
-     * @inheritdoc
-     *
-     * @param name
-     * @param instance
-     * @param singleton
-     */
-    Request.prototype.instance = function (name, instance, singleton) {
-        if (singleton === void 0) { singleton = false; }
-        return this.container.instance(name, instance, singleton);
-    };
-    /**
-     * @inheritdoc
-     *
-     * @param key
-     */
-    Request.prototype.get = function (key) {
-        return this.container.get(key);
-    };
-    /**
-     * Sets the application instance and boots request services
-     * and container.
-     *
-     * @param app
-     */
-    Request.prototype.boot = function (app) {
-        this.loadRequest();
-        this._app = app;
-        this.instance('app', this._app, true);
-        this.loadServices(this._app);
-        return this;
-    };
     /**
      * Loads the requests query, cookies, headers and post contents.
      */
     Request.prototype.loadRequest = function () {
+        this._pathComponents = uriComponentFactory_1.ComponentFactory.createFromRequest(this);
         this.loadQuery();
         this.loadBody();
     };
@@ -118,6 +85,17 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.loadBody = function () {
     };
     /**
+     * Sets the application instance and boots request services
+     * and container.
+     *
+     * @param app
+     */
+    Request.prototype.boot = function (app) {
+        this.instance('app', app, true);
+        this.loadServices(app);
+        return this;
+    };
+    /**
      * Loads the request services and boots them.
      *
      * @param app
@@ -125,14 +103,6 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.loadServices = function (app) {
         this.serviceManager.setProviders(app.config('request.providers') || {});
         this.serviceManager.boot();
-    };
-    /**
-     * Returns the application instance.
-     *
-     * @returns IApp
-     */
-    Request.prototype.app = function () {
-        return this._app;
     };
     /**
      * Gets the request method. This is the method value obtained after
@@ -173,6 +143,15 @@ var Request = /** @class */ (function (_super) {
         return method;
     };
     /**
+     * Returns path uri components obtained by splitting the uri by
+     * forward slash (/)
+     *
+     * @returns array of request uri components
+     */
+    Request.prototype.getPathComponents = function () {
+        return this._pathComponents;
+    };
+    /**
      * Returns the actual request method.
      *
      * @returns string
@@ -201,6 +180,9 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.params = function () {
         throw new Error("Method not implemented.");
     };
+    Request.prototype.isJson = function () {
+        throw new Error("Method not implemented.");
+    };
     Request.prototype.acceptsJson = function () {
         throw new Error("Method not implemented.");
     };
@@ -210,14 +192,103 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.getPath = function () {
         throw new Error("Method not implemented.");
     };
-    Request.prototype.getPathComponents = function () {
-        throw new Error("Method not implemented.");
-    };
     Request.prototype.getFullUrl = function () {
         throw new Error("Method not implemented.");
     };
     Request.prototype.getQueryString = function () {
         throw new Error("Method not implemented.");
+    };
+    /**
+     * Sets the format in which response has to be send.
+     *
+     * @param format
+     */
+    Request.prototype.setFormat = function (format) {
+        this._format = format;
+        return this;
+    };
+    /**
+     * @inheritdoc
+     *
+     * @returns string
+     */
+    Request.prototype.getFormat = function (defaulValue) {
+        if (defaulValue === void 0) { defaulValue = "html"; }
+        if (null == this._format) {
+            this._format = this.getAttribute('_format');
+        }
+        return null == this._format ? defaulValue : this._format;
+    };
+    /**
+     * @inheritdoc
+     *
+     * @param format
+     * @return
+     */
+    Request.prototype.getMimeType = function (format) {
+        return send_1.mime.getType(format);
+    };
+    /**
+     * @inheritdoc
+     *
+     * @param key
+     * @param value
+     */
+    Request.prototype.setAttribute = function (key, value) {
+        this._attributes[key] = value;
+        return this;
+    };
+    /**
+     * @inheritdoc
+     *
+     * @param key
+     * @param defaultValue
+     */
+    Request.prototype.getAttribute = function (key, defaultValue) {
+        if (defaultValue === void 0) { defaultValue = null; }
+        if (Object.keys(this._attributes).includes(key)) {
+            return this._attributes[key];
+        }
+        return defaultValue;
+    };
+    /**
+     * @inheritdoc
+     *
+     * @param name
+     * @param resolver
+     */
+    Request.prototype.singleton = function (name, resolver) {
+        return this.container.singleton(name, resolver);
+    };
+    /**
+     * @inheritdoc
+     *
+     * @param name
+     * @param resolver
+     * @param singleton
+     */
+    Request.prototype.bind = function (name, resolver, singleton) {
+        if (singleton === void 0) { singleton = false; }
+        return this.container.bind(name, resolver, singleton);
+    };
+    /**
+     * @inheritdoc
+     *
+     * @param name
+     * @param instance
+     * @param singleton
+     */
+    Request.prototype.instance = function (name, instance, singleton) {
+        if (singleton === void 0) { singleton = false; }
+        return this.container.instance(name, instance, singleton);
+    };
+    /**
+     * @inheritdoc
+     *
+     * @param key
+     */
+    Request.prototype.get = function (key) {
+        return this.container.get(key);
     };
     return Request;
 }(http_1.IncomingMessage));
