@@ -169,14 +169,14 @@ export class Application extends Container implements IApp {
         request.boot(this);
 
         try {
-            response = await router.processRequest(request, response);
+            response = await router.handle(request, response);
         } catch (err) {
             response.statusCode = 500;
             response.setContent(err.message || "Server error");
         }
-        response = response.prepareResponse(request);
+        response = response.prepareResponse();
 
-        response.send();
+        response = response.send();
     }
 
     /**

@@ -173,7 +173,7 @@ var Application = /** @class */ (function (_super) {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, router.processRequest(request, response)];
+                        return [4 /*yield*/, router.handle(request, response)];
                     case 2:
                         response = _a.sent();
                         return [3 /*break*/, 4];
@@ -183,8 +183,8 @@ var Application = /** @class */ (function (_super) {
                         response.setContent(err_1.message || "Server error");
                         return [3 /*break*/, 4];
                     case 4:
-                        response = response.prepareResponse(request);
-                        response.send();
+                        response = response.prepareResponse();
+                        response = response.send();
                         return [2 /*return*/];
                 }
             });
