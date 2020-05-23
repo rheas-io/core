@@ -166,9 +166,9 @@ export class Application extends Container implements IApp {
         const request = <IRequest>req;
         let response = <IResponse>res;
 
-        request.boot(this);
-
         try {
+            request.boot(this);
+
             response = await router.handle(request, response);
         } catch (err) {
             response.statusCode = 500;
@@ -225,7 +225,7 @@ export class Application extends Container implements IApp {
 
         server.listen(port);
         server.on('listening', () => this.onListening(server));
-        server.on('error', error => this.onError(error, port));
+        server.on('error', (error: any) => this.onError(error, port));
 
         return server;
     }
