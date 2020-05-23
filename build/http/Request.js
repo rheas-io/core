@@ -17,7 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_1 = __importDefault(require("url"));
-var send_1 = require("send");
+var mime_types_1 = __importDefault(require("mime-types"));
 var http_1 = require("http");
 var container_1 = require("../container");
 var serviceManager_1 = require("../serviceManager");
@@ -83,7 +83,9 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.loadRequest = function () {
         this._pathComponents = uriComponentFactory_1.ComponentFactory.createFromRequest(this);
-        this.loadQuery();
+        var parsed = url_1.default.parse(this.getFullUrl(), true);
+        this._query = parsed.query;
+        //this.loadQuery();
         this.loadBody();
     };
     /**
@@ -186,24 +188,29 @@ var Request = /** @class */ (function (_super) {
      * @returns string
      */
     Request.prototype.getPath = function () {
-        return this.url || '/';
+        return this.url;
+    };
+    Request.prototype.getProtocol = function () {
+        return this.isSecure() ? 'https' : 'http';
+    };
+    Request.prototype.getHost = function () {
+        return this.headers.host || '';
+    };
+    Request.prototype.getFullUrl = function () {
+        return this.getProtocol() + '://' + this.getHost() + this.getPath();
+    };
+    Request.prototype.getQueryString = function () {
+        throw new Error("Method not implemented.");
     };
     Request.prototype.params = function () {
-        throw new Error("Method not implemented.");
+        var params = [];
+        this._pathComponents.forEach(function (components) { return params.push.apply(params, Object.values(components.getParam())); });
+        return params;
     };
     Request.prototype.isJson = function () {
         throw new Error("Method not implemented.");
     };
     Request.prototype.acceptsJson = function () {
-        throw new Error("Method not implemented.");
-    };
-    Request.prototype.getHost = function () {
-        throw new Error("Method not implemented.");
-    };
-    Request.prototype.getFullUrl = function () {
-        throw new Error("Method not implemented.");
-    };
-    Request.prototype.getQueryString = function () {
         throw new Error("Method not implemented.");
     };
     /**
@@ -234,7 +241,7 @@ var Request = /** @class */ (function (_super) {
      * @return
      */
     Request.prototype.getMimeType = function (format) {
-        return send_1.mime.getType(format);
+        return mime_types_1.default.lookup(format) || null;
     };
     /**
      * @inheritdoc

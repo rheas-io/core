@@ -132,12 +132,13 @@ export declare class Request extends IncomingMessage implements IRequest {
      * @returns string
      */
     getPath(): string;
-    params(): string[];
-    isJson(): boolean;
-    acceptsJson(): boolean;
+    getProtocol(): string;
     getHost(): string;
     getFullUrl(): string;
     getQueryString(): string;
+    params(): string[];
+    isJson(): boolean;
+    acceptsJson(): boolean;
     /**
      * Sets the format in which response has to be send.
      *

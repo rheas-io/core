@@ -1,5 +1,5 @@
 import url from "url";
-import { mime } from "send";
+import mime from "mime-types";
 import { IncomingMessage } from "http";
 import { Container } from "../container";
 import { IApp } from "@rheas/contracts/core";
@@ -103,7 +103,11 @@ export class Request extends IncomingMessage implements IRequest {
 
         this._pathComponents = ComponentFactory.createFromRequest(this);
 
-        this.loadQuery();
+        const parsed = url.parse(this.getFullUrl(), true);
+
+        this._query = parsed.query;
+
+        //this.loadQuery();
 
         this.loadBody();
     }
@@ -228,11 +232,33 @@ export class Request extends IncomingMessage implements IRequest {
      * @returns string
      */
     public getPath(): string {
-        return this.url || '/';
+        return <string>this.url;
     }
 
-    params(): string[] {
+    public getProtocol(): string {
+        return this.isSecure() ? 'https' : 'http';
+    }
+
+    public getHost(): string {
+        return this.headers.host || '';
+    }
+
+    public getFullUrl(): string {
+        return this.getProtocol() + '://' + this.getHost() + this.getPath();
+    }
+
+    public getQueryString(): string {
         throw new Error("Method not implemented.");
+    }
+
+    public params(): string[] {
+        let params: string[] = [];
+
+        this._pathComponents.forEach(
+            components => params.push(...Object.values(components.getParam()))
+        );
+
+        return params;
     }
 
     isJson(): boolean {
@@ -240,15 +266,6 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     acceptsJson(): boolean {
-        throw new Error("Method not implemented.");
-    }
-    getHost(): string {
-        throw new Error("Method not implemented.");
-    }
-    getFullUrl(): string {
-        throw new Error("Method not implemented.");
-    }
-    getQueryString(): string {
         throw new Error("Method not implemented.");
     }
 
@@ -283,7 +300,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @return
      */
     public getMimeType(format: string): string | null {
-        return mime.getType(format);
+        return mime.lookup(format) || null;
     }
 
     /**
