@@ -21,9 +21,13 @@
     "copypackage_dev": "cp -rf package.json build_dev",
     "build-dev": "tsc --outDir ./build_dev && npm run copypackage_dev"
   },
+  "dependencies": {
+    "mime-types": "^2.1.27"
+  },
   "devDependencies": {
     "@types/jest": "^25.2.1",
     "@types/node": "^13.13.2",
+    "@types/mime-types": "^2.1.0",
     "jest": "^25.4.0",
     "ts-jest": "^25.4.0",
     "typescript": "^3.8.3"
