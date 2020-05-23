@@ -6,10 +6,11 @@ import { IDeferredService } from "@rheas/contracts/services";
 export class RedirectServiceProvider extends ServiceProvider implements IDeferredService {
 
     /**
-     * Registers the redirect service when requested.
+     * As this is a deferred service, redirector will be registerd only
+     * when the service is requested.
      */
     public register() {
-        this.container.singleton('redirect', (request) => {
+        this.container.singleton(this.provide(), (request) => {
             return new Redirector(<IRequest>request, request.get('response'));
         });
     }

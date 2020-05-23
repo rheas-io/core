@@ -21,10 +21,11 @@ var RedirectServiceProvider = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     /**
-     * Registers the redirect service when requested.
+     * As this is a deferred service, redirector will be registerd only
+     * when the service is requested.
      */
     RedirectServiceProvider.prototype.register = function () {
-        this.container.singleton('redirect', function (request) {
+        this.container.singleton(this.provide(), function (request) {
             return new redirector_1.Redirector(request, request.get('response'));
         });
     };
