@@ -1,7 +1,6 @@
 /// <reference types="node" />
 import { ServerResponse } from "http";
-import { IRequest } from "@rheas/contracts";
-import { IResponse } from "@rheas/contracts/core/response";
+import { IRequest, IResponse } from "@rheas/contracts";
 export declare class Response extends ServerResponse implements IResponse {
     /**
      * The request object to which this response was created.

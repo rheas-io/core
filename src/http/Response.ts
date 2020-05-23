@@ -1,7 +1,6 @@
 import { ServerResponse } from "http";
-import { IRequest } from "@rheas/contracts";
 import { app } from "@rheas/support/helpers";
-import { IResponse } from "@rheas/contracts/core/response";
+import { IRequest, IResponse } from "@rheas/contracts";
 
 export class Response extends ServerResponse implements IResponse {
 
@@ -190,7 +189,9 @@ export class Response extends ServerResponse implements IResponse {
      */
     public redirect(to: string, status?: number): IResponse {
 
-        this.statusCode = 302;
+        const redirector =
+
+            this.statusCode = 302;
 
         if (status && this.isRedirectStatus(status)) {
             this.statusCode = status;

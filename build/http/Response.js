@@ -161,7 +161,7 @@ var Response = /** @class */ (function (_super) {
      * @param status
      */
     Response.prototype.redirect = function (to, status) {
-        this.statusCode = 302;
+        var redirector = this.statusCode = 302;
         if (status && this.isRedirectStatus(status)) {
             this.statusCode = status;
         }
