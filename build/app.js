@@ -172,7 +172,7 @@ var Application = /** @class */ (function (_super) {
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        request.boot(this);
+                        request.boot(this, response);
                         return [4 /*yield*/, router.handle(request, response)];
                     case 2:
                         response = _a.sent();

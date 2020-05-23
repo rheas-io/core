@@ -4,10 +4,10 @@ import { IncomingMessage } from "http";
 import { Container } from "../container";
 import { IApp } from "@rheas/contracts/core";
 import { ServiceManager } from "../serviceManager";
-import { IRequest, AnyObject } from "@rheas/contracts";
 import { SuspiciousOperationException } from "../errors";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
+import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 import { ComponentFactory } from "@rheas/routing/uri/uriComponentFactory";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 
@@ -84,20 +84,26 @@ export class Request extends IncomingMessage implements IRequest {
      * inside the boot. Process them and store in memory for faster processing
      * 
      * @param app 
+     * @param response
      */
-    public boot(app: IApp): IRequest {
+    public boot(app: IApp, response: IResponse): IRequest {
 
         this.instance('app', app, true);
+        this.instance('response', response, true);
 
         this.loadRequest();
 
-        this.loadServices(app);
+        this.serviceManager.setProviders(app.config('request.providers', {}));
+
+        this.serviceManager.boot();
 
         return this;
     }
 
     /**
      * Loads the requests query, cookies, headers and post contents.
+     * 
+     * //TODO
      */
     private loadRequest(): void {
 
@@ -125,17 +131,6 @@ export class Request extends IncomingMessage implements IRequest {
      */
     private loadBody(): void {
 
-    }
-
-    /**
-     * Loads the request services and boots them.
-     * 
-     * @param app 
-     */
-    private loadServices(app: IApp) {
-        this.serviceManager.setProviders(app.config('request.providers') || {});
-
-        this.serviceManager.boot();
     }
 
     /**
@@ -234,23 +229,23 @@ export class Request extends IncomingMessage implements IRequest {
     public getPath(): string {
         return <string>this.url;
     }
-
+    //TODO
     public getProtocol(): string {
         return this.isSecure() ? 'https' : 'http';
     }
-
+    //TODO
     public getHost(): string {
         return this.headers.host || '';
     }
-
+    //TODO
     public getFullUrl(): string {
         return this.getProtocol() + '://' + this.getHost() + this.getPath();
     }
-
+    //TODO
     public getQueryString(): string {
         throw new Error("Method not implemented.");
     }
-
+    //TODO
     public params(): string[] {
         let params: string[] = [];
 

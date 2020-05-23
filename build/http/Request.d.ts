@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import { IncomingMessage } from "http";
 import { IApp } from "@rheas/contracts/core";
-import { IRequest, AnyObject } from "@rheas/contracts";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
+import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 export declare class Request extends IncomingMessage implements IRequest {
     /**
@@ -65,10 +65,13 @@ export declare class Request extends IncomingMessage implements IRequest {
      * inside the boot. Process them and store in memory for faster processing
      *
      * @param app
+     * @param response
      */
-    boot(app: IApp): IRequest;
+    boot(app: IApp, response: IResponse): IRequest;
     /**
      * Loads the requests query, cookies, headers and post contents.
+     *
+     * //TODO
      */
     private loadRequest;
     /**
@@ -80,12 +83,6 @@ export declare class Request extends IncomingMessage implements IRequest {
      *
      */
     private loadBody;
-    /**
-     * Loads the request services and boots them.
-     *
-     * @param app
-     */
-    private loadServices;
     /**
      * Gets the request method. This is the method value obtained after
      * checking method overrides in header, post and query. To get the original

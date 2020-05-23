@@ -71,15 +71,20 @@ var Request = /** @class */ (function (_super) {
      * inside the boot. Process them and store in memory for faster processing
      *
      * @param app
+     * @param response
      */
-    Request.prototype.boot = function (app) {
+    Request.prototype.boot = function (app, response) {
         this.instance('app', app, true);
+        this.instance('response', response, true);
         this.loadRequest();
-        this.loadServices(app);
+        this.serviceManager.setProviders(app.config('request.providers', {}));
+        this.serviceManager.boot();
         return this;
     };
     /**
      * Loads the requests query, cookies, headers and post contents.
+     *
+     * //TODO
      */
     Request.prototype.loadRequest = function () {
         this._pathComponents = uriComponentFactory_1.ComponentFactory.createFromRequest(this);
@@ -99,15 +104,6 @@ var Request = /** @class */ (function (_super) {
      *
      */
     Request.prototype.loadBody = function () {
-    };
-    /**
-     * Loads the request services and boots them.
-     *
-     * @param app
-     */
-    Request.prototype.loadServices = function (app) {
-        this.serviceManager.setProviders(app.config('request.providers') || {});
-        this.serviceManager.boot();
     };
     /**
      * Gets the request method. This is the method value obtained after
@@ -190,18 +186,23 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.getPath = function () {
         return this.url;
     };
+    //TODO
     Request.prototype.getProtocol = function () {
         return this.isSecure() ? 'https' : 'http';
     };
+    //TODO
     Request.prototype.getHost = function () {
         return this.headers.host || '';
     };
+    //TODO
     Request.prototype.getFullUrl = function () {
         return this.getProtocol() + '://' + this.getHost() + this.getPath();
     };
+    //TODO
     Request.prototype.getQueryString = function () {
         throw new Error("Method not implemented.");
     };
+    //TODO
     Request.prototype.params = function () {
         var params = [];
         this._pathComponents.forEach(function (components) { return params.push.apply(params, Object.values(components.getParam())); });
