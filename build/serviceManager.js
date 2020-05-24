@@ -59,6 +59,8 @@ var ServiceManager = /** @class */ (function () {
             throw new errors_1.InvalidArgumentException("A service " + name + " is already loaded/registered. Check the app/request configuration files for \n                service provider list.");
         }
         this._services[name] = provider;
+        // No need to register the service as it will be registered and booted
+        // when it is required.
         return this;
     };
     /**

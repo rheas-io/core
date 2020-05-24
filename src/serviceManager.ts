@@ -80,6 +80,9 @@ export class ServiceManager implements IServiceManager {
         }
         this._services[name] = provider;
 
+        // No need to register the service as it will be registered and booted
+        // when it is required.
+        
         return this;
     }
 
