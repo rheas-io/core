@@ -314,7 +314,7 @@ var Application = /** @class */ (function (_super) {
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // Container.
-        if (service === null && this._serviceManager.loadDeferredService(key)) {
+        if (service === null && this._serviceManager.registerServiceByName(key)) {
             return _super.prototype.get.call(this, key);
         }
         return service;

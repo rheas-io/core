@@ -34,13 +34,6 @@ export declare class ServiceManager implements IServiceManager {
      */
     protected _loadedServices: KeyValue<IServiceProvider>;
     /**
-     * Stores the alias of all the deferred services, which can be loaded
-     * later.
-     *
-     * @var array
-     */
-    protected _deferredServices: string[];
-    /**
      *
      * @param container
      * @param providers
@@ -48,11 +41,18 @@ export declare class ServiceManager implements IServiceManager {
     constructor(container: IContainer, providers?: KeyValue<ClassOf<IServiceProvider>>);
     /**
      * Sets the service providers handled by this manager. Services are not updated
-     * if the manager is already booted.
+     * if the manager is already registered.
      *
      * @param providers
      */
     setProviders(providers: KeyValue<ClassOf<IServiceProvider>>): void;
+    /**
+     * @inheritdoc
+     *
+     * @param name
+     * @param provider
+     */
+    newService(name: string, provider: ClassOf<IServiceProvider>): IServiceManager;
     /**
      * Registers the necessary service providers. Deferred services are
      * cached in the deferred providers list and are loaded only when a
@@ -60,37 +60,17 @@ export declare class ServiceManager implements IServiceManager {
      */
     register(): void;
     /**
-     * Registers a service if it is not a deferrable service and boots the
-     * same if the app is already booted.
-     *
-     * @param name
-     * @param serviceProvider
-     */
-    registerService(name: string, serviceProvider: IServiceProvider): void;
-    /**
      * Registers a particular service of the given name.
      *
      * @param name
      */
-    registerServiceByName(name: string): void;
+    registerServiceByName(name: string): boolean;
     /**
      * Checks if a service by this name is already loaded.
      *
      * @param name
      */
     isServiceLoaded(name: string): boolean;
-    /**
-     * Loads a deferred service.
-     *
-     * @param key
-     */
-    loadDeferredService(key: string): boolean;
-    /**
-     * Checks if the service is a deferred.
-     *
-     * @param name
-     */
-    isDeferredService(name: string): boolean;
     /**
      * Registers the necessary service providers, if it is not already
      * registered and boots each one of them. Once that is done, we will

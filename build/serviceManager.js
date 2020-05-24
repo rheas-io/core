@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var errors_1 = require("./errors");
 var ServiceManager = /** @class */ (function () {
     /**
      *
@@ -32,27 +33,33 @@ var ServiceManager = /** @class */ (function () {
          * @var array
          */
         this._loadedServices = {};
-        /**
-         * Stores the alias of all the deferred services, which can be loaded
-         * later.
-         *
-         * @var array
-         */
-        this._deferredServices = [];
         this._container = container;
         this._services = providers;
     }
     /**
      * Sets the service providers handled by this manager. Services are not updated
-     * if the manager is already booted.
+     * if the manager is already registered.
      *
      * @param providers
      */
     ServiceManager.prototype.setProviders = function (providers) {
-        if (this.isBooted()) {
+        if (this.isRegistered()) {
             return;
         }
         this._services = providers;
+    };
+    /**
+     * @inheritdoc
+     *
+     * @param name
+     * @param provider
+     */
+    ServiceManager.prototype.newService = function (name, provider) {
+        if (this.isServiceLoaded(name)) {
+            throw new errors_1.InvalidArgumentException("A service " + name + " is already loaded/registered. Check the app/request configuration files for \n                service provider list.");
+        }
+        this._services[name] = provider;
+        return this;
     };
     /**
      * Registers the necessary service providers. Deferred services are
@@ -64,39 +71,17 @@ var ServiceManager = /** @class */ (function () {
             return;
         }
         for (var alias in this._services) {
-            var service = this._services[alias];
             // A service can be deferred to load when it is absolutely needed.
             // Such services should have a provides property that states, to which
             // alias it should be loaded.
-            if ('provide' in service && !this._deferredServices.includes(alias)) {
-                this._deferredServices.push(alias);
-            }
+            //
             // If the service doesn't has to be deferred, we will register
             // them immediately.
-            else {
-                this.registerService(alias, new service(this._container));
+            if (!('provide' in this._services[alias])) {
+                this.registerServiceByName(alias);
             }
         }
         this.setRegistered(true);
-    };
-    /**
-     * Registers a service if it is not a deferrable service and boots the
-     * same if the app is already booted.
-     *
-     * @param name
-     * @param serviceProvider
-     */
-    ServiceManager.prototype.registerService = function (name, serviceProvider) {
-        if (this.isServiceLoaded(name)) {
-            throw new Error("A service '" + name + "' is already registered. Refer the config/app file for all the services.");
-        }
-        serviceProvider.register();
-        serviceProvider.setRegistered(true);
-        this._loadedServices[name] = serviceProvider;
-        this._deferredServices = this._deferredServices.filter(function (serviceName) { return serviceName !== name; });
-        if (this.isBooted()) {
-            this.bootService(serviceProvider);
-        }
     };
     /**
      * Registers a particular service of the given name.
@@ -104,13 +89,20 @@ var ServiceManager = /** @class */ (function () {
      * @param name
      */
     ServiceManager.prototype.registerServiceByName = function (name) {
-        if (this.isServiceLoaded(name)) {
-            return;
+        // Return false if the service is already loaded or service
+        // is not a class 
+        if (this.isServiceLoaded(name) || !('new' in this._services[name])) {
+            return false;
         }
         var service = this._services[name];
-        if (service) {
-            this.registerService(name, new service(this._container));
+        var serviceProvider = new service(this._container);
+        serviceProvider.register();
+        serviceProvider.setRegistered(true);
+        this._loadedServices[name] = serviceProvider;
+        if (this.isBooted()) {
+            this.bootService(serviceProvider);
         }
+        return true;
     };
     /**
      * Checks if a service by this name is already loaded.
@@ -119,26 +111,6 @@ var ServiceManager = /** @class */ (function () {
      */
     ServiceManager.prototype.isServiceLoaded = function (name) {
         return !!this._loadedServices[name];
-    };
-    /**
-     * Loads a deferred service.
-     *
-     * @param key
-     */
-    ServiceManager.prototype.loadDeferredService = function (key) {
-        if (this.isDeferredService(key)) {
-            this.registerServiceByName(key);
-            return true;
-        }
-        return false;
-    };
-    /**
-     * Checks if the service is a deferred.
-     *
-     * @param name
-     */
-    ServiceManager.prototype.isDeferredService = function (name) {
-        return this._deferredServices.includes(name);
     };
     /**
      * Registers the necessary service providers, if it is not already

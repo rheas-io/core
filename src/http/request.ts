@@ -90,6 +90,7 @@ export class Request extends IncomingMessage implements IRequest {
 
         this.instance('app', app, true);
         this.instance('response', response, true);
+        this.instance('services', this.serviceManager, true);
 
         this.loadRequest();
 
@@ -372,6 +373,14 @@ export class Request extends IncomingMessage implements IRequest {
      * @param key 
      */
     public get(key: string) {
-        return this.container.get(key);
+        const service = this.container.get(key);
+
+        // If no service is found we will load any deferredServices. If the 
+        // deferred service is loaded, we will try getting the value again from the
+        // container.
+        if (service === null && this.serviceManager.registerServiceByName(key)) {
+            return this.container.get(key);
+        }
+        return service;
     }
 }

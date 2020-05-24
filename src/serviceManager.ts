@@ -1,6 +1,7 @@
 import { ClassOf, KeyValue } from "@rheas/contracts";
 import { IContainer } from "@rheas/contracts/container";
 import { IServiceManager, IServiceProvider } from "@rheas/contracts/services";
+import { InvalidArgumentException } from "./errors";
 
 export class ServiceManager implements IServiceManager {
 
@@ -41,14 +42,6 @@ export class ServiceManager implements IServiceManager {
     protected _loadedServices: KeyValue<IServiceProvider> = {};
 
     /**
-     * Stores the alias of all the deferred services, which can be loaded
-     * later.
-     * 
-     * @var array
-     */
-    protected _deferredServices: string[] = [];
-
-    /**
      * 
      * @param container 
      * @param providers 
@@ -60,15 +53,34 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * Sets the service providers handled by this manager. Services are not updated
-     * if the manager is already booted.
+     * if the manager is already registered.
      * 
      * @param providers 
      */
     public setProviders(providers: KeyValue<ClassOf<IServiceProvider>>): void {
-        if (this.isBooted()) {
+        if (this.isRegistered()) {
             return;
         }
         this._services = providers;
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @param name 
+     * @param provider 
+     */
+    public newService(name: string, provider: ClassOf<IServiceProvider>): IServiceManager {
+
+        if (this.isServiceLoaded(name)) {
+            throw new InvalidArgumentException(
+                `A service ${name} is already loaded/registered. Check the app/request configuration files for 
+                service provider list.`
+            );
+        }
+        this._services[name] = provider;
+
+        return this;
     }
 
     /**
@@ -82,45 +94,17 @@ export class ServiceManager implements IServiceManager {
         }
 
         for (let alias in this._services) {
-            const service = this._services[alias];
             // A service can be deferred to load when it is absolutely needed.
             // Such services should have a provides property that states, to which
             // alias it should be loaded.
-            if ('provide' in service && !this._deferredServices.includes(alias)) {
-                this._deferredServices.push(alias);
-            }
+            //
             // If the service doesn't has to be deferred, we will register
             // them immediately.
-            else {
-                this.registerService(alias, new service(this._container));
+            if (!('provide' in this._services[alias])) {
+                this.registerServiceByName(alias);
             }
         }
         this.setRegistered(true);
-    }
-
-    /**
-     * Registers a service if it is not a deferrable service and boots the
-     * same if the app is already booted.
-     * 
-     * @param name 
-     * @param serviceProvider 
-     */
-    public registerService(name: string, serviceProvider: IServiceProvider): void {
-
-        if (this.isServiceLoaded(name)) {
-            throw new Error(`A service '${name}' is already registered. Refer the config/app file for all the services.`);
-        }
-
-        serviceProvider.register();
-        serviceProvider.setRegistered(true);
-
-        this._loadedServices[name] = serviceProvider;
-
-        this._deferredServices = this._deferredServices.filter(serviceName => serviceName !== name);
-
-        if (this.isBooted()) {
-            this.bootService(serviceProvider);
-        }
     }
 
     /**
@@ -128,15 +112,26 @@ export class ServiceManager implements IServiceManager {
      * 
      * @param name 
      */
-    public registerServiceByName(name: string) {
-        if (this.isServiceLoaded(name)) {
-            return;
+    public registerServiceByName(name: string): boolean {
+        // Return false if the service is already loaded or service
+        // is not a class 
+        if (this.isServiceLoaded(name) || !('new' in this._services[name])) {
+            return false;
         }
-        const service: ClassOf<IServiceProvider> = this._services[name];
 
-        if (service) {
-            this.registerService(name, new service(this._container));
+        const service: ClassOf<IServiceProvider> = this._services[name];
+        const serviceProvider = new service(this._container);
+
+        serviceProvider.register();
+        serviceProvider.setRegistered(true);
+
+        this._loadedServices[name] = serviceProvider;
+
+        if (this.isBooted()) {
+            this.bootService(serviceProvider);
         }
+
+        return true;
     }
 
     /**
@@ -146,30 +141,6 @@ export class ServiceManager implements IServiceManager {
      */
     public isServiceLoaded(name: string): boolean {
         return !!this._loadedServices[name];
-    }
-
-    /**
-     * Loads a deferred service.
-     * 
-     * @param key 
-     */
-    public loadDeferredService(key: string): boolean {
-
-        if (this.isDeferredService(key)) {
-            this.registerServiceByName(key);
-
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Checks if the service is a deferred.
-     * 
-     * @param name 
-     */
-    public isDeferredService(name: string): boolean {
-        return this._deferredServices.includes(name);
     }
 
     /**

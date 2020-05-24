@@ -76,6 +76,7 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.boot = function (app, response) {
         this.instance('app', app, true);
         this.instance('response', response, true);
+        this.instance('services', this.serviceManager, true);
         this.loadRequest();
         this.serviceManager.setProviders(app.config('request.providers', {}));
         this.serviceManager.boot();
@@ -312,7 +313,14 @@ var Request = /** @class */ (function (_super) {
      * @param key
      */
     Request.prototype.get = function (key) {
-        return this.container.get(key);
+        var service = this.container.get(key);
+        // If no service is found we will load any deferredServices. If the 
+        // deferred service is loaded, we will try getting the value again from the
+        // container.
+        if (service === null && this.serviceManager.registerServiceByName(key)) {
+            return this.container.get(key);
+        }
+        return service;
     };
     return Request;
 }(http_1.IncomingMessage));
