@@ -2,7 +2,7 @@ import url from "url";
 import mime from "mime-types";
 import { IncomingMessage } from "http";
 import { Container } from "../container";
-import { IApp } from "@rheas/contracts/core";
+import { IApp, IRedirector } from "@rheas/contracts/core";
 import { ServiceManager } from "../serviceManager";
 import { SuspiciousOperationException } from "../errors";
 import { IServiceManager } from "@rheas/contracts/services";
@@ -131,6 +131,15 @@ export class Request extends IncomingMessage implements IRequest {
      */
     private loadBody(): void {
 
+    }
+
+    /**
+     * @inheritdoc
+     * 
+     * @return IRedirector
+     */
+    public redirect(): IRedirector {
+        return this.get('redirect');
     }
 
     /**

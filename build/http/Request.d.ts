@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { IncomingMessage } from "http";
-import { IApp } from "@rheas/contracts/core";
+import { IApp, IRedirector } from "@rheas/contracts/core";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
@@ -83,6 +83,12 @@ export declare class Request extends IncomingMessage implements IRequest {
      *
      */
     private loadBody;
+    /**
+     * @inheritdoc
+     *
+     * @return IRedirector
+     */
+    redirect(): IRedirector;
     /**
      * Gets the request method. This is the method value obtained after
      * checking method overrides in header, post and query. To get the original

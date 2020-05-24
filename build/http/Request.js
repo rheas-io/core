@@ -106,6 +106,14 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.loadBody = function () {
     };
     /**
+     * @inheritdoc
+     *
+     * @return IRedirector
+     */
+    Request.prototype.redirect = function () {
+        return this.get('redirect');
+    };
+    /**
      * Gets the request method. This is the method value obtained after
      * checking method overrides in header, post and query. To get the original
      * method call getRealMethod().
