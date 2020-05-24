@@ -59,8 +59,8 @@ var Request = /** @class */ (function (_super) {
          * @var StringObject
          */
         _this._query = {};
-        _this.container = new container_1.Container();
-        _this.serviceManager = new serviceManager_1.ServiceManager(_this);
+        _this._container = new container_1.Container();
+        _this._serviceManager = new serviceManager_1.ServiceManager(_this);
         return _this;
     }
     /**
@@ -76,10 +76,10 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.boot = function (app, response) {
         this.instance('app', app, true);
         this.instance('response', response, true);
-        this.instance('services', this.serviceManager, true);
+        this.instance('services', this._serviceManager, true);
         this.loadRequest();
-        this.serviceManager.setProviders(app.config('request.providers', {}));
-        this.serviceManager.boot();
+        this._serviceManager.setProviders(app.config('request.providers', {}));
+        this._serviceManager.boot();
         return this;
     };
     /**
@@ -283,7 +283,7 @@ var Request = /** @class */ (function (_super) {
      * @param resolver
      */
     Request.prototype.singleton = function (name, resolver) {
-        return this.container.singleton(name, resolver);
+        return this._container.singleton(name, resolver);
     };
     /**
      * @inheritdoc
@@ -294,7 +294,7 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.bind = function (name, resolver, singleton) {
         if (singleton === void 0) { singleton = false; }
-        return this.container.bind(name, resolver, singleton);
+        return this._container.bind(name, resolver, singleton);
     };
     /**
      * @inheritdoc
@@ -305,7 +305,7 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.instance = function (name, instance, singleton) {
         if (singleton === void 0) { singleton = false; }
-        return this.container.instance(name, instance, singleton);
+        return this._container.instance(name, instance, singleton);
     };
     /**
      * @inheritdoc
@@ -313,12 +313,12 @@ var Request = /** @class */ (function (_super) {
      * @param key
      */
     Request.prototype.get = function (key) {
-        var service = this.container.get(key);
+        var service = this._container.get(key);
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // container.
-        if (service === null && this.serviceManager.registerServiceByName(key)) {
-            return this.container.get(key);
+        if (service === null && this._serviceManager.registerServiceByName(key)) {
+            return this._container.get(key);
         }
         return service;
     };

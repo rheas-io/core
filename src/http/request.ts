@@ -18,14 +18,14 @@ export class Request extends IncomingMessage implements IRequest {
      * 
      * @var IContainer
      */
-    protected container: IContainer;
+    protected _container: IContainer;
 
     /**
      * Manages all the request specific services
      * 
      * @var IServiceManager
      */
-    protected serviceManager: IServiceManager;
+    protected _serviceManager: IServiceManager;
 
     /**
      * The segmented path uri components.
@@ -73,8 +73,8 @@ export class Request extends IncomingMessage implements IRequest {
     constructor(socket: any) {
         super(socket);
 
-        this.container = new Container();
-        this.serviceManager = new ServiceManager(this);
+        this._container = new Container();
+        this._serviceManager = new ServiceManager(this);
     }
     /**
      * Sets the application instance and boots request services and 
@@ -90,13 +90,13 @@ export class Request extends IncomingMessage implements IRequest {
 
         this.instance('app', app, true);
         this.instance('response', response, true);
-        this.instance('services', this.serviceManager, true);
+        this.instance('services', this._serviceManager, true);
 
         this.loadRequest();
 
-        this.serviceManager.setProviders(app.config('request.providers', {}));
+        this._serviceManager.setProviders(app.config('request.providers', {}));
 
-        this.serviceManager.boot();
+        this._serviceManager.boot();
 
         return this;
     }
@@ -342,7 +342,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @param resolver 
      */
     public singleton(name: string, resolver: InstanceHandler): IContainerInstance {
-        return this.container.singleton(name, resolver);
+        return this._container.singleton(name, resolver);
     }
 
     /**
@@ -353,7 +353,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @param singleton 
      */
     public bind(name: string, resolver: InstanceHandler, singleton: boolean = false): IContainerInstance {
-        return this.container.bind(name, resolver, singleton);
+        return this._container.bind(name, resolver, singleton);
     }
 
     /**
@@ -364,7 +364,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @param singleton 
      */
     public instance<T>(name: string, instance: T, singleton: boolean = false): IContainerInstance {
-        return this.container.instance(name, instance, singleton);
+        return this._container.instance(name, instance, singleton);
     }
 
     /**
@@ -373,13 +373,13 @@ export class Request extends IncomingMessage implements IRequest {
      * @param key 
      */
     public get(key: string) {
-        const service = this.container.get(key);
+        const service = this._container.get(key);
 
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // container.
-        if (service === null && this.serviceManager.registerServiceByName(key)) {
-            return this.container.get(key);
+        if (service === null && this._serviceManager.registerServiceByName(key)) {
+            return this._container.get(key);
         }
         return service;
     }

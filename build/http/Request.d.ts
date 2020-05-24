@@ -11,13 +11,13 @@ export declare class Request extends IncomingMessage implements IRequest {
      *
      * @var IContainer
      */
-    protected container: IContainer;
+    protected _container: IContainer;
     /**
      * Manages all the request specific services
      *
      * @var IServiceManager
      */
-    protected serviceManager: IServiceManager;
+    protected _serviceManager: IServiceManager;
     /**
      * The segmented path uri components.
      *
