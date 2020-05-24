@@ -118,7 +118,7 @@ export class Application extends Container implements IApp {
      */
     public startApp(): void {
 
-        // Boot the application before starting the server
+        // Boot the application services before starting the server
         this._serviceManager.boot();
 
         // Establish connection to the database before opening a 

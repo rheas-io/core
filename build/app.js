@@ -123,7 +123,7 @@ var Application = /** @class */ (function (_super) {
      */
     Application.prototype.startApp = function () {
         var _this = this;
-        // Boot the application before starting the server
+        // Boot the application services before starting the server
         this._serviceManager.boot();
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
