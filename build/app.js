@@ -179,8 +179,9 @@ var Application = /** @class */ (function (_super) {
                         return [3 /*break*/, 4];
                     case 3:
                         err_1 = _a.sent();
+                        err_1.message = "Status 500: Exception handler failure." + (err_1.message || 'Server error');
                         response.statusCode = 500;
-                        response.setContent(err_1.message || "Server error");
+                        response.setContent(err_1.message);
                         return [3 /*break*/, 4];
                     case 4:
                         response = response.prepareResponse();

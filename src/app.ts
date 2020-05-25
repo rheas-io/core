@@ -9,7 +9,7 @@ import { IApp } from "@rheas/contracts/core/app";
 import { IRouter } from "@rheas/contracts/routes";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IManager, IServerCreator } from "@rheas/contracts/core";
-import { IRequest,IResponse, IDbConnector } from "@rheas/contracts";
+import { IRequest, IResponse, IDbConnector } from "@rheas/contracts";
 import http, { Server, IncomingMessage, ServerResponse } from "http";
 
 export class Application extends Container implements IApp {
@@ -170,8 +170,9 @@ export class Application extends Container implements IApp {
 
             response = await router.handle(request, response);
         } catch (err) {
+            err.message = "Status 500: Exception handler failure." + (err.message || 'Server error');
             response.statusCode = 500;
-            response.setContent(err.message || "Server error");
+            response.setContent(err.message);
         }
         response = response.prepareResponse();
 
