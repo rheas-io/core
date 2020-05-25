@@ -66,6 +66,13 @@ export declare class ServiceManager implements IServiceManager {
      */
     registerServiceByName(name: string): boolean;
     /**
+     * Gets new service provider object for the service given by name.
+     * Returns null if an object was not created.
+     *
+     * @param name
+     */
+    private getServiceProvider;
+    /**
      * Checks if a service by this name is already loaded.
      *
      * @param name

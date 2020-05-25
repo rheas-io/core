@@ -82,7 +82,7 @@ export class ServiceManager implements IServiceManager {
 
         // No need to register the service as it will be registered and booted
         // when it is required.
-        
+
         return this;
     }
 
@@ -122,8 +122,13 @@ export class ServiceManager implements IServiceManager {
             return false;
         }
 
-        const service: ClassOf<IServiceProvider> = this._services[name];
-        const serviceProvider = new service(this._container);
+        // Gets the service provider object if it is resolvable or
+        // returns false.
+        const serviceProvider = this.getServiceProvider(name);
+
+        if (serviceProvider === null) {
+            return false;
+        }
 
         serviceProvider.register();
         serviceProvider.setRegistered(true);
@@ -135,6 +140,23 @@ export class ServiceManager implements IServiceManager {
         }
 
         return true;
+    }
+
+    /**
+     * Gets new service provider object for the service given by name.
+     * Returns null if an object was not created.
+     * 
+     * @param name 
+     */
+    private getServiceProvider(name: string): IServiceProvider | null {
+
+        try {
+            const service: ClassOf<IServiceProvider> = this._services[name];
+
+            return new service(this._container);
+        } catch (err) { };
+
+        return null;
     }
 
     /**
