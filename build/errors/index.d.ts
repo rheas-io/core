@@ -1,2 +1,3 @@
 import { SuspiciousOperationException } from "./suspicious";
-export { SuspiciousOperationException };
+import { InvalidArgumentException } from "./invalidArgument";
+export { InvalidArgumentException, SuspiciousOperationException, };

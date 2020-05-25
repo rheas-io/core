@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var errors_1 = require("./errors");
+var invalidArgument_1 = require("@rheas/errors/invalidArgument");
 var ServiceManager = /** @class */ (function () {
     /**
      *
@@ -56,7 +56,7 @@ var ServiceManager = /** @class */ (function () {
      */
     ServiceManager.prototype.newService = function (name, provider) {
         if (this.isServiceLoaded(name)) {
-            throw new errors_1.InvalidArgumentException("A service " + name + " is already loaded/registered. Check the app/request configuration files for \n                service provider list.");
+            throw new invalidArgument_1.InvalidArgumentException("A service " + name + " is already loaded/registered. Check the app/request configuration files for \n                service provider list.");
         }
         this._services[name] = provider;
         // No need to register the service as it will be registered and booted
@@ -96,8 +96,12 @@ var ServiceManager = /** @class */ (function () {
         if (this.isServiceLoaded(name)) {
             return false;
         }
-        var service = this._services[name];
-        var serviceProvider = new service(this._container);
+        // Gets the service provider object if it is resolvable or
+        // returns false.
+        var serviceProvider = this.getServiceProvider(name);
+        if (serviceProvider === null) {
+            return false;
+        }
         serviceProvider.register();
         serviceProvider.setRegistered(true);
         this._loadedServices[name] = serviceProvider;
@@ -105,6 +109,21 @@ var ServiceManager = /** @class */ (function () {
             this.bootService(serviceProvider);
         }
         return true;
+    };
+    /**
+     * Gets new service provider object for the service given by name.
+     * Returns null if an object was not created.
+     *
+     * @param name
+     */
+    ServiceManager.prototype.getServiceProvider = function (name) {
+        try {
+            var service = this._services[name];
+            return new service(this._container);
+        }
+        catch (err) { }
+        ;
+        return null;
     };
     /**
      * Checks if a service by this name is already loaded.

@@ -75,11 +75,6 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     private loadRequest;
     /**
-     * Loads the request query from the url. The result is urldecoded
-     * query stores as key value pairs.
-     */
-    private loadQuery;
-    /**
      *
      */
     private loadBody;

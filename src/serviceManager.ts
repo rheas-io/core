@@ -1,7 +1,7 @@
 import { ClassOf, KeyValue } from "@rheas/contracts";
 import { IContainer } from "@rheas/contracts/container";
+import { InvalidArgumentException } from "@rheas/errors/invalidArgument";
 import { IServiceManager, IServiceProvider } from "@rheas/contracts/services";
-import { InvalidArgumentException } from "./errors";
 
 export class ServiceManager implements IServiceManager {
 

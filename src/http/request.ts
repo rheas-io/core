@@ -2,12 +2,12 @@ import url from "url";
 import mime from "mime-types";
 import { IncomingMessage } from "http";
 import { Container } from "../container";
-import { IApp, IRedirector } from "@rheas/contracts/core";
 import { ServiceManager } from "../serviceManager";
-import { SuspiciousOperationException } from "../errors";
+import { IApp, IRedirector } from "@rheas/contracts/core";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
+import { SuspiciousOperationException } from "@rheas/errors/suspicious";
 import { ComponentFactory } from "@rheas/routing/uri/uriComponentFactory";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 
@@ -114,17 +114,7 @@ export class Request extends IncomingMessage implements IRequest {
 
         this._query = parsed.query;
 
-        //this.loadQuery();
-
         this.loadBody();
-    }
-
-    /**
-     * Loads the request query from the url. The result is urldecoded
-     * query stores as key value pairs.
-     */
-    private loadQuery(): void {
-        this._query = url.parse(this.url || "", true).query;
     }
 
     /**

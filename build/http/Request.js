@@ -21,7 +21,7 @@ var mime_types_1 = __importDefault(require("mime-types"));
 var http_1 = require("http");
 var container_1 = require("../container");
 var serviceManager_1 = require("../serviceManager");
-var errors_1 = require("../errors");
+var suspicious_1 = require("@rheas/errors/suspicious");
 var uriComponentFactory_1 = require("@rheas/routing/uri/uriComponentFactory");
 var Request = /** @class */ (function (_super) {
     __extends(Request, _super);
@@ -91,15 +91,7 @@ var Request = /** @class */ (function (_super) {
         this._pathComponents = uriComponentFactory_1.ComponentFactory.createFromRequest(this);
         var parsed = url_1.default.parse(this.getFullUrl(), true);
         this._query = parsed.query;
-        //this.loadQuery();
         this.loadBody();
-    };
-    /**
-     * Loads the request query from the url. The result is urldecoded
-     * query stores as key value pairs.
-     */
-    Request.prototype.loadQuery = function () {
-        this._query = url_1.default.parse(this.url || "", true).query;
     };
     /**
      *
@@ -148,7 +140,7 @@ var Request = /** @class */ (function (_super) {
         }
         method = method.toUpperCase();
         if (!['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].includes(method)) {
-            throw new errors_1.SuspiciousOperationException("Invalid method requested: " + method);
+            throw new suspicious_1.SuspiciousOperationException("Invalid method requested: " + method);
         }
         return method;
     };
