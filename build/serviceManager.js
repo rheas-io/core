@@ -93,7 +93,7 @@ var ServiceManager = /** @class */ (function () {
     ServiceManager.prototype.registerServiceByName = function (name) {
         // Return false if the service is already loaded or service
         // is not a class 
-        if (this.isServiceLoaded(name) || !('new' in this._services[name])) {
+        if (this.isServiceLoaded(name)) {
             return false;
         }
         var service = this._services[name];

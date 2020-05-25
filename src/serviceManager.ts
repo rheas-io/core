@@ -118,7 +118,7 @@ export class ServiceManager implements IServiceManager {
     public registerServiceByName(name: string): boolean {
         // Return false if the service is already loaded or service
         // is not a class 
-        if (this.isServiceLoaded(name) || !('new' in this._services[name])) {
+        if (this.isServiceLoaded(name)) {
             return false;
         }
 
