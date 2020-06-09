@@ -3,12 +3,12 @@ import mime from "mime-types";
 import { IncomingMessage } from "http";
 import { Container } from "../container";
 import { ServiceManager } from "../serviceManager";
+import { RequestComponent } from "@rheas/routing/uri";
 import { IApp, IRedirector } from "@rheas/contracts/core";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 import { SuspiciousOperationException } from "@rheas/errors/suspicious";
-import { ComponentFactory } from "@rheas/routing/uri/uriComponentFactory";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 
 export class Request extends IncomingMessage implements IRequest {
@@ -32,7 +32,7 @@ export class Request extends IncomingMessage implements IRequest {
      * 
      * @var array
      */
-    protected _pathComponents: IRequestComponent[] = [];
+    protected _pathComponents: IRequestComponent[] | null = null;
 
     /**
      * Stores request attributes. 
@@ -107,8 +107,6 @@ export class Request extends IncomingMessage implements IRequest {
      * //TODO
      */
     private loadRequest(): void {
-
-        this._pathComponents = ComponentFactory.createFromRequest(this);
 
         const parsed = url.parse(this.getFullUrl(), true);
 
@@ -188,6 +186,12 @@ export class Request extends IncomingMessage implements IRequest {
      */
     public getPathComponents(): IRequestComponent[] {
 
+        if (this._pathComponents === null) {
+            this._pathComponents = this.getPath().split('/').map(
+                component => new RequestComponent(component)
+            );
+        }
+
         return this._pathComponents;
     }
 
@@ -249,7 +253,7 @@ export class Request extends IncomingMessage implements IRequest {
     public params(): string[] {
         let params: string[] = [];
 
-        this._pathComponents.forEach(
+        this.getPathComponents().forEach(
             components => params.push(...Object.values(components.getParam()))
         );
 

@@ -23,7 +23,7 @@ export declare class Request extends IncomingMessage implements IRequest {
      *
      * @var array
      */
-    protected _pathComponents: IRequestComponent[];
+    protected _pathComponents: IRequestComponent[] | null;
     /**
      * Stores request attributes.
      *

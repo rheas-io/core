@@ -21,8 +21,8 @@ var mime_types_1 = __importDefault(require("mime-types"));
 var http_1 = require("http");
 var container_1 = require("../container");
 var serviceManager_1 = require("../serviceManager");
+var uri_1 = require("@rheas/routing/uri");
 var suspicious_1 = require("@rheas/errors/suspicious");
-var uriComponentFactory_1 = require("@rheas/routing/uri/uriComponentFactory");
 var Request = /** @class */ (function (_super) {
     __extends(Request, _super);
     /**
@@ -37,7 +37,7 @@ var Request = /** @class */ (function (_super) {
          *
          * @var array
          */
-        _this._pathComponents = [];
+        _this._pathComponents = null;
         /**
          * Stores request attributes.
          *
@@ -88,7 +88,6 @@ var Request = /** @class */ (function (_super) {
      * //TODO
      */
     Request.prototype.loadRequest = function () {
-        this._pathComponents = uriComponentFactory_1.ComponentFactory.createFromRequest(this);
         var parsed = url_1.default.parse(this.getFullUrl(), true);
         this._query = parsed.query;
         this.loadBody();
@@ -151,6 +150,9 @@ var Request = /** @class */ (function (_super) {
      * @returns array of request uri components
      */
     Request.prototype.getPathComponents = function () {
+        if (this._pathComponents === null) {
+            this._pathComponents = this.getPath().split('/').map(function (component) { return new uri_1.RequestComponent(component); });
+        }
         return this._pathComponents;
     };
     /**
@@ -206,7 +208,7 @@ var Request = /** @class */ (function (_super) {
     //TODO
     Request.prototype.params = function () {
         var params = [];
-        this._pathComponents.forEach(function (components) { return params.push.apply(params, Object.values(components.getParam())); });
+        this.getPathComponents().forEach(function (components) { return params.push.apply(params, Object.values(components.getParam())); });
         return params;
     };
     Request.prototype.isJson = function () {
