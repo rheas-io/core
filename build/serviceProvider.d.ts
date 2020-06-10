@@ -6,7 +6,14 @@ export declare class ServiceProvider implements IServiceProvider {
      *
      * @var IContainer
      */
-    protected container: IContainer;
+    protected readonly container: IContainer;
+    /**
+     * Name by which the service is registered on the
+     * config files.
+     *
+     * @var string
+     */
+    protected readonly name: string;
     /**
      * Registered status of the provider.
      *
@@ -19,7 +26,13 @@ export declare class ServiceProvider implements IServiceProvider {
      * @var boolean
      */
     protected _booted: boolean;
-    constructor(container: IContainer);
+    /**
+     * Creates a new service provider
+     *
+     * @param name
+     * @param container
+     */
+    constructor(name: string, container: IContainer);
     /**
      * Register the service within this function. Referencing other services
      * within this function should be done carefully. It could be possible that

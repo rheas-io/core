@@ -8,7 +8,15 @@ export class ServiceProvider implements IServiceProvider {
      * 
      * @var IContainer
      */
-    protected container: IContainer;
+    protected readonly container: IContainer;
+
+    /**
+     * Name by which the service is registered on the
+     * config files.
+     * 
+     * @var string
+     */
+    protected readonly name: string;
 
     /**
      * Registered status of the provider.
@@ -24,7 +32,14 @@ export class ServiceProvider implements IServiceProvider {
      */
     protected _booted: boolean = false;
 
-    constructor(container: IContainer) {
+    /**
+     * Creates a new service provider
+     * 
+     * @param name 
+     * @param container 
+     */
+    constructor(name: string, container: IContainer) {
+        this.name = name;
         this.container = container;
     }
 

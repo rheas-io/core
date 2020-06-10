@@ -119,7 +119,7 @@ var ServiceManager = /** @class */ (function () {
     ServiceManager.prototype.getServiceProvider = function (name) {
         try {
             var service = this._services[name];
-            return new service(this._container);
+            return new service(name, this._container);
         }
         catch (err) { }
         ;

@@ -153,7 +153,7 @@ export class ServiceManager implements IServiceManager {
         try {
             const service: ClassOf<IServiceProvider> = this._services[name];
 
-            return new service(this._container);
+            return new service(name, this._container);
         } catch (err) { };
 
         return null;

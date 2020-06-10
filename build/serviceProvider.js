@@ -1,7 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var ServiceProvider = /** @class */ (function () {
-    function ServiceProvider(container) {
+    /**
+     * Creates a new service provider
+     *
+     * @param name
+     * @param container
+     */
+    function ServiceProvider(name, container) {
         /**
          * Registered status of the provider.
          *
@@ -14,6 +20,7 @@ var ServiceProvider = /** @class */ (function () {
          * @var boolean
          */
         this._booted = false;
+        this.name = name;
         this.container = container;
     }
     /**
