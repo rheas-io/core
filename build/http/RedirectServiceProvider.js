@@ -25,8 +25,10 @@ var RedirectServiceProvider = /** @class */ (function (_super) {
      * when the service is requested.
      */
     RedirectServiceProvider.prototype.register = function () {
-        this.container.singleton(this.provide(), function (request) {
-            return new redirector_1.Redirector(request, request.get('response'));
+        this.container.singleton(this.serviceName(), function (request) {
+            var app = request.get('app');
+            var urlGenerator = app.get('url');
+            return new redirector_1.Redirector(urlGenerator, request, request.get('response'));
         });
     };
     /**
@@ -35,7 +37,7 @@ var RedirectServiceProvider = /** @class */ (function (_super) {
      * @returns string
      */
     RedirectServiceProvider.prototype.provide = function () {
-        return 'redirect';
+        return this.serviceName();
     };
     return RedirectServiceProvider;
 }(serviceProvider_1.ServiceProvider));
