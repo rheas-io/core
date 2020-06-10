@@ -6,14 +6,14 @@ export declare class ServiceProvider implements IServiceProvider {
      *
      * @var IContainer
      */
-    protected readonly container: IContainer;
+    protected container: IContainer;
     /**
      * Name by which the service is registered on the
      * config files.
      *
      * @var string
      */
-    protected readonly name: string;
+    protected _name: string;
     /**
      * Registered status of the provider.
      *
@@ -72,4 +72,10 @@ export declare class ServiceProvider implements IServiceProvider {
      * @return boolean
      */
     isBooted(): boolean;
+    /**
+     * Returns the name of the service.
+     *
+     * @return string
+     */
+    serviceName(): string;
 }

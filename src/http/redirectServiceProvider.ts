@@ -1,6 +1,8 @@
 import { Redirector } from "./redirector";
 import { IRequest } from "@rheas/contracts";
+import { IApp } from "@rheas/contracts/core";
 import { ServiceProvider } from "../serviceProvider";
+import { IUrlGenerator } from "@rheas/contracts/routes";
 import { IDeferredService } from "@rheas/contracts/services";
 
 export class RedirectServiceProvider extends ServiceProvider implements IDeferredService {
@@ -10,8 +12,11 @@ export class RedirectServiceProvider extends ServiceProvider implements IDeferre
      * when the service is requested.
      */
     public register() {
-        this.container.singleton(this.provide(), (request) => {
-            return new Redirector(<IRequest>request, request.get('response'));
+        this.container.singleton(this.serviceName(), (request) => {
+            const app: IApp = request.get('app');
+            const urlGenerator: IUrlGenerator = app.get('url');
+
+            return new Redirector(urlGenerator, <IRequest>request, request.get('response'));
         });
     }
 
@@ -21,6 +26,6 @@ export class RedirectServiceProvider extends ServiceProvider implements IDeferre
      * @returns string
      */
     public provide(): string {
-        return 'redirect';
+        return this.serviceName();
     }
 }

@@ -8,7 +8,7 @@ export class ServiceProvider implements IServiceProvider {
      * 
      * @var IContainer
      */
-    protected readonly container: IContainer;
+    protected container: IContainer;
 
     /**
      * Name by which the service is registered on the
@@ -16,7 +16,7 @@ export class ServiceProvider implements IServiceProvider {
      * 
      * @var string
      */
-    protected readonly name: string;
+    protected _name: string;
 
     /**
      * Registered status of the provider.
@@ -39,7 +39,7 @@ export class ServiceProvider implements IServiceProvider {
      * @param container 
      */
     constructor(name: string, container: IContainer) {
-        this.name = name;
+        this._name = name;
         this.container = container;
     }
 
@@ -98,5 +98,14 @@ export class ServiceProvider implements IServiceProvider {
      */
     public isBooted(): boolean {
         return this._booted;
+    }
+
+    /**
+     * Returns the name of the service.
+     * 
+     * @return string
+     */
+    public serviceName(): string {
+        return this._name;
     }
 }
