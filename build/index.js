@@ -6,3 +6,5 @@ var container_1 = require("./container");
 exports.Container = container_1.Container;
 var serviceProvider_1 = require("./serviceProvider");
 exports.ServiceProvider = serviceProvider_1.ServiceProvider;
+var deferredServiceProvider_1 = require("./deferredServiceProvider");
+exports.DeferredServiceProvider = deferredServiceProvider_1.DeferredServiceProvider;
