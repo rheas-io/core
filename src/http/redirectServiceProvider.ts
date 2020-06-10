@@ -1,11 +1,10 @@
 import { Redirector } from "./redirector";
 import { IRequest } from "@rheas/contracts";
 import { IApp } from "@rheas/contracts/core";
-import { ServiceProvider } from "../serviceProvider";
 import { IUrlGenerator } from "@rheas/contracts/routes";
-import { IDeferredService } from "@rheas/contracts/services";
+import { DeferredServiceProvider } from "../deferredServiceProvider";
 
-export class RedirectServiceProvider extends ServiceProvider implements IDeferredService {
+export class RedirectServiceProvider extends DeferredServiceProvider {
 
     /**
      * As this is a deferred service, redirector will be registerd only
@@ -18,14 +17,5 @@ export class RedirectServiceProvider extends ServiceProvider implements IDeferre
 
             return new Redirector(urlGenerator, <IRequest>request, request.get('response'));
         });
-    }
-
-    /**
-     * The service will be created only if requested by this name.
-     * 
-     * @returns string
-     */
-    public provide(): string {
-        return this.serviceName();
     }
 }

@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var redirector_1 = require("./redirector");
-var serviceProvider_1 = require("../serviceProvider");
+var deferredServiceProvider_1 = require("../deferredServiceProvider");
 var RedirectServiceProvider = /** @class */ (function (_super) {
     __extends(RedirectServiceProvider, _super);
     function RedirectServiceProvider() {
@@ -31,14 +31,6 @@ var RedirectServiceProvider = /** @class */ (function (_super) {
             return new redirector_1.Redirector(urlGenerator, request, request.get('response'));
         });
     };
-    /**
-     * The service will be created only if requested by this name.
-     *
-     * @returns string
-     */
-    RedirectServiceProvider.prototype.provide = function () {
-        return this.serviceName();
-    };
     return RedirectServiceProvider;
-}(serviceProvider_1.ServiceProvider));
+}(deferredServiceProvider_1.DeferredServiceProvider));
 exports.RedirectServiceProvider = RedirectServiceProvider;
