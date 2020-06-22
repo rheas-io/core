@@ -11,7 +11,7 @@ export class RedirectServiceProvider extends DeferredServiceProvider {
      * when the service is requested.
      */
     public register() {
-        this.container.singleton(this.serviceName(), (request) => {
+        this.container.singleton(this.name, (request) => {
             const app: IApp = request.get('app');
             const urlGenerator: IUrlGenerator = app.get('url');
 

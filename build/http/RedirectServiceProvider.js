@@ -25,7 +25,7 @@ var RedirectServiceProvider = /** @class */ (function (_super) {
      * when the service is requested.
      */
     RedirectServiceProvider.prototype.register = function () {
-        this.container.singleton(this.serviceName(), function (request) {
+        this.container.singleton(this.name, function (request) {
             var app = request.get('app');
             var urlGenerator = app.get('url');
             return new redirector_1.Redirector(urlGenerator, request, request.get('response'));
