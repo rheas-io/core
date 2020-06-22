@@ -16,7 +16,7 @@ export class ServiceProvider implements IServiceProvider {
      * 
      * @var string
      */
-    protected _name: string;
+    protected name: string;
 
     /**
      * Registered status of the provider.
@@ -39,7 +39,7 @@ export class ServiceProvider implements IServiceProvider {
      * @param container 
      */
     constructor(name: string, container: IContainer) {
-        this._name = name;
+        this.name = name;
         this.container = container;
     }
 
@@ -106,6 +106,6 @@ export class ServiceProvider implements IServiceProvider {
      * @return string
      */
     public serviceName(): string {
-        return this._name;
+        return this.name;
     }
 }

@@ -9,6 +9,6 @@ export class DeferredServiceProvider extends ServiceProvider implements IDeferre
      * @returns string
      */
     public provide(): string {
-        return this._name;
+        return this.name;
     }
 }

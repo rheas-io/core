@@ -20,7 +20,7 @@ var ServiceProvider = /** @class */ (function () {
          * @var boolean
          */
         this._booted = false;
-        this._name = name;
+        this.name = name;
         this.container = container;
     }
     /**
@@ -78,7 +78,7 @@ var ServiceProvider = /** @class */ (function () {
      * @return string
      */
     ServiceProvider.prototype.serviceName = function () {
-        return this._name;
+        return this.name;
     };
     return ServiceProvider;
 }());

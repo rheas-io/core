@@ -25,7 +25,7 @@ var DeferredServiceProvider = /** @class */ (function (_super) {
      * @returns string
      */
     DeferredServiceProvider.prototype.provide = function () {
-        return this._name;
+        return this.name;
     };
     return DeferredServiceProvider;
 }(serviceProvider_1.ServiceProvider));

@@ -13,7 +13,7 @@ export declare class ServiceProvider implements IServiceProvider {
      *
      * @var string
      */
-    protected _name: string;
+    protected name: string;
     /**
      * Registered status of the provider.
      *
