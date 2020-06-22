@@ -46,6 +46,11 @@ export declare class Env implements IManager {
      */
     getEnvVariables(): StringObject;
     /**
+     * Updates the application environment variable cache facilitating
+     * syncing of .env file changes.
+     */
+    updateCache(): void;
+    /**
      * Reads the environment file if it exists and parses into
      * a key value format
      *

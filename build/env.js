@@ -34,7 +34,7 @@ var Env = /** @class */ (function () {
         var env = this.getEnvVariables();
         // env variables will have only string values, so it is
         // okay to check using OR operator
-        return env[key] || defaultValue;
+        return (env && env[key]) || defaultValue;
     };
     /**
      * Get the application env variables.
@@ -46,6 +46,13 @@ var Env = /** @class */ (function () {
             this._envVariables = this.readEnvFile();
         }
         return this._envVariables;
+    };
+    /**
+     * Updates the application environment variable cache facilitating
+     * syncing of .env file changes.
+     */
+    Env.prototype.updateCache = function () {
+        this._envVariables = this.readEnvFile();
     };
     /**
      * Reads the environment file if it exists and parses into

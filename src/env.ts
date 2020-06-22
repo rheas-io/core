@@ -56,7 +56,7 @@ export class Env implements IManager {
 
         // env variables will have only string values, so it is
         // okay to check using OR operator
-        return env[key] || defaultValue;
+        return (env && env[key]) || defaultValue;
     }
 
     /**
@@ -70,6 +70,14 @@ export class Env implements IManager {
             this._envVariables = this.readEnvFile();
         }
         return this._envVariables;
+    }
+
+    /**
+     * Updates the application environment variable cache facilitating
+     * syncing of .env file changes.
+     */
+    public updateCache(): void {
+        this._envVariables = this.readEnvFile();
     }
 
     /**

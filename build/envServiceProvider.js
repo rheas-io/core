@@ -24,9 +24,9 @@ var EnvServiceProvider = /** @class */ (function (_super) {
      * Registers the .env file reader service.
      *
      * The service will be responsible for creating, updating
-     * any environment variables. Also has a function to remove
-     * the cached variable, so that environment var updates can
-     * be synced.
+     * any environment variables. Also has a function to update
+     * the cached variable, so that environment var updates are
+     * synced.
      */
     EnvServiceProvider.prototype.register = function () {
         this.container.singleton(this.name, function (app) {
