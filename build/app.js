@@ -53,13 +53,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
+var request_1 = require("./request");
 var support_1 = require("@rheas/support");
-var container_1 = require("./container");
-var http_1 = require("./http");
+var response_1 = require("./response");
 var https_1 = __importDefault(require("https"));
+var container_1 = require("@rheas/container");
 var configManager_1 = require("./configManager");
 var serviceManager_1 = require("./serviceManager");
-var http_2 = __importDefault(require("http"));
+var http_1 = __importDefault(require("http"));
 var Application = /** @class */ (function (_super) {
     __extends(Application, _super);
     /**
@@ -77,7 +78,7 @@ var Application = /** @class */ (function (_super) {
         Application.instance = _this;
         _this._rootPath = rootPath;
         _this._configManager = _this.registerConfigManager();
-        _this._serviceManager = new serviceManager_1.ServiceManager(_this, _this.config('app.providers') || {});
+        _this._serviceManager = new serviceManager_1.ServiceManager(_this, _this.config('app.providers', {}));
         _this.registerBaseBindings();
         return _this;
     }
@@ -199,7 +200,7 @@ var Application = /** @class */ (function (_super) {
      */
     Application.prototype.enableHttpServer = function () {
         var port = this.normalizePort(this.config('app.port'));
-        this.createServer(http_2.default.createServer, port);
+        this.createServer(http_1.default.createServer, port);
         return this;
     };
     /**
@@ -224,8 +225,8 @@ var Application = /** @class */ (function (_super) {
     Application.prototype.createServer = function (creator, port, options) {
         var _this = this;
         options = Object.assign({}, options, {
-            IncomingMessage: http_1.Request,
-            ServerResponse: http_1.Response
+            IncomingMessage: request_1.Request,
+            ServerResponse: response_1.Response
         });
         var server = creator(options, this.listenRequests.bind(this));
         server.listen(port);

@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { Container } from "./container";
+import { Container } from "@rheas/container";
 import { IApp } from "@rheas/contracts/core/app";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IManager } from "@rheas/contracts/core";

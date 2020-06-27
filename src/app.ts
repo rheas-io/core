@@ -1,8 +1,9 @@
 import path from "path";
+import { Request } from "./request";
 import { Str } from "@rheas/support";
-import { Container } from "./container";
-import { Request, Response } from "./http";
+import { Response } from "./response";
 import https, { ServerOptions } from "https";
+import { Container } from "@rheas/container";
 import { ConfigManager } from "./configManager";
 import { ServiceManager } from "./serviceManager";
 import { IApp } from "@rheas/contracts/core/app";
@@ -63,7 +64,7 @@ export class Application extends Container implements IApp {
         this._rootPath = rootPath;
 
         this._configManager = this.registerConfigManager();
-        this._serviceManager = new ServiceManager(this, this.config('app.providers') || {});
+        this._serviceManager = new ServiceManager(this, this.config('app.providers', {}));
 
         this.registerBaseBindings();
     }
