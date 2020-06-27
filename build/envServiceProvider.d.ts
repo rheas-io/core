@@ -1,4 +1,4 @@
-import { ServiceProvider } from "./serviceProvider";
+import { ServiceProvider } from "@rheas/services";
 export declare class EnvServiceProvider extends ServiceProvider {
     /**
      * Registers the .env file reader service.

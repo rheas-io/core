@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var redirector_1 = require("./redirector");
-var deferredServiceProvider_1 = require("../deferredServiceProvider");
+var services_1 = require("@rheas/services");
 var RedirectServiceProvider = /** @class */ (function (_super) {
     __extends(RedirectServiceProvider, _super);
     function RedirectServiceProvider() {
@@ -32,5 +32,5 @@ var RedirectServiceProvider = /** @class */ (function (_super) {
         });
     };
     return RedirectServiceProvider;
-}(deferredServiceProvider_1.DeferredServiceProvider));
+}(services_1.DeferredServiceProvider));
 exports.RedirectServiceProvider = RedirectServiceProvider;

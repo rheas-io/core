@@ -14,7 +14,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var env_1 = require("./env");
-var serviceProvider_1 = require("./serviceProvider");
+var services_1 = require("@rheas/services");
 var EnvServiceProvider = /** @class */ (function (_super) {
     __extends(EnvServiceProvider, _super);
     function EnvServiceProvider() {
@@ -34,5 +34,5 @@ var EnvServiceProvider = /** @class */ (function (_super) {
         });
     };
     return EnvServiceProvider;
-}(serviceProvider_1.ServiceProvider));
+}(services_1.ServiceProvider));
 exports.EnvServiceProvider = EnvServiceProvider;
