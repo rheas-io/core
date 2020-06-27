@@ -1,5 +1,5 @@
 import { Env } from "./env";
-import { ServiceProvider } from "./serviceProvider";
+import { ServiceProvider } from "@rheas/services";
 
 export class EnvServiceProvider extends ServiceProvider {
 

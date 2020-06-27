@@ -2,7 +2,7 @@ import { Redirector } from "./redirector";
 import { IRequest } from "@rheas/contracts";
 import { IApp } from "@rheas/contracts/core";
 import { IUrlGenerator } from "@rheas/contracts/routes";
-import { DeferredServiceProvider } from "../deferredServiceProvider";
+import { DeferredServiceProvider } from "@rheas/services";
 
 export class RedirectServiceProvider extends DeferredServiceProvider {
 
