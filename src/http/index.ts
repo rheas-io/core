@@ -1,5 +1,6 @@
 import { Request } from "./request";
-import { Response } from "./response";
 import { Cookies } from "./cookies";
+import { Response } from "./response";
+import { RedirectServiceProvider } from "./redirectServiceProvider";
 
-export { Request, Response, Cookies }
+export { Request, Response, Cookies, RedirectServiceProvider }
