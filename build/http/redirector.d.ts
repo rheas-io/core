@@ -1,6 +1,13 @@
 import { IRedirector } from "@rheas/contracts/core";
-import { IRequest, IResponse } from "@rheas/contracts";
+import { IUrlGenerator } from "@rheas/contracts/routes";
+import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 export declare class Redirector implements IRedirector {
+    /**
+     * The application url resolver
+     *
+     * @var IUrlGenerator
+     */
+    protected _urlResolver: IUrlGenerator;
     /**
      * Current request/container
      *
@@ -19,39 +26,44 @@ export declare class Redirector implements IRedirector {
      * @param request
      * @param response
      */
-    constructor(request: IRequest, response: IResponse);
+    constructor(urlGenerator: IUrlGenerator, request: IRequest, response: IResponse);
     /**
-     * @inheritdoc
+     * Redirects the request to home page.
      *
+     * @param params
      * @param status
      */
-    home(status?: number): IResponse;
+    home(params?: AnyObject, status?: number): IResponse;
     /**
-     * @inheritdoc
+     * Redirects the request back to the Referrer header or to the
+     * previous url in the session. If no url is resolved from header or
+     * session, fallback is used.
      *
      * @param status
      */
     back(status?: number, fallback?: string): IResponse;
     /**
-     * @inheritdoc
+     * Refreshes the request by reloading the request url
      *
      * @param status
      */
     refresh(status?: number): IResponse;
     /**
-     * @inheritdoc
+     * Redirects the request to the given path/url.
      *
      * @param path
+     * @param params
      * @param status
      */
-    to(path: string, status?: number): IResponse;
+    to(path: string, params?: AnyObject, status?: number): IResponse;
     /**
      * @inheritdoc
      *
      * @param name
+     * @param params
      * @param status
      */
-    toRoute(name: string, status?: number): IResponse;
+    toRoute(name: string, params?: AnyObject, status?: number): IResponse;
     /**
      * Updates the response with redirect headers and content.
      *

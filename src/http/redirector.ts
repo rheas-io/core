@@ -1,8 +1,16 @@
 import { IRedirector } from "@rheas/contracts/core";
-import { IRequest, IResponse } from "@rheas/contracts";
+import { IUrlGenerator } from "@rheas/contracts/routes";
+import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 import { InvalidArgumentException } from "@rheas/errors/invalidArgument";
 
 export class Redirector implements IRedirector {
+
+    /**
+     * The application url resolver
+     * 
+     * @var IUrlGenerator
+     */
+    protected _urlResolver: IUrlGenerator;
 
     /**
      * Current request/container
@@ -24,28 +32,54 @@ export class Redirector implements IRedirector {
      * @param request 
      * @param response
      */
-    constructor(request: IRequest, response: IResponse) {
+    constructor(urlGenerator: IUrlGenerator, request: IRequest, response: IResponse) {
         this._request = request;
         this._response = response;
+        this._urlResolver = urlGenerator;
     }
 
     /**
-     * @inheritdoc
+     * Redirects the request to home page.
      * 
+     * @param params
      * @param status 
      */
-    public home(status: number = 302): IResponse {
-        throw new Error("Method not implemented.");
+    public home(params: AnyObject = {}, status: number = 302): IResponse {
+        return this.toRoute('home', params, status);
     }
 
     /**
-     * @inheritdoc
+     * Redirects the request back to the Referrer header or to the 
+     * previous url in the session. If no url is resolved from header or
+     * session, fallback is used.
      * 
      * @param status 
      */
     public back(status: number = 302, fallback: string = ""): IResponse {
 
-        const url = fallback;
+        const url = this._urlResolver.previous(this._request, fallback);
+
+        return this.createRedirectResponse(url, status);
+    }
+
+    /**
+     * Refreshes the request by reloading the request url
+     * 
+     * @param status 
+     */
+    public refresh(status: number = 302): IResponse {
+        return this.createRedirectResponse(this._request.getFullUrl(), status);
+    }
+
+    /**
+     * Redirects the request to the given path/url.
+     * 
+     * @param path 
+     * @param params
+     * @param status 
+     */
+    public to(path: string, params: AnyObject = {}, status: number = 302): IResponse {
+        const url = this._urlResolver.to(path, params);
 
         return this.createRedirectResponse(url, status);
     }
@@ -53,33 +87,15 @@ export class Redirector implements IRedirector {
     /**
      * @inheritdoc
      * 
-     * @param status 
-     */
-    public refresh(status: number = 302): IResponse {
-
-        return this.createRedirectResponse(this._request.getFullUrl(), status);
-    }
-
-    /**
-     * @inheritdoc
-     * 
-     * @param path 
-     * @param status 
-     */
-    public to(path: string, status: number = 302): IResponse {
-
-        return this.createRedirectResponse(path, status);
-    }
-
-    /**
-     * @inheritdoc
-     * 
      * @param name 
+     * @param params
      * @param status 
      */
-    public toRoute(name: string, status: number = 302): IResponse {
+    public toRoute(name: string, params: AnyObject = {}, status: number = 302): IResponse {
 
-        return this.createRedirectResponse(name, status);
+        const url = this._urlResolver.toRoute(name, params);
+
+        return this.createRedirectResponse(url, status);
     }
 
     /**
