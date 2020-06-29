@@ -60,6 +60,20 @@ export class Request extends IncomingMessage implements IRequest {
     protected _method: string | undefined;
 
     /**
+     * Caches the url path
+     * 
+     * @var string
+     */
+    protected _path: string = "";
+
+    /**
+     * Caches the query string
+     * 
+     * @var string
+     */
+    protected _queryString: string = "";
+
+    /**
      * Stores the urldecoded query parameters of this request.
      * 
      * @var StringObject
@@ -112,6 +126,8 @@ export class Request extends IncomingMessage implements IRequest {
         const parsed = url.parse(this.getFullUrl(), true);
 
         this._query = parsed.query;
+        this._queryString = parsed.search || "";
+        this._path = Str.path(parsed.pathname || "");
 
         this.loadBody();
     }
@@ -124,7 +140,7 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * @inheritdoc
+     * Returns the request redirect handler.
      * 
      * @return IRedirector
      */
@@ -227,29 +243,55 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * 
+     * Returns the request path.
      * 
      * @returns string
      */
     public getPath(): string {
-        return Str.path(this.url || '');
+        return this._path;
     }
-    //TODO
+
+    /**
+     * Returns the request scheme/protocol
+     * 
+     * @returns string
+     */
     public getProtocol(): string {
         return this.isSecure() ? 'https' : 'http';
     }
-    //TODO
+
+    /**
+     * Get host details from the headers. 
+     * 
+     * @returns string
+     */
     public getHost(): string {
         return this.headers.host || '';
     }
-    //TODO
+
+    /**
+     * Returns the request full url including protocol, domain,
+     * path and query string in the format
+     * 
+     * https://domain.com/path?query=val
+     * 
+     * @returns string
+     */
     public getFullUrl(): string {
-        return this.getProtocol() + '://' + this.getHost() + this.getPath();
+        return this.getProtocol() + '://' + this.getHost() + this.url;
     }
-    //TODO
+
+    /**
+     * Returns the querystring including the leading ? symbol.
+     * 
+     * Eg: ?code=abcedfghi&value=63vd7fd8vvv8
+     * 
+     * @returns string
+     */
     public getQueryString(): string {
-        throw new Error("Method not implemented.");
+        return this._queryString;
     }
+
     //TODO
     public params(): string[] {
         let params: string[] = [];

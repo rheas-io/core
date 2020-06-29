@@ -18,12 +18,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_1 = __importDefault(require("url"));
 var mime_types_1 = __importDefault(require("mime-types"));
+var support_1 = require("@rheas/support");
 var http_1 = require("http");
 var container_1 = require("@rheas/container");
 var serviceManager_1 = require("./serviceManager");
 var uri_1 = require("@rheas/routing/uri");
 var suspicious_1 = require("@rheas/errors/suspicious");
-var support_1 = require("@rheas/support");
 var Request = /** @class */ (function (_super) {
     __extends(Request, _super);
     /**
@@ -54,6 +54,18 @@ var Request = /** @class */ (function (_super) {
          * @var string
          */
         _this._format = null;
+        /**
+         * Caches the url path
+         *
+         * @var string
+         */
+        _this._path = "";
+        /**
+         * Caches the query string
+         *
+         * @var string
+         */
+        _this._queryString = "";
         /**
          * Stores the urldecoded query parameters of this request.
          *
@@ -91,6 +103,8 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.loadRequest = function () {
         var parsed = url_1.default.parse(this.getFullUrl(), true);
         this._query = parsed.query;
+        this._queryString = parsed.search || "";
+        this._path = support_1.Str.path(parsed.pathname || "");
         this.loadBody();
     };
     /**
@@ -99,7 +113,7 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.loadBody = function () {
     };
     /**
-     * @inheritdoc
+     * Returns the request redirect handler.
      *
      * @return IRedirector
      */
@@ -183,28 +197,49 @@ var Request = /** @class */ (function (_super) {
         return schema;
     };
     /**
-     *
+     * Returns the request path.
      *
      * @returns string
      */
     Request.prototype.getPath = function () {
-        return support_1.Str.path(this.url || '');
+        return this._path;
     };
-    //TODO
+    /**
+     * Returns the request scheme/protocol
+     *
+     * @returns string
+     */
     Request.prototype.getProtocol = function () {
         return this.isSecure() ? 'https' : 'http';
     };
-    //TODO
+    /**
+     * Get host details from the headers.
+     *
+     * @returns string
+     */
     Request.prototype.getHost = function () {
         return this.headers.host || '';
     };
-    //TODO
+    /**
+     * Returns the request full url including protocol, domain,
+     * path and query string in the format
+     *
+     * https://domain.com/path?query=val
+     *
+     * @returns string
+     */
     Request.prototype.getFullUrl = function () {
-        return this.getProtocol() + '://' + this.getHost() + this.getPath();
+        return this.getProtocol() + '://' + this.getHost() + this.url;
     };
-    //TODO
+    /**
+     * Returns the querystring including the leading ? symbol.
+     *
+     * Eg: ?code=abcedfghi&value=63vd7fd8vvv8
+     *
+     * @returns string
+     */
     Request.prototype.getQueryString = function () {
-        throw new Error("Method not implemented.");
+        return this._queryString;
     };
     //TODO
     Request.prototype.params = function () {

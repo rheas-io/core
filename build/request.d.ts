@@ -46,6 +46,18 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     protected _method: string | undefined;
     /**
+     * Caches the url path
+     *
+     * @var string
+     */
+    protected _path: string;
+    /**
+     * Caches the query string
+     *
+     * @var string
+     */
+    protected _queryString: string;
+    /**
      * Stores the urldecoded query parameters of this request.
      *
      * @var StringObject
@@ -79,7 +91,7 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     private loadBody;
     /**
-     * @inheritdoc
+     * Returns the request redirect handler.
      *
      * @return IRedirector
      */
@@ -125,14 +137,39 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     getSchema(): string;
     /**
-     *
+     * Returns the request path.
      *
      * @returns string
      */
     getPath(): string;
+    /**
+     * Returns the request scheme/protocol
+     *
+     * @returns string
+     */
     getProtocol(): string;
+    /**
+     * Get host details from the headers.
+     *
+     * @returns string
+     */
     getHost(): string;
+    /**
+     * Returns the request full url including protocol, domain,
+     * path and query string in the format
+     *
+     * https://domain.com/path?query=val
+     *
+     * @returns string
+     */
     getFullUrl(): string;
+    /**
+     * Returns the querystring including the leading ? symbol.
+     *
+     * Eg: ?code=abcedfghi&value=63vd7fd8vvv8
+     *
+     * @returns string
+     */
     getQueryString(): string;
     params(): string[];
     isJson(): boolean;
