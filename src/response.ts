@@ -1,6 +1,6 @@
 import { ServerResponse } from "http";
 import { app } from "@rheas/support/helpers";
-import { IRequest, IResponse } from "@rheas/contracts";
+import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 
 export class Response extends ServerResponse implements IResponse {
 
@@ -53,6 +53,15 @@ export class Response extends ServerResponse implements IResponse {
     }
 
     /**
+     * Sets a JSON content
+     * 
+     * @param content 
+     */
+    public json(content: AnyObject): IResponse {
+        return this.setContent(JSON.stringify(content));
+    }
+
+    /**
      * Sets the response content/body
      * 
      * @param content 
@@ -80,7 +89,8 @@ export class Response extends ServerResponse implements IResponse {
     }
 
     /**
-     * @inheritdoc
+     * Sets status as 304 and removes content and headers that are not 
+     * needed in a non-modified response.
      * 
      * @return this
      */

@@ -53,6 +53,14 @@ var Response = /** @class */ (function (_super) {
         return this.setContent(content);
     };
     /**
+     * Sets a JSON content
+     *
+     * @param content
+     */
+    Response.prototype.json = function (content) {
+        return this.setContent(JSON.stringify(content));
+    };
+    /**
      * Sets the response content/body
      *
      * @param content
@@ -75,7 +83,8 @@ var Response = /** @class */ (function (_super) {
         return this;
     };
     /**
-     * @inheritdoc
+     * Sets status as 304 and removes content and headers that are not
+     * needed in a non-modified response.
      *
      * @return this
      */

@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { ServerResponse } from "http";
-import { IRequest, IResponse } from "@rheas/contracts";
+import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 export declare class Response extends ServerResponse implements IResponse {
     /**
      * The request object to which this response was created.
@@ -35,6 +35,12 @@ export declare class Response extends ServerResponse implements IResponse {
      */
     set(content: any): IResponse;
     /**
+     * Sets a JSON content
+     *
+     * @param content
+     */
+    json(content: AnyObject): IResponse;
+    /**
      * Sets the response content/body
      *
      * @param content
@@ -48,7 +54,8 @@ export declare class Response extends ServerResponse implements IResponse {
      */
     setEmptyContent(): IResponse;
     /**
-     * @inheritdoc
+     * Sets status as 304 and removes content and headers that are not
+     * needed in a non-modified response.
      *
      * @return this
      */
