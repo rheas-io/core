@@ -69,9 +69,15 @@ var Request = /** @class */ (function (_super) {
         /**
          * Stores the urldecoded query parameters of this request.
          *
-         * @var StringObject
+         * @var AnyObject
          */
         _this._query = {};
+        /**
+         * All the request inputs
+         *
+         * @var AnyObject
+         */
+        _this._inputs = {};
         _this._container = new container_1.Container();
         _this._serviceManager = new serviceManager_1.ServiceManager(_this);
         return _this;
@@ -119,6 +125,27 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.redirect = function () {
         return this.get('redirect');
+    };
+    /**
+     * Returns all the inputs if no key is given or returns the input
+     * value of the key.
+     *
+     * @param key
+     */
+    Request.prototype.input = function (key) {
+        if (null == key) {
+            return this._inputs;
+        }
+        var value = this._inputs[key];
+        return null == value ? null : value;
+    };
+    /**
+     * Returns all the inputs as an object.
+     *
+     * @returns
+     */
+    Request.prototype.all = function () {
+        return this.input();
     };
     /**
      * Gets the request method. This is the method value obtained after

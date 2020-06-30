@@ -60,9 +60,15 @@ export declare class Request extends IncomingMessage implements IRequest {
     /**
      * Stores the urldecoded query parameters of this request.
      *
-     * @var StringObject
+     * @var AnyObject
      */
     protected _query: AnyObject;
+    /**
+     * All the request inputs
+     *
+     * @var AnyObject
+     */
+    protected _inputs: AnyObject;
     /**
      * Creates a new server request.
      *
@@ -96,6 +102,19 @@ export declare class Request extends IncomingMessage implements IRequest {
      * @return IRedirector
      */
     redirect(): IRedirector;
+    /**
+     * Returns all the inputs if no key is given or returns the input
+     * value of the key.
+     *
+     * @param key
+     */
+    input(key?: string): any;
+    /**
+     * Returns all the inputs as an object.
+     *
+     * @returns
+     */
+    all(): AnyObject;
     /**
      * Gets the request method. This is the method value obtained after
      * checking method overrides in header, post and query. To get the original

@@ -76,9 +76,16 @@ export class Request extends IncomingMessage implements IRequest {
     /**
      * Stores the urldecoded query parameters of this request.
      * 
-     * @var StringObject
+     * @var AnyObject
      */
     protected _query: AnyObject = {};
+
+    /**
+     * All the request inputs
+     * 
+     * @var AnyObject
+     */
+    protected _inputs: AnyObject = {};
 
     /**
      * Creates a new server request.
@@ -146,6 +153,30 @@ export class Request extends IncomingMessage implements IRequest {
      */
     public redirect(): IRedirector {
         return this.get('redirect');
+    }
+
+    /**
+     * Returns all the inputs if no key is given or returns the input 
+     * value of the key.
+     * 
+     * @param key 
+     */
+    public input(key?: string): any {
+        if (null == key) {
+            return this._inputs;
+        }
+        const value = this._inputs[key];
+
+        return null == value ? null : value;
+    }
+
+    /**
+     * Returns all the inputs as an object.
+     * 
+     * @returns 
+     */
+    public all(): AnyObject {
+        return this.input();
     }
 
     /**
