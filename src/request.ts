@@ -158,6 +158,15 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
+     * Returns all the inputs as an object.
+     * 
+     * @returns 
+     */
+    public all(): AnyObject {
+        return this.input();
+    }
+
+    /**
      * Returns all the inputs if no key is given or returns the input 
      * value of the key.
      * 
@@ -173,12 +182,15 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * Returns all the inputs as an object.
+     * Replaces the request inputs with the given argument
      * 
-     * @returns 
+     * @param newParams 
      */
-    public all(): AnyObject {
-        return this.input();
+    public merge(newParams: AnyObject): IRequest {
+
+        this._inputs = Object.assign(this._inputs, newParams);
+
+        return this;
     }
 
     /**

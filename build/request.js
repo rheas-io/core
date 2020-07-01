@@ -128,6 +128,14 @@ var Request = /** @class */ (function (_super) {
         return this.get('redirect');
     };
     /**
+     * Returns all the inputs as an object.
+     *
+     * @returns
+     */
+    Request.prototype.all = function () {
+        return this.input();
+    };
+    /**
      * Returns all the inputs if no key is given or returns the input
      * value of the key.
      *
@@ -141,12 +149,13 @@ var Request = /** @class */ (function (_super) {
         return null == value ? null : value;
     };
     /**
-     * Returns all the inputs as an object.
+     * Replaces the request inputs with the given argument
      *
-     * @returns
+     * @param newParams
      */
-    Request.prototype.all = function () {
-        return this.input();
+    Request.prototype.merge = function (newParams) {
+        this._inputs = Object.assign(this._inputs, newParams);
+        return this;
     };
     /**
      * Gets the request method. This is the method value obtained after

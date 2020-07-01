@@ -103,6 +103,12 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     redirect(): IRedirector;
     /**
+     * Returns all the inputs as an object.
+     *
+     * @returns
+     */
+    all(): AnyObject;
+    /**
      * Returns all the inputs if no key is given or returns the input
      * value of the key.
      *
@@ -110,11 +116,11 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     input(key?: string): any;
     /**
-     * Returns all the inputs as an object.
+     * Replaces the request inputs with the given argument
      *
-     * @returns
+     * @param newParams
      */
-    all(): AnyObject;
+    merge(newParams: AnyObject): IRequest;
     /**
      * Gets the request method. This is the method value obtained after
      * checking method overrides in header, post and query. To get the original
