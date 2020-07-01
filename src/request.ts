@@ -136,6 +136,8 @@ export class Request extends IncomingMessage implements IRequest {
         this._queryString = parsed.search || "";
         this._path = Str.path(parsed.pathname || "");
 
+        this._inputs = Object.assign({}, this._query);
+
         this.loadBody();
     }
 

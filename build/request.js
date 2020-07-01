@@ -111,6 +111,7 @@ var Request = /** @class */ (function (_super) {
         this._query = parsed.query;
         this._queryString = parsed.search || "";
         this._path = support_1.Str.path(parsed.pathname || "");
+        this._inputs = Object.assign({}, this._query);
         this.loadBody();
     };
     /**
