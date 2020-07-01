@@ -58,6 +58,7 @@ var Response = /** @class */ (function (_super) {
      * @param content
      */
     Response.prototype.json = function (content) {
+        this._request.setFormat('json');
         return this.setContent(JSON.stringify(content));
     };
     /**

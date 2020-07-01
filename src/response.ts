@@ -58,6 +58,8 @@ export class Response extends ServerResponse implements IResponse {
      * @param content 
      */
     public json(content: AnyObject): IResponse {
+        this._request.setFormat('json');
+        
         return this.setContent(JSON.stringify(content));
     }
 
