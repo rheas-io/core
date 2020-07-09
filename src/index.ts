@@ -1,5 +1,7 @@
 import { Application } from "./app";
+import { DriverManager } from "./driverManager";
 
 export {
-    Application
+    Application,
+    DriverManager
 }

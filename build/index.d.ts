@@ -1,2 +1,3 @@
 import { Application } from "./app";
-export { Application };
+import { DriverManager } from "./driverManager";
+export { Application, DriverManager };
