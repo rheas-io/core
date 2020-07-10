@@ -97,7 +97,7 @@ var Request = /** @class */ (function (_super) {
         this.instance('response', response, true);
         this.instance('services', this._serviceManager, true);
         this.loadRequest();
-        this._serviceManager.setProviders(app.config('request.providers', {}));
+        this._serviceManager.setProviders(app.configs().get('request.providers', {}));
         this._serviceManager.boot();
         return this;
     };

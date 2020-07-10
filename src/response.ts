@@ -1,5 +1,5 @@
 import { ServerResponse } from "http";
-import { app } from "@rheas/support/helpers";
+import { config } from "@rheas/support/helpers";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 
 export class Response extends ServerResponse implements IResponse {
@@ -163,7 +163,7 @@ export class Response extends ServerResponse implements IResponse {
         const contentType = this.getHeader('Content-Type');
 
         if (typeof contentType === 'string' && contentType.startsWith('text/')) {
-            const charset = app().config('app.charset', 'UTF-8');
+            const charset = config('app.charset', 'UTF-8');
 
             this.setHeader('Content-Type', `${contentType}; charset=${charset}`);
         }

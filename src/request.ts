@@ -116,7 +116,7 @@ export class Request extends IncomingMessage implements IRequest {
 
         this.loadRequest();
 
-        this._serviceManager.setProviders(app.config('request.providers', {}));
+        this._serviceManager.setProviders(app.configs().get('request.providers', {}));
 
         this._serviceManager.boot();
 

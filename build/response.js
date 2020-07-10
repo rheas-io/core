@@ -140,7 +140,7 @@ var Response = /** @class */ (function (_super) {
     Response.prototype.prepareCharset = function () {
         var contentType = this.getHeader('Content-Type');
         if (typeof contentType === 'string' && contentType.startsWith('text/')) {
-            var charset = helpers_1.app().config('app.charset', 'UTF-8');
+            var charset = helpers_1.config('app.charset', 'UTF-8');
             this.setHeader('Content-Type', contentType + "; charset=" + charset);
         }
     };
