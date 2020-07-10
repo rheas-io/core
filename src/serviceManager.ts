@@ -82,7 +82,6 @@ export class ServiceManager implements IServiceManager {
 
         // No need to register the service as it will be registered and booted
         // when it is required.
-
         return this;
     }
 
