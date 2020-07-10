@@ -1,6 +1,5 @@
 import path from "path";
 import { Request } from "./request";
-import { Str } from "@rheas/support";
 import { Response } from "./response";
 import https, { ServerOptions } from "https";
 import { Container } from "@rheas/container";
@@ -21,14 +20,6 @@ export class Application extends Container implements IApp {
      * @var IApp
      */
     private static instance: IApp;
-
-    /**
-     * Stores the root path of the application. This root path is necessary
-     * to load different modules of the application.
-     * 
-     * @var string
-     */
-    protected _rootPath: string;
 
     /**
      * Application configurations manager. Handles the parsing and retreival
@@ -59,14 +50,12 @@ export class Application extends Container implements IApp {
     constructor(rootPath: string) {
         super();
 
+        this.registerPaths(rootPath);
+
         Application.instance = this;
 
-        this._rootPath = rootPath;
-
-        this._configManager = this.registerConfigManager();
-        this._serviceManager = new ServiceManager(this, this.config('app.providers', {}));
-
-        this.registerBaseBindings();
+        this._configManager = new ConfigManager(this.path('configs'));
+        this._serviceManager = new ServiceManager(this, this.configs().get('app.providers', {}));
     }
 
     /**
@@ -87,35 +76,47 @@ export class Application extends Container implements IApp {
     }
 
     /**
-     * Registers this app and and config bindings to the container.
-     * Also sets the container instance to this object.
+     * Registers different application paths
+     * 
+     * @param rootPath 
      */
-    protected registerBaseBindings() {
-
-        this.instance('app', this, true);
-
-        this.instance('config', this._configManager, true);
-
-        this.instance('services', this._serviceManager, true);
+    protected registerPaths(rootPath: string) {
+        this.instance('path.root', rootPath);
+        this.instance('path.assets', path.resolve(rootPath, '..', 'assets'));
+        this.instance('path.configs', path.resolve(rootPath, 'configs'));
     }
 
     /**
-     * Registers the configuration manager on the app instance. Configuration
-     * manager is reponsible for handling the different configuration files.
+     * Gets the path instance for the folder. If a path for the folder
+     * is not bound, then the root path is returned.
      * 
-     * @return IConfigManager
+     * @param folder 
      */
-    private registerConfigManager(): IManager {
-        const configPath = Str.trimEnd(this.getRootPath(), path.sep) + path.sep + 'configs';
+    public path(folder: string = "root"): string {
+        return this.get('path.' + folder) || this.get('path.root');
+    }
 
-        this._configManager = new ConfigManager(configPath);
-
+    /**
+     * Returns the application configs manager.
+     * 
+     * @returns
+     */
+    public configs(): IManager {
         return this._configManager;
     }
 
     /**
-     * Starts the server after registering service providers and listen
-     * for requests.
+     * Returns the application services manager.
+     * 
+     * @returns 
+     */
+    public services(): IServiceManager {
+        return this._serviceManager;
+    }
+
+    /**
+     * Starts the application. Boots all the registered services,
+     * creates a database connection and listen for requests.
      */
     public startApp(): void {
 
@@ -187,7 +188,7 @@ export class Application extends Container implements IApp {
      * @return this
      */
     public enableHttpServer(): IApp {
-        const port = this.normalizePort(this.config('app.port'));
+        const port = this.normalizePort(this.configs().get('app.port'));
 
         this.createServer(http.createServer, port);
 
@@ -202,7 +203,7 @@ export class Application extends Container implements IApp {
      * @return this
      */
     public enableHttpsServer(): IApp {
-        const port = this.normalizePort(this.config('app.secure_port'));
+        const port = this.normalizePort(this.configs().get('app.secure_port'));
 
         this.createServer(https.createServer, port);
 
@@ -278,33 +279,6 @@ export class Application extends Container implements IApp {
             const bind = typeof addr == 'string' ? 'pipe ' + addr : 'port ' + addr.port;
             console.log('Listening on ' + bind);
         }
-    }
-
-    /**
-     * Returns a configuration data for the key.
-     * 
-     * @param key 
-     */
-    public config(key: string, defaultValue: any = null) {
-        return this._configManager.get(key, defaultValue);
-    }
-
-    /**
-     * Gets the root path of the application
-     * 
-     * @return string
-     */
-    public getRootPath(): string {
-        return this._rootPath;
-    }
-
-    /**
-     * Returns the asset path of the application
-     * 
-     * @return string
-     */
-    public getAssetPath(): string {
-        return path.resolve(this._rootPath, '..', 'assets');
     }
 
     /**

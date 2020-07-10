@@ -54,7 +54,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
 var request_1 = require("./request");
-var support_1 = require("@rheas/support");
 var response_1 = require("./response");
 var https_1 = __importDefault(require("https"));
 var container_1 = require("@rheas/container");
@@ -75,11 +74,10 @@ var Application = /** @class */ (function (_super) {
      */
     function Application(rootPath) {
         var _this = _super.call(this) || this;
+        _this.registerPaths(rootPath);
         Application.instance = _this;
-        _this._rootPath = rootPath;
-        _this._configManager = _this.registerConfigManager();
-        _this._serviceManager = new serviceManager_1.ServiceManager(_this, _this.config('app.providers', {}));
-        _this.registerBaseBindings();
+        _this._configManager = new configManager_1.ConfigManager(_this.path('configs'));
+        _this._serviceManager = new serviceManager_1.ServiceManager(_this, _this.configs().get('app.providers', {}));
         return _this;
     }
     /**
@@ -99,28 +97,44 @@ var Application = /** @class */ (function (_super) {
         return Application.instance;
     };
     /**
-     * Registers this app and and config bindings to the container.
-     * Also sets the container instance to this object.
+     * Registers different application paths
+     *
+     * @param rootPath
      */
-    Application.prototype.registerBaseBindings = function () {
-        this.instance('app', this, true);
-        this.instance('config', this._configManager, true);
-        this.instance('services', this._serviceManager, true);
+    Application.prototype.registerPaths = function (rootPath) {
+        this.instance('path.root', rootPath);
+        this.instance('path.assets', path_1.default.resolve(rootPath, '..', 'assets'));
+        this.instance('path.configs', path_1.default.resolve(rootPath, 'configs'));
     };
     /**
-     * Registers the configuration manager on the app instance. Configuration
-     * manager is reponsible for handling the different configuration files.
+     * Gets the path instance for the folder. If a path for the folder
+     * is not bound, then the root path is returned.
      *
-     * @return IConfigManager
+     * @param folder
      */
-    Application.prototype.registerConfigManager = function () {
-        var configPath = support_1.Str.trimEnd(this.getRootPath(), path_1.default.sep) + path_1.default.sep + 'configs';
-        this._configManager = new configManager_1.ConfigManager(configPath);
+    Application.prototype.path = function (folder) {
+        if (folder === void 0) { folder = "root"; }
+        return this.get('path.' + folder) || this.get('path.root');
+    };
+    /**
+     * Returns the application configs manager.
+     *
+     * @returns
+     */
+    Application.prototype.configs = function () {
         return this._configManager;
     };
     /**
-     * Starts the server after registering service providers and listen
-     * for requests.
+     * Returns the application services manager.
+     *
+     * @returns
+     */
+    Application.prototype.services = function () {
+        return this._serviceManager;
+    };
+    /**
+     * Starts the application. Boots all the registered services,
+     * creates a database connection and listen for requests.
      */
     Application.prototype.startApp = function () {
         var _this = this;
@@ -199,7 +213,7 @@ var Application = /** @class */ (function (_super) {
      * @return this
      */
     Application.prototype.enableHttpServer = function () {
-        var port = this.normalizePort(this.config('app.port'));
+        var port = this.normalizePort(this.configs().get('app.port'));
         this.createServer(http_1.default.createServer, port);
         return this;
     };
@@ -211,7 +225,7 @@ var Application = /** @class */ (function (_super) {
      * @return this
      */
     Application.prototype.enableHttpsServer = function () {
-        var port = this.normalizePort(this.config('app.secure_port'));
+        var port = this.normalizePort(this.configs().get('app.secure_port'));
         this.createServer(https_1.default.createServer, port);
         return this;
     };
@@ -276,31 +290,6 @@ var Application = /** @class */ (function (_super) {
             var bind = typeof addr == 'string' ? 'pipe ' + addr : 'port ' + addr.port;
             console.log('Listening on ' + bind);
         }
-    };
-    /**
-     * Returns a configuration data for the key.
-     *
-     * @param key
-     */
-    Application.prototype.config = function (key, defaultValue) {
-        if (defaultValue === void 0) { defaultValue = null; }
-        return this._configManager.get(key, defaultValue);
-    };
-    /**
-     * Gets the root path of the application
-     *
-     * @return string
-     */
-    Application.prototype.getRootPath = function () {
-        return this._rootPath;
-    };
-    /**
-     * Returns the asset path of the application
-     *
-     * @return string
-     */
-    Application.prototype.getAssetPath = function () {
-        return path_1.default.resolve(this._rootPath, '..', 'assets');
     };
     /**
      * @override Container getter

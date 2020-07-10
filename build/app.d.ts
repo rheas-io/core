@@ -12,13 +12,6 @@ export declare class Application extends Container implements IApp {
      */
     private static instance;
     /**
-     * Stores the root path of the application. This root path is necessary
-     * to load different modules of the application.
-     *
-     * @var string
-     */
-    protected _rootPath: string;
-    /**
      * Application configurations manager. Handles the parsing and retreival
      * of configuration files.
      *
@@ -53,20 +46,33 @@ export declare class Application extends Container implements IApp {
      */
     static getInstance(rootPath?: string): IApp;
     /**
-     * Registers this app and and config bindings to the container.
-     * Also sets the container instance to this object.
-     */
-    protected registerBaseBindings(): void;
-    /**
-     * Registers the configuration manager on the app instance. Configuration
-     * manager is reponsible for handling the different configuration files.
+     * Registers different application paths
      *
-     * @return IConfigManager
+     * @param rootPath
      */
-    private registerConfigManager;
+    protected registerPaths(rootPath: string): void;
     /**
-     * Starts the server after registering service providers and listen
-     * for requests.
+     * Gets the path instance for the folder. If a path for the folder
+     * is not bound, then the root path is returned.
+     *
+     * @param folder
+     */
+    path(folder?: string): string;
+    /**
+     * Returns the application configs manager.
+     *
+     * @returns
+     */
+    configs(): IManager;
+    /**
+     * Returns the application services manager.
+     *
+     * @returns
+     */
+    services(): IServiceManager;
+    /**
+     * Starts the application. Boots all the registered services,
+     * creates a database connection and listen for requests.
      */
     startApp(): void;
     /**
@@ -126,24 +132,6 @@ export declare class Application extends Container implements IApp {
      * @param server
      */
     private onListening;
-    /**
-     * Returns a configuration data for the key.
-     *
-     * @param key
-     */
-    config(key: string, defaultValue?: any): any;
-    /**
-     * Gets the root path of the application
-     *
-     * @return string
-     */
-    getRootPath(): string;
-    /**
-     * Returns the asset path of the application
-     *
-     * @return string
-     */
-    getAssetPath(): string;
     /**
      * @override Container getter
      *
