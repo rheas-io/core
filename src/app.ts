@@ -1,16 +1,19 @@
 import path from "path";
 import { Request } from "./request";
 import { Response } from "./response";
+import { FileManager } from "@rheas/files";
 import https, { ServerOptions } from "https";
 import { Container } from "@rheas/container";
 import { ConfigManager } from "./configManager";
 import { ServiceManager } from "./serviceManager";
 import { IApp } from "@rheas/contracts/core/app";
 import { IRouter } from "@rheas/contracts/routes";
+import { IFileManager } from "@rheas/contracts/files";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IManager, IServerCreator } from "@rheas/contracts/core";
 import { IRequest, IResponse, IDbConnector } from "@rheas/contracts";
 import http, { Server, IncomingMessage, ServerResponse } from "http";
+import { EnvManager } from "./envManager";
 
 export class Application extends Container implements IApp {
 
@@ -20,6 +23,22 @@ export class Application extends Container implements IApp {
      * @var IApp
      */
     private static instance: IApp;
+
+    /**
+     * Application file manager. Required for loading js files and
+     * reading all kinds of files.
+     * 
+     * @var IFileManager
+     */
+    protected _fileManager: IFileManager;
+
+    /**
+     * Application environment variables manager. Needed for loading
+     * configs.
+     * 
+     * @var IManager
+     */
+    protected _envManager: IManager;
 
     /**
      * Application configurations manager. Handles the parsing and retreival
@@ -54,6 +73,8 @@ export class Application extends Container implements IApp {
 
         this.registerPaths(rootPath);
 
+        this._fileManager = new FileManager(this);
+        this._envManager = new EnvManager(this._fileManager, this.path('env'));
         this._configManager = new ConfigManager(this.path('configs'));
         this._serviceManager = new ServiceManager(this, this.configs().get('app.providers', {}));
     }
@@ -82,8 +103,9 @@ export class Application extends Container implements IApp {
      */
     protected registerPaths(rootPath: string) {
         this.instance('path.root', rootPath);
-        this.instance('path.assets', path.resolve(rootPath, '..', 'assets'));
+        this.instance('path.env', path.resolve(rootPath, '..', '.env'));
         this.instance('path.configs', path.resolve(rootPath, 'configs'));
+        this.instance('path.assets', path.resolve(rootPath, '..', 'assets'));
     }
 
     /**
@@ -94,6 +116,26 @@ export class Application extends Container implements IApp {
      */
     public path(folder: string = "root"): string {
         return this.get('path.' + folder) || this.get('path.root');
+    }
+
+    /**
+     * Returns the application file manager. Needs to be registered 
+     * before any other services as configs and env variables all need
+     * file manager to read data from files.
+     * 
+     * @returns
+     */
+    public files(): IFileManager {
+        return this._fileManager;
+    }
+
+    /**
+     * Returns the application environment variable manager.
+     * 
+     * @returns
+     */
+    public env(): IManager {
+        return this._envManager;
     }
 
     /**

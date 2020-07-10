@@ -55,11 +55,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
 var request_1 = require("./request");
 var response_1 = require("./response");
+var files_1 = require("@rheas/files");
 var https_1 = __importDefault(require("https"));
 var container_1 = require("@rheas/container");
 var configManager_1 = require("./configManager");
 var serviceManager_1 = require("./serviceManager");
 var http_1 = __importDefault(require("http"));
+var envManager_1 = require("./envManager");
 var Application = /** @class */ (function (_super) {
     __extends(Application, _super);
     /**
@@ -76,6 +78,8 @@ var Application = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         Application.instance = _this;
         _this.registerPaths(rootPath);
+        _this._fileManager = new files_1.FileManager(_this);
+        _this._envManager = new envManager_1.EnvManager(_this._fileManager, _this.path('env'));
         _this._configManager = new configManager_1.ConfigManager(_this.path('configs'));
         _this._serviceManager = new serviceManager_1.ServiceManager(_this, _this.configs().get('app.providers', {}));
         return _this;
@@ -103,8 +107,9 @@ var Application = /** @class */ (function (_super) {
      */
     Application.prototype.registerPaths = function (rootPath) {
         this.instance('path.root', rootPath);
-        this.instance('path.assets', path_1.default.resolve(rootPath, '..', 'assets'));
+        this.instance('path.env', path_1.default.resolve(rootPath, '..', '.env'));
         this.instance('path.configs', path_1.default.resolve(rootPath, 'configs'));
+        this.instance('path.assets', path_1.default.resolve(rootPath, '..', 'assets'));
     };
     /**
      * Gets the path instance for the folder. If a path for the folder
@@ -115,6 +120,24 @@ var Application = /** @class */ (function (_super) {
     Application.prototype.path = function (folder) {
         if (folder === void 0) { folder = "root"; }
         return this.get('path.' + folder) || this.get('path.root');
+    };
+    /**
+     * Returns the application file manager. Needs to be registered
+     * before any other services as configs and env variables all need
+     * file manager to read data from files.
+     *
+     * @returns
+     */
+    Application.prototype.files = function () {
+        return this._fileManager;
+    };
+    /**
+     * Returns the application environment variable manager.
+     *
+     * @returns
+     */
+    Application.prototype.env = function () {
+        return this._envManager;
     };
     /**
      * Returns the application configs manager.

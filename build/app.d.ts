@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { Container } from "@rheas/container";
 import { IApp } from "@rheas/contracts/core/app";
+import { IFileManager } from "@rheas/contracts/files";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IManager } from "@rheas/contracts/core";
 import { IncomingMessage, ServerResponse } from "http";
@@ -11,6 +12,20 @@ export declare class Application extends Container implements IApp {
      * @var IApp
      */
     private static instance;
+    /**
+     * Application file manager. Required for loading js files and
+     * reading all kinds of files.
+     *
+     * @var IFileManager
+     */
+    protected _fileManager: IFileManager;
+    /**
+     * Application environment variables manager. Needed for loading
+     * configs.
+     *
+     * @var IManager
+     */
+    protected _envManager: IManager;
     /**
      * Application configurations manager. Handles the parsing and retreival
      * of configuration files.
@@ -58,6 +73,20 @@ export declare class Application extends Container implements IApp {
      * @param folder
      */
     path(folder?: string): string;
+    /**
+     * Returns the application file manager. Needs to be registered
+     * before any other services as configs and env variables all need
+     * file manager to read data from files.
+     *
+     * @returns
+     */
+    files(): IFileManager;
+    /**
+     * Returns the application environment variable manager.
+     *
+     * @returns
+     */
+    env(): IManager;
     /**
      * Returns the application configs manager.
      *
