@@ -74,8 +74,8 @@ var Application = /** @class */ (function (_super) {
      */
     function Application(rootPath) {
         var _this = _super.call(this) || this;
-        _this.registerPaths(rootPath);
         Application.instance = _this;
+        _this.registerPaths(rootPath);
         _this._configManager = new configManager_1.ConfigManager(_this.path('configs'));
         _this._serviceManager = new serviceManager_1.ServiceManager(_this, _this.configs().get('app.providers', {}));
         return _this;

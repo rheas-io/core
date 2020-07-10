@@ -50,9 +50,9 @@ export class Application extends Container implements IApp {
     constructor(rootPath: string) {
         super();
 
-        this.registerPaths(rootPath);
-
         Application.instance = this;
+
+        this.registerPaths(rootPath);
 
         this._configManager = new ConfigManager(this.path('configs'));
         this._serviceManager = new ServiceManager(this, this.configs().get('app.providers', {}));
