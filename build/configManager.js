@@ -37,15 +37,15 @@ var ConfigManager = /** @class */ (function () {
         }
         // Splits the key by '.' character. Configs are requested using
         // filename.config format.
-        var _a = key.split('.'), filename = _a[0], configKeys = _a.slice(1);
+        var filename = key.split('.')[0];
         var config = null;
         // Check if the file is already cached or not. If not, we will try to
         // cache the file first. Only if file cache is successfull, we will check
         // for the configuration data.
         if (this.isCachedFile(filename) || this.cacheFile(filename)) {
-            config = configKeys.reduce(function (prev, current) { return (prev && prev[current]) ? prev[current] : null; }, this._configs[filename]);
+            config = support_1.Obj.get(this._configs, key);
         }
-        return null == config ? defaultValue : config;
+        return config == null ? defaultValue : config;
     };
     /**
      * Caches all the configuration data in the file

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { Str } from "@rheas/support";
+import { Str, Obj } from "@rheas/support";
 import { AnyObject } from "@rheas/contracts";
 import { IManager } from "@rheas/contracts/core";
 
@@ -47,20 +47,17 @@ export class ConfigManager implements IManager {
 
         // Splits the key by '.' character. Configs are requested using
         // filename.config format.
-        const [filename, ...configKeys] = key.split('.');
+        const filename = key.split('.')[0];
         let config = null;
 
         // Check if the file is already cached or not. If not, we will try to
         // cache the file first. Only if file cache is successfull, we will check
         // for the configuration data.
         if (this.isCachedFile(filename) || this.cacheFile(filename)) {
-            config = configKeys.reduce(
-                (prev: any, current: any) => (prev && prev[current]) ? prev[current] : null,
-                this._configs[filename]
-            );
+            config = Obj.get(this._configs, key);
         }
 
-        return null == config ? defaultValue : config;
+        return config == null ? defaultValue : config;
     }
 
     /**
