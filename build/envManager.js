@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var helpers_1 = require("@rheas/support/helpers");
 var EnvManager = /** @class */ (function () {
     /**
      * Creates a new environment variable handler.
      *
      * @param envPath
      */
-    function EnvManager(file, envPath, encoding) {
+    function EnvManager(envPath, encoding) {
         if (encoding === void 0) { encoding = 'utf8'; }
         /**
          * Caches environment variables
@@ -14,7 +15,6 @@ var EnvManager = /** @class */ (function () {
          * @var StringObject
          */
         this._envVariables = null;
-        this._file = file;
         this._encoding = encoding;
         this._envFilePath = envPath;
     }
@@ -56,14 +56,14 @@ var EnvManager = /** @class */ (function () {
      * @return object
      */
     EnvManager.prototype.readEnvFile = function () {
-        if (!this._file.fileExists(this._envFilePath)) {
-            return {};
+        var fs = helpers_1.files();
+        if (fs.fileExists(this._envFilePath)) {
+            try {
+                var fileContents = fs.readFileSync(this._envFilePath, this._encoding);
+                return this.parseContents(fileContents);
+            }
+            catch (error) { }
         }
-        try {
-            var fileContents = this._file.readFileSync(this._envFilePath, this._encoding);
-            return this.parseContents(fileContents);
-        }
-        catch (error) { }
         return {};
     };
     /**

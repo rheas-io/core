@@ -3,10 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var support_1 = require("@rheas/support");
+var helpers_1 = require("@rheas/support/helpers");
 var ConfigManager = /** @class */ (function () {
+    /**
+     * Creates a config manager that is responsible for reading
+     * app configurations.
+     *
+     * @param _path
+     */
     function ConfigManager(_path) {
         /**
          * Caches all the app configurations.
@@ -14,13 +20,7 @@ var ConfigManager = /** @class */ (function () {
          * @var object
          */
         this._configs = {};
-        /**
-         * Keeps an array of cached file names.
-         *
-         * @var array
-         */
-        this._cachedFiles = [];
-        this._path = support_1.Str.trimEnd(_path, path_1.default.sep);
+        this._path = support_1.Str.path(_path);
     }
     /**
      * Gets the application configurations. Configs are requested
@@ -54,11 +54,7 @@ var ConfigManager = /** @class */ (function () {
      */
     ConfigManager.prototype.cacheFile = function (filename) {
         var filePath = this.getFilePath(filename);
-        if (!this.configFileExists(filePath)) {
-            return null;
-        }
-        this._configs[filename] = require(filePath).default;
-        return this._cachedFiles.push(filename);
+        this._configs[filename] = helpers_1.files().readJsFile(filePath);
     };
     /**
      * Returns the whole filePath
@@ -66,7 +62,7 @@ var ConfigManager = /** @class */ (function () {
      * @param filename
      */
     ConfigManager.prototype.getFilePath = function (filename) {
-        return this._path + path_1.default.sep + filename + ".js";
+        return path_1.default.resolve(this._path, filename + ".js");
     };
     /**
      * Checks if a file name is cached or not.
@@ -74,21 +70,7 @@ var ConfigManager = /** @class */ (function () {
      * @return boolean
      */
     ConfigManager.prototype.isCachedFile = function (filename) {
-        return this._cachedFiles.includes(filename);
-    };
-    /**
-     * Checks if a config file exists or not.
-     *
-     * @param filename
-     */
-    ConfigManager.prototype.configFileExists = function (filePath) {
-        try {
-            return fs_1.default.lstatSync(filePath).isFile();
-        }
-        // lstatSync throws an error if the file does not exists. 
-        catch (err) {
-            return false;
-        }
+        return this._configs[filename] != null;
     };
     return ConfigManager;
 }());

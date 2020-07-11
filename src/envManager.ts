@@ -1,4 +1,4 @@
-import fs from "fs";
+import { files } from "@rheas/support/helpers";
 import { StringObject } from "@rheas/contracts";
 import { IManager } from "@rheas/contracts/core";
 import { IFileManager } from "@rheas/contracts/files";
@@ -20,13 +20,6 @@ export class EnvManager implements IManager {
     protected _encoding: string;
 
     /**
-     * The application file handler
-     * 
-     * @var IFiles
-     */
-    protected _file: IFileManager;
-
-    /**
      * Caches environment variables
      * 
      * @var StringObject
@@ -38,8 +31,7 @@ export class EnvManager implements IManager {
      * 
      * @param envPath 
      */
-    constructor(file: IFileManager, envPath: string, encoding = 'utf8') {
-        this._file = file;
+    constructor(envPath: string, encoding = 'utf8') {
         this._encoding = encoding;
         this._envFilePath = envPath;
     }
@@ -87,16 +79,15 @@ export class EnvManager implements IManager {
      */
     protected readEnvFile(): StringObject {
 
-        if (!this._file.fileExists(this._envFilePath)) {
-            return {};
+        const fs: IFileManager = files();
+
+        if (fs.fileExists(this._envFilePath)) {
+            try {
+                const fileContents = fs.readFileSync(this._envFilePath, this._encoding);
+
+                return this.parseContents(fileContents);
+            } catch (error) { }
         }
-
-        try {
-            const fileContents = this._file.readFileSync(this._envFilePath, this._encoding);
-
-            return this.parseContents(fileContents);
-        } catch (error) { }
-
         return {};
     }
 

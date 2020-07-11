@@ -1,6 +1,5 @@
 import { StringObject } from "@rheas/contracts";
 import { IManager } from "@rheas/contracts/core";
-import { IFileManager } from "@rheas/contracts/files";
 export declare class EnvManager implements IManager {
     /**
      * The environment file path
@@ -15,12 +14,6 @@ export declare class EnvManager implements IManager {
      */
     protected _encoding: string;
     /**
-     * The application file handler
-     *
-     * @var IFiles
-     */
-    protected _file: IFileManager;
-    /**
      * Caches environment variables
      *
      * @var StringObject
@@ -31,7 +24,7 @@ export declare class EnvManager implements IManager {
      *
      * @param envPath
      */
-    constructor(file: IFileManager, envPath: string, encoding?: string);
+    constructor(envPath: string, encoding?: string);
     /**
      * Gets the environment variable from the file.
      *

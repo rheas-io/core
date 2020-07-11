@@ -1,7 +1,7 @@
-import fs from "fs";
 import path from "path";
 import { Str, Obj } from "@rheas/support";
 import { AnyObject } from "@rheas/contracts";
+import { files } from "@rheas/support/helpers";
 import { IManager } from "@rheas/contracts/core";
 
 export class ConfigManager implements IManager {
@@ -21,14 +21,13 @@ export class ConfigManager implements IManager {
     private _configs: AnyObject = {};
 
     /**
-     * Keeps an array of cached file names.
+     * Creates a config manager that is responsible for reading
+     * app configurations.
      * 
-     * @var array
+     * @param _path 
      */
-    private _cachedFiles: string[] = [];
-
     constructor(_path: string) {
-        this._path = Str.trimEnd(_path, path.sep);
+        this._path = Str.path(_path);
     }
 
     /**
@@ -68,12 +67,7 @@ export class ConfigManager implements IManager {
     private cacheFile(filename: string) {
         const filePath = this.getFilePath(filename);
 
-        if (!this.configFileExists(filePath)) {
-            return null;
-        }
-        this._configs[filename] = require(filePath).default;
-
-        return this._cachedFiles.push(filename);
+        this._configs[filename] = files().readJsFile(filePath);
     }
 
     /**
@@ -82,7 +76,7 @@ export class ConfigManager implements IManager {
      * @param filename 
      */
     private getFilePath(filename: string): string {
-        return `${this._path + path.sep + filename}.js`;
+        return path.resolve(this._path, `${filename}.js`);
     }
 
     /**
@@ -91,19 +85,6 @@ export class ConfigManager implements IManager {
      * @return boolean
      */
     private isCachedFile(filename: string): boolean {
-        return this._cachedFiles.includes(filename);
-    }
-
-    /**
-     * Checks if a config file exists or not.
-     * 
-     * @param filename 
-     */
-    private configFileExists(filePath: string): boolean {
-        try {
-            return fs.lstatSync(filePath).isFile();
-        }
-        // lstatSync throws an error if the file does not exists. 
-        catch (err) { return false; }
+        return this._configs[filename] != null;
     }
 }

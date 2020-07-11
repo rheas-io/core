@@ -13,11 +13,11 @@ export declare class ConfigManager implements IManager {
      */
     private _configs;
     /**
-     * Keeps an array of cached file names.
+     * Creates a config manager that is responsible for reading
+     * app configurations.
      *
-     * @var array
+     * @param _path
      */
-    private _cachedFiles;
     constructor(_path: string);
     /**
      * Gets the application configurations. Configs are requested
@@ -44,10 +44,4 @@ export declare class ConfigManager implements IManager {
      * @return boolean
      */
     private isCachedFile;
-    /**
-     * Checks if a config file exists or not.
-     *
-     * @param filename
-     */
-    private configFileExists;
 }
