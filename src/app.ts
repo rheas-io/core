@@ -190,7 +190,7 @@ export class Application extends Container implements IApp {
         let response = <IResponse>res;
 
         try {
-            request.boot(this, response);
+            request.boot(response);
 
             response = await router.handle(request, response);
         } catch (err) {

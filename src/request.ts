@@ -3,6 +3,7 @@ import mime from "mime-types";
 import { Str } from "@rheas/support";
 import { IncomingMessage } from "http";
 import { Container } from "@rheas/container";
+import { config } from "@rheas/support/helpers";
 import { ServiceManager } from "./serviceManager";
 import { RequestComponent } from "@rheas/routing/uri";
 import { IApp, IRedirector } from "@rheas/contracts/core";
@@ -99,24 +100,21 @@ export class Request extends IncomingMessage implements IRequest {
         this._serviceManager = new ServiceManager(this);
     }
     /**
-     * Sets the application instance and boots request services and 
+     * Sets the response instance and boots request services and 
      * container. 
      * 
      * The request data like url, query and all the stuff will be available 
      * inside the boot. Process them and store in memory for faster processing
-     * 
-     * @param app 
+     *  
      * @param response
      */
-    public boot(app: IApp, response: IResponse): IRequest {
-
-        this.instance('app', app, true);
+    public boot(response: IResponse): IRequest {
         this.instance('response', response, true);
         this.instance('services', this._serviceManager, true);
 
         this.loadRequest();
 
-        this._serviceManager.setProviders(app.configs().get('request.providers', {}));
+        this._serviceManager.setProviders(config('request.providers', {}));
 
         this._serviceManager.boot();
 

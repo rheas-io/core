@@ -21,6 +21,7 @@ var mime_types_1 = __importDefault(require("mime-types"));
 var support_1 = require("@rheas/support");
 var http_1 = require("http");
 var container_1 = require("@rheas/container");
+var helpers_1 = require("@rheas/support/helpers");
 var serviceManager_1 = require("./serviceManager");
 var uri_1 = require("@rheas/routing/uri");
 var suspicious_1 = require("@rheas/errors/suspicious");
@@ -83,21 +84,19 @@ var Request = /** @class */ (function (_super) {
         return _this;
     }
     /**
-     * Sets the application instance and boots request services and
+     * Sets the response instance and boots request services and
      * container.
      *
      * The request data like url, query and all the stuff will be available
      * inside the boot. Process them and store in memory for faster processing
      *
-     * @param app
      * @param response
      */
-    Request.prototype.boot = function (app, response) {
-        this.instance('app', app, true);
+    Request.prototype.boot = function (response) {
         this.instance('response', response, true);
         this.instance('services', this._serviceManager, true);
         this.loadRequest();
-        this._serviceManager.setProviders(app.configs().get('request.providers', {}));
+        this._serviceManager.setProviders(helpers_1.config('request.providers', {}));
         this._serviceManager.boot();
         return this;
     };
