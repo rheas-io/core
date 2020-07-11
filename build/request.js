@@ -80,7 +80,7 @@ var Request = /** @class */ (function (_super) {
          */
         _this._inputs = {};
         _this._container = new container_1.Container();
-        _this._serviceManager = new serviceManager_1.ServiceManager(_this);
+        _this._serviceManager = new serviceManager_1.ServiceManager(_this, helpers_1.config('request.providers', {}));
         return _this;
     }
     /**
@@ -94,9 +94,7 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.boot = function (response) {
         this.instance('response', response, true);
-        this.instance('services', this._serviceManager, true);
         this.loadRequest();
-        this._serviceManager.setProviders(helpers_1.config('request.providers', {}));
         this._serviceManager.boot();
         return this;
     };

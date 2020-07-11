@@ -5,8 +5,8 @@ import { IncomingMessage } from "http";
 import { Container } from "@rheas/container";
 import { config } from "@rheas/support/helpers";
 import { ServiceManager } from "./serviceManager";
+import { IRedirector } from "@rheas/contracts/core";
 import { RequestComponent } from "@rheas/routing/uri";
-import { IApp, IRedirector } from "@rheas/contracts/core";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
@@ -97,7 +97,7 @@ export class Request extends IncomingMessage implements IRequest {
         super(socket);
 
         this._container = new Container();
-        this._serviceManager = new ServiceManager(this);
+        this._serviceManager = new ServiceManager(this, config('request.providers', {}));
     }
     /**
      * Sets the response instance and boots request services and 
@@ -110,11 +110,8 @@ export class Request extends IncomingMessage implements IRequest {
      */
     public boot(response: IResponse): IRequest {
         this.instance('response', response, true);
-        this.instance('services', this._serviceManager, true);
 
         this.loadRequest();
-
-        this._serviceManager.setProviders(config('request.providers', {}));
 
         this._serviceManager.boot();
 
