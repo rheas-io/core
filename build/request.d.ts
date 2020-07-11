@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import { IncomingMessage } from "http";
 import { IRedirector } from "@rheas/contracts/core";
+import { IRequest, AnyObject } from "@rheas/contracts";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
-import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 export declare class Request extends IncomingMessage implements IRequest {
     /**
@@ -76,15 +76,12 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     constructor(socket: any);
     /**
-     * Sets the response instance and boots request services and
-     * container.
+     * Boots request services and container.
      *
      * The request data like url, query and all the stuff will be available
      * inside the boot. Process them and store in memory for faster processing
-     *
-     * @param response
      */
-    boot(response: IResponse): IRequest;
+    boot(): IRequest;
     /**
      * Loads the requests query, cookies, headers and post contents.
      *

@@ -7,9 +7,9 @@ import { config } from "@rheas/support/helpers";
 import { ServiceManager } from "./serviceManager";
 import { IRedirector } from "@rheas/contracts/core";
 import { RequestComponent } from "@rheas/routing/uri";
+import { IRequest, AnyObject } from "@rheas/contracts";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
-import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 import { SuspiciousOperationException } from "@rheas/errors/suspicious";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 
@@ -100,17 +100,12 @@ export class Request extends IncomingMessage implements IRequest {
         this._serviceManager = new ServiceManager(this, config('request.providers', {}));
     }
     /**
-     * Sets the response instance and boots request services and 
-     * container. 
+     * Boots request services and container. 
      * 
      * The request data like url, query and all the stuff will be available 
      * inside the boot. Process them and store in memory for faster processing
-     *  
-     * @param response
      */
-    public boot(response: IResponse): IRequest {
-        this.instance('response', response, true);
-
+    public boot(): IRequest {
         this.loadRequest();
 
         this._serviceManager.boot();

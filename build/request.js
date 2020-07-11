@@ -84,16 +84,12 @@ var Request = /** @class */ (function (_super) {
         return _this;
     }
     /**
-     * Sets the response instance and boots request services and
-     * container.
+     * Boots request services and container.
      *
      * The request data like url, query and all the stuff will be available
      * inside the boot. Process them and store in memory for faster processing
-     *
-     * @param response
      */
-    Request.prototype.boot = function (response) {
-        this.instance('response', response, true);
+    Request.prototype.boot = function () {
         this.loadRequest();
         this._serviceManager.boot();
         return this;

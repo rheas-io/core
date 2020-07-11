@@ -188,7 +188,7 @@ export class Application extends Container implements IApp {
         let response = <IResponse>res;
 
         try {
-            request.boot(response);
+            request.boot();
 
             response = await router.handle(request, response);
         } catch (err) {
