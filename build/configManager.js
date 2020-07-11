@@ -55,6 +55,7 @@ var ConfigManager = /** @class */ (function () {
     ConfigManager.prototype.cacheFile = function (filename) {
         var filePath = this.getFilePath(filename);
         this._configs[filename] = helpers_1.files().readJsFile(filePath);
+        return this.isCachedFile(filename);
     };
     /**
      * Returns the whole filePath

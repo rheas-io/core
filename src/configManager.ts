@@ -64,10 +64,12 @@ export class ConfigManager implements IManager {
      * 
      * @param filename 
      */
-    private cacheFile(filename: string) {
+    private cacheFile(filename: string): boolean {
         const filePath = this.getFilePath(filename);
 
         this._configs[filename] = files().readJsFile(filePath);
+
+        return this.isCachedFile(filename);
     }
 
     /**
