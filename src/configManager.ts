@@ -1,5 +1,5 @@
 import path from "path";
-import { Str, Obj } from "@rheas/support";
+import { Obj } from "@rheas/support";
 import { AnyObject } from "@rheas/contracts";
 import { files } from "@rheas/support/helpers";
 import { IManager } from "@rheas/contracts/core";
@@ -27,7 +27,7 @@ export class ConfigManager implements IManager {
      * @param _path 
      */
     constructor(_path: string) {
-        this._path = Str.path(_path);
+        this._path = _path;
     }
 
     /**

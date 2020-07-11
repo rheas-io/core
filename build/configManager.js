@@ -20,7 +20,7 @@ var ConfigManager = /** @class */ (function () {
          * @var object
          */
         this._configs = {};
-        this._path = support_1.Str.path(_path);
+        this._path = _path;
     }
     /**
      * Gets the application configurations. Configs are requested
