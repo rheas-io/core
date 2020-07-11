@@ -25,14 +25,6 @@ export class Application extends Container implements IApp {
     private static instance: IApp;
 
     /**
-     * Application file manager. Required for loading js files and
-     * reading all kinds of files.
-     * 
-     * @var IFileManager
-     */
-    protected _fileManager: IFileManager;
-
-    /**
      * Application environment variables manager. Needed for loading
      * configs.
      * 
@@ -73,8 +65,7 @@ export class Application extends Container implements IApp {
 
         this.registerPaths(rootPath);
 
-        this._fileManager = new FileManager(this);
-        this._envManager = new EnvManager(this._fileManager, this.path('env'));
+        this._envManager = new EnvManager(this.path('env'));
         this._configManager = new ConfigManager(this.path('configs'));
         this._serviceManager = new ServiceManager(this, this.configs().get('app.providers', {}));
     }
@@ -116,17 +107,6 @@ export class Application extends Container implements IApp {
      */
     public path(folder: string = "root"): string {
         return this.get('path.' + folder) || this.get('path.root');
-    }
-
-    /**
-     * Returns the application file manager. Needs to be registered 
-     * before any other services as configs and env variables all need
-     * file manager to read data from files.
-     * 
-     * @returns
-     */
-    public files(): IFileManager {
-        return this._fileManager;
     }
 
     /**
