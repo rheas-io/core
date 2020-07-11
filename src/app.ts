@@ -1,19 +1,17 @@
 import path from "path";
 import { Request } from "./request";
 import { Response } from "./response";
-import { FileManager } from "@rheas/files";
+import { EnvManager } from "./envManager";
 import https, { ServerOptions } from "https";
 import { Container } from "@rheas/container";
 import { ConfigManager } from "./configManager";
 import { ServiceManager } from "./serviceManager";
 import { IApp } from "@rheas/contracts/core/app";
 import { IRouter } from "@rheas/contracts/routes";
-import { IFileManager } from "@rheas/contracts/files";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IManager, IServerCreator } from "@rheas/contracts/core";
 import { IRequest, IResponse, IDbConnector } from "@rheas/contracts";
 import http, { Server, IncomingMessage, ServerResponse } from "http";
-import { EnvManager } from "./envManager";
 
 export class Application extends Container implements IApp {
 

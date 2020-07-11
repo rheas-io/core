@@ -55,12 +55,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var path_1 = __importDefault(require("path"));
 var request_1 = require("./request");
 var response_1 = require("./response");
+var envManager_1 = require("./envManager");
 var https_1 = __importDefault(require("https"));
 var container_1 = require("@rheas/container");
 var configManager_1 = require("./configManager");
 var serviceManager_1 = require("./serviceManager");
 var http_1 = __importDefault(require("http"));
-var envManager_1 = require("./envManager");
 var Application = /** @class */ (function (_super) {
     __extends(Application, _super);
     /**
