@@ -2,6 +2,7 @@ import url from "url";
 import mime from "mime-types";
 import { Str } from "@rheas/support";
 import { IncomingMessage } from "http";
+import accepts, { Accepts } from "accepts";
 import { Container } from "@rheas/container";
 import { config } from "@rheas/support/helpers";
 import { ServiceManager } from "./serviceManager";
@@ -28,6 +29,13 @@ export class Request extends IncomingMessage implements IRequest {
      * @var IServiceManager
      */
     protected _serviceManager: IServiceManager;
+
+    /**
+     * The accept instance that has to be used for negotiations.
+     * 
+     * @var Accepts
+     */
+    protected _negotiator: Accepts | null = null;
 
     /**
      * The segmented path uri components.
@@ -99,6 +107,7 @@ export class Request extends IncomingMessage implements IRequest {
         this._container = new Container();
         this._serviceManager = new ServiceManager(this, config('request.providers', {}));
     }
+
     /**
      * Boots request services and container. 
      * 
@@ -338,12 +347,112 @@ export class Request extends IncomingMessage implements IRequest {
         return params;
     }
 
-    isJson(): boolean {
-        throw new Error("Method not implemented.");
+    /**
+     * Returns true if the request is an AJAX request.
+     * 
+     * @returns
+     */
+    public ajax(): boolean {
+        return 'XMLHttpRequest' === this.headers['X-Requested-With'];
     }
 
-    acceptsJson(): boolean {
-        throw new Error("Method not implemented.");
+    /**
+     * Returns true if the request is a PJAX request.
+     * 
+     * @returns
+     */
+    public pjax(): boolean {
+        return 'true' === this.headers['X-PJAX'];
+    }
+
+    /**
+     * Returns true if the request accepts the given type.
+     * 
+     * @param type 
+     */
+    public accepts(type: string): boolean {
+        return false !== this.negotiator().type(type);
+    }
+
+    /**
+     * Returns true if the request accepts json
+     * 
+     * @returns 
+     */
+    public acceptsJson(): boolean {
+        return (this.ajax() && !this.pjax() && this.acceptsAnyType()) || this.wantsJson();
+    }
+
+    /**
+     * Returns true if the request is specifically asking for
+     * json.
+     * 
+     * @returns
+     */
+    public wantsJson(): boolean {
+        const types = this.acceptableContentTypes();
+
+        if (types.length > 0) {
+            return types[0].includes('/json') || types[0].includes('+json');
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the request accepts any content type
+     * 
+     * @returns
+     */
+    public acceptsAnyType(): boolean {
+        const types = this.acceptableContentTypes();
+
+        return types.includes('*/*') || types.includes('*');
+    }
+
+    /**
+     * Returns the acceptable content types in the quality order. 
+     * Most preferred are returned first.
+     * 
+     * @returns 
+     */
+    public acceptableContentTypes(): string[] {
+        return this.negotiator().types() as string[];
+    }
+
+    /**
+     * Returns true if the request conten-type is a json
+     * 
+     * @returns
+     */
+    public isJson(): boolean {
+        const content_type = this.headers["content-type"];
+
+        if (content_type) {
+            return content_type.includes('/json') || content_type.includes('+json');
+        }
+        return false;
+    }
+
+    /**
+     * Returns the negotiator instance.
+     * 
+     * @returns
+     */
+    public negotiator(): Accepts {
+        if (this._negotiator === null) {
+            this._negotiator = accepts(this);
+        }
+        return this._negotiator;
+    }
+
+    /**
+     * Returns the mimetype of the format. null if no mime found.
+     * 
+     * @param format 
+     * @return
+     */
+    public getMimeType(format: string): string | null {
+        return mime.lookup(format) || null;
     }
 
     /**
@@ -358,7 +467,12 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * @inheritdoc
+     * Gets the request format set by the application. Setting a custom format
+     * to the request overrides the accept header. 
+     * 
+     * For instance, if accept header allows both html and json and the server 
+     * want to send json, application can set "json" as the request format and 
+     * the response will have json content-type.
      * 
      * @returns string
      */
@@ -371,17 +485,8 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * @inheritdoc
-     * 
-     * @param format 
-     * @return
-     */
-    public getMimeType(format: string): string | null {
-        return mime.lookup(format) || null;
-    }
-
-    /**
-     * @inheritdoc
+     * Sets an attribute value. This enables setting custom values on request
+     * that are not actually present in the incoming request. 
      * 
      * @param key 
      * @param value 
@@ -394,7 +499,8 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * @inheritdoc
+     * Gets an attribute value if it exists or the defaultValue or null if no 
+     * default is given.
      * 
      * @param key 
      * @param defaultValue 
@@ -408,7 +514,9 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * @inheritdoc
+     * Binds a singleton resolver to the container. Once resolved, the value 
+     * will be used for the lifetime of the service which can either be app
+     * lifetime or request lifetime.
      * 
      * @param name 
      * @param resolver 
@@ -418,7 +526,8 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * @inheritdoc
+     * Binds a resolver to the container. Used mainly for non-singleton resolvers,
+     * that gets resolved repeatedly when requested.
      * 
      * @param name 
      * @param resolver 
@@ -429,7 +538,8 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * @inheritdoc
+     * Adds an instance to this container. Any type of object can be passed as an argument 
+     * and returns the same after adding it to container.
      * 
      * @param name 
      * @param instance 
@@ -440,7 +550,8 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * @inheritdoc
+     * Returns the binding stored in this container. The resolved value is returned
+     * if the key is assigned to a resolver.
      * 
      * @param key 
      */

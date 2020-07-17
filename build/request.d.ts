@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import { IncomingMessage } from "http";
+import { Accepts } from "accepts";
 import { IRedirector } from "@rheas/contracts/core";
 import { IRequest, AnyObject } from "@rheas/contracts";
 import { IServiceManager } from "@rheas/contracts/services";
@@ -18,6 +19,12 @@ export declare class Request extends IncomingMessage implements IRequest {
      * @var IServiceManager
      */
     protected _serviceManager: IServiceManager;
+    /**
+     * The accept instance that has to be used for negotiations.
+     *
+     * @var Accepts
+     */
+    protected _negotiator: Accepts | null;
     /**
      * The segmented path uri components.
      *
@@ -193,8 +200,69 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     getQueryString(): string;
     params(): string[];
-    isJson(): boolean;
+    /**
+     * Returns true if the request is an AJAX request.
+     *
+     * @returns
+     */
+    ajax(): boolean;
+    /**
+     * Returns true if the request is a PJAX request.
+     *
+     * @returns
+     */
+    pjax(): boolean;
+    /**
+     * Returns true if the request accepts the given type.
+     *
+     * @param type
+     */
+    accepts(type: string): boolean;
+    /**
+     * Returns true if the request accepts json
+     *
+     * @returns
+     */
     acceptsJson(): boolean;
+    /**
+     * Returns true if the request is specifically asking for
+     * json.
+     *
+     * @returns
+     */
+    wantsJson(): boolean;
+    /**
+     * Returns true if the request accepts any content type
+     *
+     * @returns
+     */
+    acceptsAnyType(): boolean;
+    /**
+     * Returns the acceptable content types in the quality order.
+     * Most preferred are returned first.
+     *
+     * @returns
+     */
+    acceptableContentTypes(): string[];
+    /**
+     * Returns true if the request conten-type is a json
+     *
+     * @returns
+     */
+    isJson(): boolean;
+    /**
+     * Returns the negotiator instance.
+     *
+     * @returns
+     */
+    negotiator(): Accepts;
+    /**
+     * Returns the mimetype of the format. null if no mime found.
+     *
+     * @param format
+     * @return
+     */
+    getMimeType(format: string): string | null;
     /**
      * Sets the format in which response has to be send.
      *
@@ -202,41 +270,44 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     setFormat(format: string): IRequest;
     /**
-     * @inheritdoc
+     * Gets the request format set by the application. Setting a custom format
+     * to the request overrides the accept header.
+     *
+     * For instance, if accept header allows both html and json and the server
+     * want to send json, application can set "json" as the request format and
+     * the response will have json content-type.
      *
      * @returns string
      */
     getFormat(defaulValue?: string): string;
     /**
-     * @inheritdoc
-     *
-     * @param format
-     * @return
-     */
-    getMimeType(format: string): string | null;
-    /**
-     * @inheritdoc
+     * Sets an attribute value. This enables setting custom values on request
+     * that are not actually present in the incoming request.
      *
      * @param key
      * @param value
      */
     setAttribute(key: string, value: any): IRequest;
     /**
-     * @inheritdoc
+     * Gets an attribute value if it exists or the defaultValue or null if no
+     * default is given.
      *
      * @param key
      * @param defaultValue
      */
     getAttribute(key: string, defaultValue?: any): any;
     /**
-     * @inheritdoc
+     * Binds a singleton resolver to the container. Once resolved, the value
+     * will be used for the lifetime of the service which can either be app
+     * lifetime or request lifetime.
      *
      * @param name
      * @param resolver
      */
     singleton(name: string, resolver: InstanceHandler): IContainerInstance;
     /**
-     * @inheritdoc
+     * Binds a resolver to the container. Used mainly for non-singleton resolvers,
+     * that gets resolved repeatedly when requested.
      *
      * @param name
      * @param resolver
@@ -244,7 +315,8 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     bind(name: string, resolver: InstanceHandler, singleton?: boolean): IContainerInstance;
     /**
-     * @inheritdoc
+     * Adds an instance to this container. Any type of object can be passed as an argument
+     * and returns the same after adding it to container.
      *
      * @param name
      * @param instance
@@ -252,7 +324,8 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     instance<T>(name: string, instance: T, singleton?: boolean): IContainerInstance;
     /**
-     * @inheritdoc
+     * Returns the binding stored in this container. The resolved value is returned
+     * if the key is assigned to a resolver.
      *
      * @param key
      */

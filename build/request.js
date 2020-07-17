@@ -20,6 +20,7 @@ var url_1 = __importDefault(require("url"));
 var mime_types_1 = __importDefault(require("mime-types"));
 var support_1 = require("@rheas/support");
 var http_1 = require("http");
+var accepts_1 = __importDefault(require("accepts"));
 var container_1 = require("@rheas/container");
 var helpers_1 = require("@rheas/support/helpers");
 var serviceManager_1 = require("./serviceManager");
@@ -34,6 +35,12 @@ var Request = /** @class */ (function (_super) {
      */
     function Request(socket) {
         var _this = _super.call(this, socket) || this;
+        /**
+         * The accept instance that has to be used for negotiations.
+         *
+         * @var Accepts
+         */
+        _this._negotiator = null;
         /**
          * The segmented path uri components.
          *
@@ -277,11 +284,100 @@ var Request = /** @class */ (function (_super) {
         this.getPathComponents().forEach(function (components) { return params.push.apply(params, Object.values(components.getParam())); });
         return params;
     };
-    Request.prototype.isJson = function () {
-        throw new Error("Method not implemented.");
+    /**
+     * Returns true if the request is an AJAX request.
+     *
+     * @returns
+     */
+    Request.prototype.ajax = function () {
+        return 'XMLHttpRequest' === this.headers['X-Requested-With'];
     };
+    /**
+     * Returns true if the request is a PJAX request.
+     *
+     * @returns
+     */
+    Request.prototype.pjax = function () {
+        return 'true' === this.headers['X-PJAX'];
+    };
+    /**
+     * Returns true if the request accepts the given type.
+     *
+     * @param type
+     */
+    Request.prototype.accepts = function (type) {
+        return false !== this.negotiator().type(type);
+    };
+    /**
+     * Returns true if the request accepts json
+     *
+     * @returns
+     */
     Request.prototype.acceptsJson = function () {
-        throw new Error("Method not implemented.");
+        return (this.ajax() && !this.pjax() && this.acceptsAnyType()) || this.wantsJson();
+    };
+    /**
+     * Returns true if the request is specifically asking for
+     * json.
+     *
+     * @returns
+     */
+    Request.prototype.wantsJson = function () {
+        var types = this.acceptableContentTypes();
+        if (types.length > 0) {
+            return types[0].includes('/json') || types[0].includes('+json');
+        }
+        return false;
+    };
+    /**
+     * Returns true if the request accepts any content type
+     *
+     * @returns
+     */
+    Request.prototype.acceptsAnyType = function () {
+        var types = this.acceptableContentTypes();
+        return types.includes('*/*') || types.includes('*');
+    };
+    /**
+     * Returns the acceptable content types in the quality order.
+     * Most preferred are returned first.
+     *
+     * @returns
+     */
+    Request.prototype.acceptableContentTypes = function () {
+        return this.negotiator().types();
+    };
+    /**
+     * Returns true if the request conten-type is a json
+     *
+     * @returns
+     */
+    Request.prototype.isJson = function () {
+        var content_type = this.headers["content-type"];
+        if (content_type) {
+            return content_type.includes('/json') || content_type.includes('+json');
+        }
+        return false;
+    };
+    /**
+     * Returns the negotiator instance.
+     *
+     * @returns
+     */
+    Request.prototype.negotiator = function () {
+        if (this._negotiator === null) {
+            this._negotiator = accepts_1.default(this);
+        }
+        return this._negotiator;
+    };
+    /**
+     * Returns the mimetype of the format. null if no mime found.
+     *
+     * @param format
+     * @return
+     */
+    Request.prototype.getMimeType = function (format) {
+        return mime_types_1.default.lookup(format) || null;
     };
     /**
      * Sets the format in which response has to be send.
@@ -293,7 +389,12 @@ var Request = /** @class */ (function (_super) {
         return this;
     };
     /**
-     * @inheritdoc
+     * Gets the request format set by the application. Setting a custom format
+     * to the request overrides the accept header.
+     *
+     * For instance, if accept header allows both html and json and the server
+     * want to send json, application can set "json" as the request format and
+     * the response will have json content-type.
      *
      * @returns string
      */
@@ -305,16 +406,8 @@ var Request = /** @class */ (function (_super) {
         return null == this._format ? defaulValue : this._format;
     };
     /**
-     * @inheritdoc
-     *
-     * @param format
-     * @return
-     */
-    Request.prototype.getMimeType = function (format) {
-        return mime_types_1.default.lookup(format) || null;
-    };
-    /**
-     * @inheritdoc
+     * Sets an attribute value. This enables setting custom values on request
+     * that are not actually present in the incoming request.
      *
      * @param key
      * @param value
@@ -324,7 +417,8 @@ var Request = /** @class */ (function (_super) {
         return this;
     };
     /**
-     * @inheritdoc
+     * Gets an attribute value if it exists or the defaultValue or null if no
+     * default is given.
      *
      * @param key
      * @param defaultValue
@@ -337,7 +431,9 @@ var Request = /** @class */ (function (_super) {
         return defaultValue;
     };
     /**
-     * @inheritdoc
+     * Binds a singleton resolver to the container. Once resolved, the value
+     * will be used for the lifetime of the service which can either be app
+     * lifetime or request lifetime.
      *
      * @param name
      * @param resolver
@@ -346,7 +442,8 @@ var Request = /** @class */ (function (_super) {
         return this._container.singleton(name, resolver);
     };
     /**
-     * @inheritdoc
+     * Binds a resolver to the container. Used mainly for non-singleton resolvers,
+     * that gets resolved repeatedly when requested.
      *
      * @param name
      * @param resolver
@@ -357,7 +454,8 @@ var Request = /** @class */ (function (_super) {
         return this._container.bind(name, resolver, singleton);
     };
     /**
-     * @inheritdoc
+     * Adds an instance to this container. Any type of object can be passed as an argument
+     * and returns the same after adding it to container.
      *
      * @param name
      * @param instance
@@ -368,7 +466,8 @@ var Request = /** @class */ (function (_super) {
         return this._container.instance(name, instance, singleton);
     };
     /**
-     * @inheritdoc
+     * Returns the binding stored in this container. The resolved value is returned
+     * if the key is assigned to a resolver.
      *
      * @param key
      */
