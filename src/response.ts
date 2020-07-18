@@ -126,11 +126,8 @@ export class Response extends ServerResponse implements IResponse {
         // chunk response and head request.
         else {
             this.prepareContentType();
-
             this.prepareCharset();
-
             this.prepareTransferEncoding();
-
             this.prepareForHead();
         }
 
@@ -192,28 +189,10 @@ export class Response extends ServerResponse implements IResponse {
         }
     }
 
-    /**
-     * Creates a redirect response to the given url and status. If no 
-     * status code is given, 302 is used by default.
-     * 
-     * @param to 
-     * @param status 
-     */
-    public redirect(to: string, status?: number): IResponse {
-
-        const redirector =
-
-            this.statusCode = 302;
-
-        if (status && this.isRedirectStatus(status)) {
-            this.statusCode = status;
-        }
-
-        return this;
-    }
+    
 
     /**
-     * @inheritdoc
+     * Returns the headers that are not needed in Not-Modified responses.
      * 
      * @returns array
      */

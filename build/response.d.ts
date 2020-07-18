@@ -90,15 +90,7 @@ export declare class Response extends ServerResponse implements IResponse {
      */
     private prepareForHead;
     /**
-     * Creates a redirect response to the given url and status. If no
-     * status code is given, 302 is used by default.
-     *
-     * @param to
-     * @param status
-     */
-    redirect(to: string, status?: number): IResponse;
-    /**
-     * @inheritdoc
+     * Returns the headers that are not needed in Not-Modified responses.
      *
      * @returns array
      */

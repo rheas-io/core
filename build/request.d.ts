@@ -225,8 +225,15 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     acceptsJson(): boolean;
     /**
-     * Returns true if the request is specifically asking for
-     * json.
+     * Returns true if the request is specifically asking for json. Mimetype for
+     * json content is either
+     *
+     * [1] application/json
+     * [2] application/problem+json
+     *
+     * We will check for the presence of "/json" and "+json" strings. We use the string
+     * check as the negotiator might return true even if the client is not requesting
+     * for it but accepts any type "*"
      *
      * @returns
      */
