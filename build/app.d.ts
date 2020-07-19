@@ -84,6 +84,16 @@ export declare class Application extends Container implements IApp {
      */
     services(): IServiceManager;
     /**
+     * Middleware exception keys setter and getter.
+     *
+     * Throughout the app certain exceptions will have to be made to
+     * services/operations. These are set/get using this function.
+     *
+     * @param key
+     * @param value
+     */
+    exceptions(key: string, value?: string[]): string[];
+    /**
      * Starts the application. Boots all the registered services,
      * creates a database connection and listen for requests.
      */
@@ -154,5 +164,5 @@ export declare class Application extends Container implements IApp {
      *
      * @param key The binding key to retreive
      */
-    get(key: string): any;
+    get(key: string, defaultValue?: any): any;
 }

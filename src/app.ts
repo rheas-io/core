@@ -135,6 +135,37 @@ export class Application extends Container implements IApp {
     }
 
     /**
+     * Middleware exception keys setter and getter. 
+     * 
+     * Throughout the app certain exceptions will have to be made to 
+     * services/operations. These are set/get using this function.
+     * 
+     * @param key 
+     * @param value 
+     */
+    public exceptions(key: string, value?: string[]): string[] {
+
+        const bindKey = 'exceptions.' + key;
+
+        // If value is null, act as a getter. Returns the string
+        // array for the exceptions if it exists or returns an 
+        // empty array 
+        if (value == null) {
+            return this.get(bindKey, []);
+        }
+
+        // If value is undefined, set it to an empty array and
+        // proceed with binding to the container.
+        value = value || [];
+
+        // Non singleton binding, so can be updated with new values
+        // from anywhere.
+        this.instance(bindKey, value);
+
+        return value;
+    }
+
+    /**
      * Starts the application. Boots all the registered services,
      * creates a database connection and listen for requests.
      */
@@ -310,14 +341,14 @@ export class Application extends Container implements IApp {
      * 
      * @param key The binding key to retreive
      */
-    public get(key: string): any {
-        const service = super.get(key);
+    public get(key: string, defaultValue?: any): any {
+        const service = super.get(key, defaultValue);
 
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // Container.
         if (service === null && this._serviceManager.registerServiceByName(key)) {
-            return super.get(key);
+            return super.get(key, defaultValue);
         }
         return service;
     }
