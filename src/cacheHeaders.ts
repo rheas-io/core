@@ -18,7 +18,13 @@ export class CacheHeaders {
     protected _cacheControls: AnyObject = {};
 
     /**
+     * Creates a cache manager for req/res headers. This manager acts as a
+     * cache setter for response and getter for the requests. 
      * 
+     * All cache related operations like setting cache-controls, reading the 
+     * freshness of the response, ttl, age etc are handled in here.
+     * 
+     * All cache related http header setters are also managed by this class.
      */
     constructor() {
         this._headers = new Headers();
