@@ -1,7 +1,8 @@
 import { Str } from "@rheas/support";
 import { StringObject } from "@rheas/contracts";
+import { IHeaders } from "@rheas/contracts/core";
 
-export class Headers {
+export class Headers implements IHeaders{
 
     /**
      * All the headers.

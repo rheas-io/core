@@ -1,5 +1,6 @@
 import { StringObject } from "@rheas/contracts";
-export declare class Headers {
+import { IHeaders } from "@rheas/contracts/core";
+export declare class Headers implements IHeaders {
     /**
      * All the headers.
      *
