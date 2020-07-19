@@ -21,6 +21,15 @@ var CacheHeaders = /** @class */ (function () {
         this._headers = new headers_1.Headers();
     }
     /**
+     * Returns true if the response has valid validation headers
+     * like ETag or Last-Modified
+     *
+     * @returns
+     */
+    CacheHeaders.prototype.isValidateable = function () {
+        return this._headers.has('Last-Modified') || this._headers.has('ETag');
+    };
+    /**
      * Returns true if the response is considered "fresh".
      *
      * A response is considered fresh if its lifetime is less than the

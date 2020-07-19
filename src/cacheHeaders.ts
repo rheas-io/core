@@ -32,6 +32,16 @@ export class CacheHeaders implements ICacheManager {
     }
 
     /**
+     * Returns true if the response has valid validation headers
+     * like ETag or Last-Modified
+     * 
+     * @returns 
+     */
+    public isValidateable(): boolean {
+        return this._headers.has('Last-Modified') || this._headers.has('ETag');
+    }
+
+    /**
      * Returns true if the response is considered "fresh".
      * 
      * A response is considered fresh if its lifetime is less than the 
