@@ -1,6 +1,7 @@
 import { Headers } from "./headers";
 import { AnyObject } from "@rheas/contracts";
-export declare class CacheHeaders {
+import { ICacheManager } from "@rheas/contracts/core";
+export declare class CacheHeaders implements ICacheManager {
     /**
      * Stores cache related headers.
      *
