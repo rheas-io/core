@@ -14,6 +14,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var http_1 = require("http");
+var cacheHeaders_1 = require("./cacheHeaders");
 var helpers_1 = require("@rheas/support/helpers");
 var Response = /** @class */ (function (_super) {
     __extends(Response, _super);
@@ -24,6 +25,13 @@ var Response = /** @class */ (function (_super) {
      */
     function Response(req) {
         var _this = _super.call(this, req) || this;
+        /**
+         * The response cache manager which handles cache related
+         * headers.
+         *
+         * @var ICacheManager
+         */
+        _this._cache = null;
         /**
          * The content to be send as response.
          *
@@ -69,6 +77,17 @@ var Response = /** @class */ (function (_super) {
     Response.prototype.setContent = function (content) {
         this._content = content;
         return this;
+    };
+    /**
+     * Returns the cache header manager of this response.
+     *
+     * @returns
+     */
+    Response.prototype.cache = function () {
+        if (this._cache === null) {
+            this._cache = new cacheHeaders_1.CacheHeaders();
+        }
+        return this._cache;
     };
     /**
      * Sets the content to empty and removes Content-Type, Content-Length and

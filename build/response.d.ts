@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import { ServerResponse } from "http";
+import { ICacheManager } from "@rheas/contracts/core";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 export declare class Response extends ServerResponse implements IResponse {
     /**
@@ -8,6 +9,13 @@ export declare class Response extends ServerResponse implements IResponse {
      * @var IRequest
      */
     protected _request: IRequest;
+    /**
+     * The response cache manager which handles cache related
+     * headers.
+     *
+     * @var ICacheManager
+     */
+    protected _cache: ICacheManager | null;
     /**
      * The content to be send as response.
      *
@@ -46,6 +54,12 @@ export declare class Response extends ServerResponse implements IResponse {
      * @param content
      */
     setContent(content: any): IResponse;
+    /**
+     * Returns the cache header manager of this response.
+     *
+     * @returns
+     */
+    cache(): ICacheManager;
     /**
      * Sets the content to empty and removes Content-Type, Content-Length and
      * Transfer-Encoding header.

@@ -1,5 +1,7 @@
 import { ServerResponse } from "http";
+import { CacheHeaders } from "./cacheHeaders";
 import { config } from "@rheas/support/helpers";
+import { ICacheManager } from "@rheas/contracts/core";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 
 export class Response extends ServerResponse implements IResponse {
@@ -10,6 +12,14 @@ export class Response extends ServerResponse implements IResponse {
      * @var IRequest
      */
     protected _request: IRequest;
+
+    /**
+     * The response cache manager which handles cache related 
+     * headers.
+     * 
+     * @var ICacheManager
+     */
+    protected _cache: ICacheManager | null = null;
 
     /**
      * The content to be send as response.
@@ -37,7 +47,6 @@ export class Response extends ServerResponse implements IResponse {
      * @returns IResponse
      */
     public send(): IResponse {
-
         this.end(this._content);
 
         return this;
@@ -59,7 +68,7 @@ export class Response extends ServerResponse implements IResponse {
      */
     public json(content: AnyObject): IResponse {
         this._request.setFormat('json');
-        
+
         return this.setContent(JSON.stringify(content));
     }
 
@@ -72,6 +81,18 @@ export class Response extends ServerResponse implements IResponse {
         this._content = content;
 
         return this;
+    }
+
+    /**
+     * Returns the cache header manager of this response.
+     * 
+     * @returns
+     */
+    public cache(): ICacheManager {
+        if (this._cache === null) {
+            this._cache = new CacheHeaders();
+        }
+        return this._cache;
     }
 
     /**
@@ -188,8 +209,6 @@ export class Response extends ServerResponse implements IResponse {
             this.setContent('');
         }
     }
-
-    
 
     /**
      * Returns the headers that are not needed in Not-Modified responses.
