@@ -70,6 +70,20 @@ export class RequestContent implements IAttributeManager {
     }
 
     /**
+     * Returns true if the request conten-type is a json
+     * 
+     * @returns
+     */
+    public isJson(): boolean {
+        const content_type = this._request.headers["content-type"];
+
+        if (content_type) {
+            return content_type.includes('/json') || content_type.includes('+json');
+        }
+        return false;
+    }
+
+    /**
      * Returns true if the request accepts json
      * 
      * @returns 
@@ -119,20 +133,6 @@ export class RequestContent implements IAttributeManager {
      */
     public acceptableContentTypes(): string[] {
         return this.negotiator().types() as string[];
-    }
-
-    /**
-     * Returns true if the request conten-type is a json
-     * 
-     * @returns
-     */
-    public isJson(): boolean {
-        const content_type = this._request.headers["content-type"];
-
-        if (content_type) {
-            return content_type.includes('/json') || content_type.includes('+json');
-        }
-        return false;
     }
 
     /**

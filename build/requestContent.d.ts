@@ -51,6 +51,12 @@ export declare class RequestContent implements IAttributeManager {
      */
     accepts(type: string): boolean;
     /**
+     * Returns true if the request conten-type is a json
+     *
+     * @returns
+     */
+    isJson(): boolean;
+    /**
      * Returns true if the request accepts json
      *
      * @returns
@@ -83,12 +89,6 @@ export declare class RequestContent implements IAttributeManager {
      * @returns
      */
     acceptableContentTypes(): string[];
-    /**
-     * Returns true if the request conten-type is a json
-     *
-     * @returns
-     */
-    isJson(): boolean;
     /**
      * Returns the negotiator instance.
      *

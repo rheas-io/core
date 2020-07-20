@@ -57,6 +57,18 @@ var RequestContent = /** @class */ (function () {
         return false !== this.negotiator().type(type);
     };
     /**
+     * Returns true if the request conten-type is a json
+     *
+     * @returns
+     */
+    RequestContent.prototype.isJson = function () {
+        var content_type = this._request.headers["content-type"];
+        if (content_type) {
+            return content_type.includes('/json') || content_type.includes('+json');
+        }
+        return false;
+    };
+    /**
      * Returns true if the request accepts json
      *
      * @returns
@@ -101,18 +113,6 @@ var RequestContent = /** @class */ (function () {
      */
     RequestContent.prototype.acceptableContentTypes = function () {
         return this.negotiator().types();
-    };
-    /**
-     * Returns true if the request conten-type is a json
-     *
-     * @returns
-     */
-    RequestContent.prototype.isJson = function () {
-        var content_type = this._request.headers["content-type"];
-        if (content_type) {
-            return content_type.includes('/json') || content_type.includes('+json');
-        }
-        return false;
     };
     /**
      * Returns the negotiator instance.
