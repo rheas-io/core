@@ -1,10 +1,15 @@
 /// <reference types="node" />
 import { IncomingMessage } from "http";
 import { IRequest, AnyObject } from "@rheas/contracts";
+import { Fields, Files } from "formidable";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { IRedirector, IRequestContent, IRequestInput } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
+interface IParsedBody {
+    files: Files;
+    fields: Fields;
+}
 export declare class Request extends IncomingMessage implements IRequest {
     /**
      * This request's container manager
@@ -55,6 +60,18 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     protected _queryString: string;
     /**
+     * Stores the POST request body contents.
+     *
+     * @var AnyObject
+     */
+    protected _body: AnyObject;
+    /**
+     * Stores the files uploaded with field names as key.
+     *
+     * @var AnyObject
+     */
+    protected _files: AnyObject;
+    /**
      * Stores the urldecoded query parameters of this request.
      *
      * @var AnyObject
@@ -72,17 +89,21 @@ export declare class Request extends IncomingMessage implements IRequest {
      * The request data like url, query and all the stuff will be available
      * inside the boot. Process them and store in memory for faster processing
      */
-    boot(): IRequest;
+    boot(): Promise<IRequest>;
     /**
      * Loads the requests query, cookies, headers and post contents.
      *
      * //TODO
      */
-    private loadRequest;
+    protected loadRequest(): Promise<void>;
     /**
+     * Loads the request body using the Formidable package. This will read
+     * multipart form data, uriencoded form data and file uploads and returns
+     * an object containing fields and files.
      *
+     * @returns
      */
-    private loadBody;
+    getContents(): Promise<IParsedBody>;
     /**
      * Returns the request redirect handler.
      *
@@ -179,6 +200,23 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     getQueryString(): string;
     /**
+     * Returns the request body contents as JSON object.
+     *
+     * @returns
+     */
+    body(): AnyObject;
+    /**
+     * Returns the uploaded request files.
+     *
+     * @returns
+     */
+    files(): AnyObject;
+    /**
+     *
+     * @returns
+     */
+    query(): AnyObject;
+    /**
      *
      * //TODO
      */
@@ -219,3 +257,4 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     get(key: string, defaultValue?: any): any;
 }
+export {};

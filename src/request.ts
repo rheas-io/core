@@ -8,11 +8,17 @@ import { RequestContent } from "./requestContent";
 import { ServiceManager } from "./serviceManager";
 import { RequestComponent } from "@rheas/routing/uri";
 import { IRequest, AnyObject } from "@rheas/contracts";
+import { IncomingForm, Fields, Files } from "formidable";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { SuspiciousOperationException } from "@rheas/errors/suspicious";
 import { IRedirector, IRequestContent, IRequestInput } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
+
+interface IParsedBody {
+    files: Files,
+    fields: Fields,
+}
 
 export class Request extends IncomingMessage implements IRequest {
 
@@ -73,6 +79,20 @@ export class Request extends IncomingMessage implements IRequest {
     protected _queryString: string = "";
 
     /**
+     * Stores the POST request body contents.
+     * 
+     * @var AnyObject
+     */
+    protected _body: AnyObject = {};
+
+    /**
+     * Stores the files uploaded with field names as key.
+     * 
+     * @var AnyObject
+     */
+    protected _files: AnyObject = {};
+
+    /**
      * Stores the urldecoded query parameters of this request.
      * 
      * @var AnyObject
@@ -97,8 +117,8 @@ export class Request extends IncomingMessage implements IRequest {
      * The request data like url, query and all the stuff will be available 
      * inside the boot. Process them and store in memory for faster processing
      */
-    public boot(): IRequest {
-        this.loadRequest();
+    public async boot(): Promise<IRequest> {
+        await this.loadRequest();
 
         this._serviceManager.boot();
 
@@ -110,22 +130,41 @@ export class Request extends IncomingMessage implements IRequest {
      * 
      * //TODO
      */
-    private loadRequest(): void {
+    protected async loadRequest(): Promise<void> {
 
         const parsed = url.parse(this.getFullUrl(), true);
 
         this._query = parsed.query;
         this._queryString = parsed.search || "";
-        this._path = Str.path(parsed.pathname || "");
+        this._path = Str.path(parsed.pathname || "");        
 
-        this.loadBody();
+        // Load the request body contents like form post data
+        // or file uploads.
+        const parsedBody = await this.getContents();
+
+        this._body = parsedBody.fields;
+        this._files = parsedBody.files;
     }
 
     /**
+     * Loads the request body using the Formidable package. This will read
+     * multipart form data, uriencoded form data and file uploads and returns
+     * an object containing fields and files.
      * 
+     * @returns 
      */
-    private loadBody(): void {
+    public async getContents(): Promise<IParsedBody> {
+        const form = new IncomingForm();
+        form.multiples = true;
 
+        return await new Promise((resolve, reject) => {
+            form.parse(this, (err, fields, files) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve({ fields, files });
+            });
+        });
     }
 
     /**
@@ -303,6 +342,32 @@ export class Request extends IncomingMessage implements IRequest {
      */
     public getQueryString(): string {
         return this._queryString;
+    }
+
+    /**
+     * Returns the request body contents as JSON object.
+     * 
+     * @returns
+     */
+    public body(): AnyObject {
+        return this._body;
+    }
+
+    /**
+     * Returns the uploaded request files.
+     * 
+     * @returns
+     */
+    public files(): AnyObject {
+        return this._files;
+    }
+
+    /**
+     * 
+     * @returns
+     */
+    public query(): AnyObject {
+        return this._query;
     }
 
     /**
