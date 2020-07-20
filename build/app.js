@@ -222,19 +222,21 @@ var Application = /** @class */ (function (_super) {
                         response = res;
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        request.boot();
-                        return [4 /*yield*/, router.handle(request, response)];
+                        _a.trys.push([1, 4, , 5]);
+                        return [4 /*yield*/, request.boot()];
                     case 2:
-                        response = _a.sent();
-                        return [3 /*break*/, 4];
+                        _a.sent();
+                        return [4 /*yield*/, router.handle(request, response)];
                     case 3:
+                        response = _a.sent();
+                        return [3 /*break*/, 5];
+                    case 4:
                         err_1 = _a.sent();
                         err_1.message = "Status 500: Exception handler failure." + (err_1.message || 'Server error');
                         response.statusCode = 500;
                         response.setContent(err_1.message);
-                        return [3 /*break*/, 4];
-                    case 4:
+                        return [3 /*break*/, 5];
+                    case 5:
                         response = response.prepareResponse();
                         response = response.send();
                         return [2 /*return*/];
