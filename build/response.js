@@ -66,7 +66,7 @@ var Response = /** @class */ (function (_super) {
      * @param content
      */
     Response.prototype.json = function (content) {
-        this._request.setFormat('json');
+        this._request.contents().setFormat('json');
         return this.setContent(JSON.stringify(content));
     };
     /**
@@ -146,8 +146,8 @@ var Response = /** @class */ (function (_super) {
         if (this.hasHeader('Content-Type')) {
             return;
         }
-        var format = this._request.getFormat();
-        var mimeType = this._request.getMimeType(format);
+        var format = this._request.contents().getFormat();
+        var mimeType = this._request.contents().getMimeType(format);
         if (null !== mimeType) {
             this.setHeader('Content-Type', mimeType);
         }

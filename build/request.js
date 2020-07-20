@@ -17,12 +17,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_1 = __importDefault(require("url"));
-var mime_types_1 = __importDefault(require("mime-types"));
 var support_1 = require("@rheas/support");
 var http_1 = require("http");
-var accepts_1 = __importDefault(require("accepts"));
 var container_1 = require("@rheas/container");
+var requestInput_1 = require("./requestInput");
 var helpers_1 = require("@rheas/support/helpers");
+var requestContent_1 = require("./requestContent");
 var serviceManager_1 = require("./serviceManager");
 var uri_1 = require("@rheas/routing/uri");
 var suspicious_1 = require("@rheas/errors/suspicious");
@@ -36,32 +36,23 @@ var Request = /** @class */ (function (_super) {
     function Request(socket) {
         var _this = _super.call(this, socket) || this;
         /**
-         * The accept instance that has to be used for negotiations.
+         * Manages all the request contents
          *
-         * @var Accepts
+         * @var IRequestContent
          */
-        _this._negotiator = null;
+        _this._contentsManager = null;
+        /**
+         * Manages all the request inputs
+         *
+         * @var IRequestInput
+         */
+        _this._inputsManager = null;
         /**
          * The segmented path uri components.
          *
          * @var array
          */
         _this._pathComponents = null;
-        /**
-         * Stores request attributes.
-         *
-         * Container bindings are restricted in such a way that singleton keys can't
-         * be replaced. Attributes allow replacing values of a key.
-         *
-         * @var AnyObject
-         */
-        _this._attributes = {};
-        /**
-         * The format in which response has to be sent.
-         *
-         * @var string
-         */
-        _this._format = null;
         /**
          * Caches the url path
          *
@@ -80,12 +71,6 @@ var Request = /** @class */ (function (_super) {
          * @var AnyObject
          */
         _this._query = {};
-        /**
-         * All the request inputs
-         *
-         * @var AnyObject
-         */
-        _this._inputs = {};
         _this._container = new container_1.Container();
         _this._serviceManager = new serviceManager_1.ServiceManager(_this, helpers_1.config('request.providers', {}));
         return _this;
@@ -111,7 +96,6 @@ var Request = /** @class */ (function (_super) {
         this._query = parsed.query;
         this._queryString = parsed.search || "";
         this._path = support_1.Str.path(parsed.pathname || "");
-        this._inputs = Object.assign({}, this._query);
         this.loadBody();
     };
     /**
@@ -128,34 +112,28 @@ var Request = /** @class */ (function (_super) {
         return this.get('redirect');
     };
     /**
-     * Returns all the inputs as an object.
+     * Returns the requets content manager which is responsible for
+     * reading content-type related headers and performing various checks
+     * and operations.
      *
      * @returns
      */
-    Request.prototype.all = function () {
-        return this.input();
-    };
-    /**
-     * Returns all the inputs if no key is given or returns the input
-     * value of the key.
-     *
-     * @param key
-     */
-    Request.prototype.input = function (key) {
-        if (null == key) {
-            return this._inputs;
+    Request.prototype.contents = function () {
+        if (this._contentsManager === null) {
+            this._contentsManager = new requestContent_1.RequestContent(this);
         }
-        var value = this._inputs[key];
-        return null == value ? null : value;
+        return this._contentsManager;
     };
     /**
-     * Replaces the request inputs with the given argument
+     * Returns the request inputs manager.
      *
-     * @param newParams
+     * @returns
      */
-    Request.prototype.merge = function (newParams) {
-        this._inputs = Object.assign(this._inputs, newParams);
-        return this;
+    Request.prototype.inputs = function () {
+        if (this._inputsManager === null) {
+            this._inputsManager = new requestInput_1.RequestInput(this);
+        }
+        return this._inputsManager;
     };
     /**
      * Gets the request method. This is the method value obtained after
@@ -230,8 +208,7 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.getSchema = function () {
         //@ts-ignore
-        var schema = this.socket.encrypted ? "https" : "http";
-        return schema;
+        return (this.socket.encrypted ? "https" : "http");
     };
     /**
      * Returns the request path.
@@ -278,164 +255,14 @@ var Request = /** @class */ (function (_super) {
     Request.prototype.getQueryString = function () {
         return this._queryString;
     };
-    //TODO
+    /**
+     *
+     * //TODO
+     */
     Request.prototype.params = function () {
         var params = [];
         this.getPathComponents().forEach(function (components) { return params.push.apply(params, Object.values(components.getParam())); });
         return params;
-    };
-    /**
-     * Returns true if the request is an AJAX request.
-     *
-     * @returns
-     */
-    Request.prototype.ajax = function () {
-        return 'XMLHttpRequest' === this.headers['X-Requested-With'];
-    };
-    /**
-     * Returns true if the request is a PJAX request.
-     *
-     * @returns
-     */
-    Request.prototype.pjax = function () {
-        return 'true' === this.headers['X-PJAX'];
-    };
-    /**
-     * Returns true if the request accepts the given type.
-     *
-     * @param type
-     */
-    Request.prototype.accepts = function (type) {
-        return false !== this.negotiator().type(type);
-    };
-    /**
-     * Returns true if the request accepts json
-     *
-     * @returns
-     */
-    Request.prototype.acceptsJson = function () {
-        return (this.ajax() && !this.pjax() && this.acceptsAnyType()) || this.wantsJson();
-    };
-    /**
-     * Returns true if the request is specifically asking for json. Mimetype for
-     * json content is either
-     *
-     * [1] application/json
-     * [2] application/problem+json
-     *
-     * We will check for the presence of "/json" and "+json" strings. We use the string
-     * check as the negotiator might return true even if the client is not requesting
-     * for it but accepts any type "*"
-     *
-     * @returns
-     */
-    Request.prototype.wantsJson = function () {
-        var types = this.acceptableContentTypes();
-        if (types.length > 0) {
-            return types[0].includes('/json') || types[0].includes('+json');
-        }
-        return false;
-    };
-    /**
-     * Returns true if the request accepts any content type
-     *
-     * @returns
-     */
-    Request.prototype.acceptsAnyType = function () {
-        var types = this.acceptableContentTypes();
-        return types.includes('*/*') || types.includes('*');
-    };
-    /**
-     * Returns the acceptable content types in the quality order.
-     * Most preferred are returned first.
-     *
-     * @returns
-     */
-    Request.prototype.acceptableContentTypes = function () {
-        return this.negotiator().types();
-    };
-    /**
-     * Returns true if the request conten-type is a json
-     *
-     * @returns
-     */
-    Request.prototype.isJson = function () {
-        var content_type = this.headers["content-type"];
-        if (content_type) {
-            return content_type.includes('/json') || content_type.includes('+json');
-        }
-        return false;
-    };
-    /**
-     * Returns the negotiator instance.
-     *
-     * @returns
-     */
-    Request.prototype.negotiator = function () {
-        if (this._negotiator === null) {
-            this._negotiator = accepts_1.default(this);
-        }
-        return this._negotiator;
-    };
-    /**
-     * Returns the mimetype of the format. null if no mime found.
-     *
-     * @param format
-     * @return
-     */
-    Request.prototype.getMimeType = function (format) {
-        return mime_types_1.default.lookup(format) || null;
-    };
-    /**
-     * Sets the format in which response has to be send.
-     *
-     * @param format
-     */
-    Request.prototype.setFormat = function (format) {
-        this._format = format;
-        return this;
-    };
-    /**
-     * Gets the request format set by the application. Setting a custom format
-     * to the request overrides the accept header.
-     *
-     * For instance, if accept header allows both html and json and the server
-     * want to send json, application can set "json" as the request format and
-     * the response will have json content-type.
-     *
-     * @returns string
-     */
-    Request.prototype.getFormat = function (defaulValue) {
-        if (defaulValue === void 0) { defaulValue = "html"; }
-        if (null == this._format) {
-            this._format = this.getAttribute('_format');
-        }
-        return null == this._format ? defaulValue : this._format;
-    };
-    /**
-     * Sets an attribute value. This enables setting custom values on request
-     * that are not actually present in the incoming request.
-     *
-     * @param key
-     * @param value
-     */
-    Request.prototype.setAttribute = function (key, value) {
-        this._attributes[key] = value;
-        return this;
-    };
-    /**
-     * Gets an attribute value if it exists or the defaultValue or null if no
-     * default is given.
-     *
-     * @param key
-     * @param defaultValue
-     */
-    Request.prototype.getAttribute = function (key, defaultValue) {
-        if (defaultValue === void 0) { defaultValue = null; }
-        if (Object.keys(this._attributes).includes(key)) {
-            return this._attributes[key];
-        }
-        return defaultValue;
     };
     /**
      * Binds a singleton resolver to the container. Once resolved, the value
@@ -477,14 +304,16 @@ var Request = /** @class */ (function (_super) {
      * if the key is assigned to a resolver.
      *
      * @param key
+     * @param defaultValue
      */
-    Request.prototype.get = function (key) {
-        var service = this._container.get(key);
+    Request.prototype.get = function (key, defaultValue) {
+        if (defaultValue === void 0) { defaultValue = null; }
+        var service = this._container.get(key, defaultValue);
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // container.
         if (service === null && this._serviceManager.registerServiceByName(key)) {
-            return this._container.get(key);
+            return this._container.get(key, defaultValue);
         }
         return service;
     };

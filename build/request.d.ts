@@ -1,10 +1,9 @@
 /// <reference types="node" />
 import { IncomingMessage } from "http";
-import { Accepts } from "accepts";
-import { IRedirector } from "@rheas/contracts/core";
 import { IRequest, AnyObject } from "@rheas/contracts";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
+import { IRedirector, IRequestContent, IRequestInput } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 export declare class Request extends IncomingMessage implements IRequest {
     /**
@@ -20,32 +19,23 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     protected _serviceManager: IServiceManager;
     /**
-     * The accept instance that has to be used for negotiations.
+     * Manages all the request contents
      *
-     * @var Accepts
+     * @var IRequestContent
      */
-    protected _negotiator: Accepts | null;
+    protected _contentsManager: IRequestContent | null;
+    /**
+     * Manages all the request inputs
+     *
+     * @var IRequestInput
+     */
+    protected _inputsManager: IRequestInput | null;
     /**
      * The segmented path uri components.
      *
      * @var array
      */
     protected _pathComponents: IRequestComponent[] | null;
-    /**
-     * Stores request attributes.
-     *
-     * Container bindings are restricted in such a way that singleton keys can't
-     * be replaced. Attributes allow replacing values of a key.
-     *
-     * @var AnyObject
-     */
-    protected _attributes: AnyObject;
-    /**
-     * The format in which response has to be sent.
-     *
-     * @var string
-     */
-    protected _format: string | null;
     /**
      * The request method.
      *
@@ -70,12 +60,6 @@ export declare class Request extends IncomingMessage implements IRequest {
      * @var AnyObject
      */
     protected _query: AnyObject;
-    /**
-     * All the request inputs
-     *
-     * @var AnyObject
-     */
-    protected _inputs: AnyObject;
     /**
      * Creates a new server request.
      *
@@ -106,24 +90,19 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     redirect(): IRedirector;
     /**
-     * Returns all the inputs as an object.
+     * Returns the requets content manager which is responsible for
+     * reading content-type related headers and performing various checks
+     * and operations.
      *
      * @returns
      */
-    all(): AnyObject;
+    contents(): IRequestContent;
     /**
-     * Returns all the inputs if no key is given or returns the input
-     * value of the key.
+     * Returns the request inputs manager.
      *
-     * @param key
+     * @returns
      */
-    input(key?: string): any;
-    /**
-     * Replaces the request inputs with the given argument
-     *
-     * @param newParams
-     */
-    merge(newParams: AnyObject): IRequest;
+    inputs(): IRequestInput;
     /**
      * Gets the request method. This is the method value obtained after
      * checking method overrides in header, post and query. To get the original
@@ -199,110 +178,11 @@ export declare class Request extends IncomingMessage implements IRequest {
      * @returns string
      */
     getQueryString(): string;
+    /**
+     *
+     * //TODO
+     */
     params(): string[];
-    /**
-     * Returns true if the request is an AJAX request.
-     *
-     * @returns
-     */
-    ajax(): boolean;
-    /**
-     * Returns true if the request is a PJAX request.
-     *
-     * @returns
-     */
-    pjax(): boolean;
-    /**
-     * Returns true if the request accepts the given type.
-     *
-     * @param type
-     */
-    accepts(type: string): boolean;
-    /**
-     * Returns true if the request accepts json
-     *
-     * @returns
-     */
-    acceptsJson(): boolean;
-    /**
-     * Returns true if the request is specifically asking for json. Mimetype for
-     * json content is either
-     *
-     * [1] application/json
-     * [2] application/problem+json
-     *
-     * We will check for the presence of "/json" and "+json" strings. We use the string
-     * check as the negotiator might return true even if the client is not requesting
-     * for it but accepts any type "*"
-     *
-     * @returns
-     */
-    wantsJson(): boolean;
-    /**
-     * Returns true if the request accepts any content type
-     *
-     * @returns
-     */
-    acceptsAnyType(): boolean;
-    /**
-     * Returns the acceptable content types in the quality order.
-     * Most preferred are returned first.
-     *
-     * @returns
-     */
-    acceptableContentTypes(): string[];
-    /**
-     * Returns true if the request conten-type is a json
-     *
-     * @returns
-     */
-    isJson(): boolean;
-    /**
-     * Returns the negotiator instance.
-     *
-     * @returns
-     */
-    negotiator(): Accepts;
-    /**
-     * Returns the mimetype of the format. null if no mime found.
-     *
-     * @param format
-     * @return
-     */
-    getMimeType(format: string): string | null;
-    /**
-     * Sets the format in which response has to be send.
-     *
-     * @param format
-     */
-    setFormat(format: string): IRequest;
-    /**
-     * Gets the request format set by the application. Setting a custom format
-     * to the request overrides the accept header.
-     *
-     * For instance, if accept header allows both html and json and the server
-     * want to send json, application can set "json" as the request format and
-     * the response will have json content-type.
-     *
-     * @returns string
-     */
-    getFormat(defaulValue?: string): string;
-    /**
-     * Sets an attribute value. This enables setting custom values on request
-     * that are not actually present in the incoming request.
-     *
-     * @param key
-     * @param value
-     */
-    setAttribute(key: string, value: any): IRequest;
-    /**
-     * Gets an attribute value if it exists or the defaultValue or null if no
-     * default is given.
-     *
-     * @param key
-     * @param defaultValue
-     */
-    getAttribute(key: string, defaultValue?: any): any;
     /**
      * Binds a singleton resolver to the container. Once resolved, the value
      * will be used for the lifetime of the service which can either be app
@@ -335,6 +215,7 @@ export declare class Request extends IncomingMessage implements IRequest {
      * if the key is assigned to a resolver.
      *
      * @param key
+     * @param defaultValue
      */
-    get(key: string): any;
+    get(key: string, defaultValue?: any): any;
 }

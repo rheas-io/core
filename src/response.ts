@@ -67,7 +67,7 @@ export class Response extends ServerResponse implements IResponse {
      * @param content 
      */
     public json(content: AnyObject): IResponse {
-        this._request.setFormat('json');
+        this._request.contents().setFormat('json');
 
         return this.setContent(JSON.stringify(content));
     }
@@ -165,8 +165,8 @@ export class Response extends ServerResponse implements IResponse {
             return;
         }
 
-        const format = this._request.getFormat();
-        const mimeType = this._request.getMimeType(format);
+        const format = this._request.contents().getFormat();
+        const mimeType = this._request.contents().getMimeType(format);
 
         if (null !== mimeType) {
             this.setHeader('Content-Type', mimeType);
