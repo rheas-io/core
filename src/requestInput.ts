@@ -41,7 +41,6 @@ export class RequestInput implements IRequestInput {
      * @param newParams 
      */
     public merge(newParams: AnyObject): IRequestInput {
-
         this._inputs = Object.assign(this._inputs, newParams);
 
         return this;
