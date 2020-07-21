@@ -40,8 +40,8 @@ export declare class RequestInput implements IRequestInput {
      */
     inputSource(): AnyObject;
     /**
-     * Returns all the inputs as an object. Inputs in the order of precedence,
-     * highest is at the top.
+     * Returns all the inputs as an object. Inputs order of precedence is given
+     * below, highest is at the top.
      *
      * [1] App merges
      * [2] Url params

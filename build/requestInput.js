@@ -42,8 +42,8 @@ class RequestInput {
         return Object.assign({}, this._request.query(), this._request.body(), this._request.files());
     }
     /**
-     * Returns all the inputs as an object. Inputs in the order of precedence,
-     * highest is at the top.
+     * Returns all the inputs as an object. Inputs order of precedence is given
+     * below, highest is at the top.
      *
      * [1] App merges
      * [2] Url params
