@@ -147,17 +147,16 @@ export class Request extends IncomingMessage implements IRequest {
     protected async loadRequest(): Promise<void> {
 
         const parsed = url.parse(this.getFullUrl(), true);
-
-        this._query = parsed.query;
         this._queryString = parsed.search || "";
         this._path = Str.path(parsed.pathname || "");
 
         // Load the request body contents like form post data
         // or file uploads.
         const parsedBody = await this.getContents();
+        this._body = Object.assign(this._body, parsedBody.fields);
+        this._files = Object.assign(this._files, parsedBody.files);
 
-        this._body = parsedBody.fields;
-        this._files = parsedBody.files;
+        this._query = Object.assign(this._query, parsed.query);
     }
 
     /**

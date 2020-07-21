@@ -97,14 +97,14 @@ class Request extends http_1.IncomingMessage {
      */
     async loadRequest() {
         const parsed = url_1.default.parse(this.getFullUrl(), true);
-        this._query = parsed.query;
         this._queryString = parsed.search || "";
         this._path = support_1.Str.path(parsed.pathname || "");
         // Load the request body contents like form post data
         // or file uploads.
         const parsedBody = await this.getContents();
-        this._body = parsedBody.fields;
-        this._files = parsedBody.files;
+        this._body = Object.assign(this._body, parsedBody.fields);
+        this._files = Object.assign(this._files, parsedBody.files);
+        this._query = Object.assign(this._query, parsed.query);
     }
     /**
      * Loads the request body using the Formidable package. This will read
