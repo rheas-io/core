@@ -63,6 +63,7 @@ var serviceManager_1 = require("./serviceManager");
 var uri_1 = require("@rheas/routing/uri");
 var formidable_1 = require("formidable");
 var suspicious_1 = require("@rheas/errors/suspicious");
+var headers_1 = require("./headers");
 var Request = /** @class */ (function (_super) {
     __extends(Request, _super);
     /**
@@ -121,6 +122,7 @@ var Request = /** @class */ (function (_super) {
          */
         _this._query = {};
         _this._container = new container_1.Container();
+        _this._headers = new headers_1.Headers(_this.headers);
         _this._serviceManager = new serviceManager_1.ServiceManager(_this, helpers_1.config('request.providers', {}));
         return _this;
     }
@@ -144,9 +146,13 @@ var Request = /** @class */ (function (_super) {
         });
     };
     /**
-     * Loads the requests query, cookies, headers and post contents.
+     * This function is responsible for parsing the request and obtaining
+     * necessary fields like query, path, body, files etc.
      *
-     * //TODO
+     * [1] The query object, req path and query string are parsed by the NodeJS
+     *     url.parse module.
+     *
+     * [2] Request body and file uploads are handled by the Formidable package.
      */
     Request.prototype.loadRequest = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -204,6 +210,14 @@ var Request = /** @class */ (function (_super) {
      */
     Request.prototype.redirect = function () {
         return this.get('redirect');
+    };
+    /**
+     * Returns the header manager of this request.
+     *
+     * @returns
+     */
+    Request.prototype.reqHeaders = function () {
+        return this._headers;
     };
     /**
      * Returns the requets content manager which is responsible for

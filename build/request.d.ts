@@ -4,7 +4,7 @@ import { IRequest, AnyObject } from "@rheas/contracts";
 import { Fields, Files } from "formidable";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
-import { IRedirector, IRequestContent, IRequestInput } from "@rheas/contracts/core";
+import { IRedirector, IRequestContent, IRequestInput, IHeaders } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 interface IParsedBody {
     files: Files;
@@ -78,6 +78,13 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     protected _query: AnyObject;
     /**
+     * The request header object. Responsible for querying request
+     * headers, parses cookies etc.
+     *
+     * @var IHeaders
+     */
+    protected _headers: IHeaders;
+    /**
      * Creates a new server request.
      *
      * @param socket
@@ -91,9 +98,13 @@ export declare class Request extends IncomingMessage implements IRequest {
      */
     boot(): Promise<IRequest>;
     /**
-     * Loads the requests query, cookies, headers and post contents.
+     * This function is responsible for parsing the request and obtaining
+     * necessary fields like query, path, body, files etc.
      *
-     * //TODO
+     * [1] The query object, req path and query string are parsed by the NodeJS
+     *     url.parse module.
+     *
+     * [2] Request body and file uploads are handled by the Formidable package.
      */
     protected loadRequest(): Promise<void>;
     /**
@@ -110,6 +121,12 @@ export declare class Request extends IncomingMessage implements IRequest {
      * @return IRedirector
      */
     redirect(): IRedirector;
+    /**
+     * Returns the header manager of this request.
+     *
+     * @returns
+     */
+    reqHeaders(): IHeaders;
     /**
      * Returns the requets content manager which is responsible for
      * reading content-type related headers and performing various checks

@@ -12,8 +12,9 @@ import { IncomingForm, Fields, Files } from "formidable";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { SuspiciousOperationException } from "@rheas/errors/suspicious";
-import { IRedirector, IRequestContent, IRequestInput } from "@rheas/contracts/core";
+import { IRedirector, IRequestContent, IRequestInput, IHeaders } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
+import { Headers } from "./headers";
 
 interface IParsedBody {
     files: Files,
@@ -100,6 +101,14 @@ export class Request extends IncomingMessage implements IRequest {
     protected _query: AnyObject = {};
 
     /**
+     * The request header object. Responsible for querying request 
+     * headers, parses cookies etc.
+     * 
+     * @var IHeaders
+     */
+    protected _headers: IHeaders;
+
+    /**
      * Creates a new server request.
      * 
      * @param socket 
@@ -108,6 +117,7 @@ export class Request extends IncomingMessage implements IRequest {
         super(socket);
 
         this._container = new Container();
+        this._headers = new Headers(this.headers);
         this._serviceManager = new ServiceManager(this, config('request.providers', {}));
     }
 
@@ -126,9 +136,13 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * Loads the requests query, cookies, headers and post contents.
+     * This function is responsible for parsing the request and obtaining
+     * necessary fields like query, path, body, files etc.
      * 
-     * //TODO
+     * [1] The query object, req path and query string are parsed by the NodeJS
+     *     url.parse module.
+     * 
+     * [2] Request body and file uploads are handled by the Formidable package. 
      */
     protected async loadRequest(): Promise<void> {
 
@@ -136,7 +150,7 @@ export class Request extends IncomingMessage implements IRequest {
 
         this._query = parsed.query;
         this._queryString = parsed.search || "";
-        this._path = Str.path(parsed.pathname || "");        
+        this._path = Str.path(parsed.pathname || "");
 
         // Load the request body contents like form post data
         // or file uploads.
@@ -174,6 +188,15 @@ export class Request extends IncomingMessage implements IRequest {
      */
     public redirect(): IRedirector {
         return this.get('redirect');
+    }
+
+    /**
+     * Returns the header manager of this request.
+     * 
+     * @returns
+     */
+    public reqHeaders(): IHeaders {
+        return this._headers;
     }
 
     /**
