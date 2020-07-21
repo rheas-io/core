@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { ServerResponse } from "http";
-import { ICacheManager } from "@rheas/contracts/core";
+import { ICacheManager, IHeaders } from "@rheas/contracts/core";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 export declare class Response extends ServerResponse implements IResponse {
     /**
@@ -10,12 +10,12 @@ export declare class Response extends ServerResponse implements IResponse {
      */
     protected _request: IRequest;
     /**
-     * The response cache manager which handles cache related
-     * headers.
+     * The response header object. Responsible for querying response
+     * headers, parses cookies etc.
      *
-     * @var ICacheManager
+     * @var IHeaders
      */
-    protected _cache: ICacheManager | null;
+    protected _headers: IHeaders & ICacheManager;
     /**
      * The content to be send as response.
      *

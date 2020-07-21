@@ -1,7 +1,7 @@
+import { Headers } from "./headers";
 import { ServerResponse } from "http";
-import { CacheHeaders } from "./cacheHeaders";
 import { config } from "@rheas/support/helpers";
-import { ICacheManager } from "@rheas/contracts/core";
+import { ICacheManager, IHeaders } from "@rheas/contracts/core";
 import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
 
 export class Response extends ServerResponse implements IResponse {
@@ -14,12 +14,12 @@ export class Response extends ServerResponse implements IResponse {
     protected _request: IRequest;
 
     /**
-     * The response cache manager which handles cache related 
-     * headers.
+     * The response header object. Responsible for querying response 
+     * headers, parses cookies etc.
      * 
-     * @var ICacheManager
+     * @var IHeaders
      */
-    protected _cache: ICacheManager | null = null;
+    protected _headers: IHeaders & ICacheManager;
 
     /**
      * The content to be send as response.
@@ -37,6 +37,7 @@ export class Response extends ServerResponse implements IResponse {
         super(req);
 
         this._request = req;
+        this._headers = new Headers();
     }
 
     /**
@@ -89,10 +90,7 @@ export class Response extends ServerResponse implements IResponse {
      * @returns
      */
     public cache(): ICacheManager {
-        if (this._cache === null) {
-            this._cache = new CacheHeaders();
-        }
-        return this._cache;
+        return this._headers;
     }
 
     /**
