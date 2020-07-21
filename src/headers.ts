@@ -1,15 +1,26 @@
 import { Str } from "@rheas/support";
-import { StringObject } from "@rheas/contracts";
+import { AnyObject } from "@rheas/contracts";
 import { IHeaders } from "@rheas/contracts/core";
 
-export class Headers implements IHeaders{
+export class Headers implements IHeaders {
 
     /**
      * All the headers.
      * 
-     * @var StringObject
+     * @var AnyObject
      */
-    protected _headers: StringObject = {};
+    protected _headers: AnyObject;
+
+    /**
+     * Creates a new header class that operates on request and
+     * response headers. The argument passed in is the NodeJS 
+     * message.headers property
+     *  
+     * @param headers 
+     */
+    constructor(headers: AnyObject = {}) {
+        this._headers = headers;
+    }
 
     /**
      * Gets the header value of the key if it exists or returns the defaultValue. 

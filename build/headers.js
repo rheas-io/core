@@ -2,13 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var support_1 = require("@rheas/support");
 var Headers = /** @class */ (function () {
-    function Headers() {
-        /**
-         * All the headers.
-         *
-         * @var StringObject
-         */
-        this._headers = {};
+    /**
+     * Creates a new header class that operates on request and
+     * response headers. The argument passed in is the NodeJS
+     * message.headers property
+     *
+     * @param headers
+     */
+    function Headers(headers) {
+        if (headers === void 0) { headers = {}; }
+        this._headers = headers;
     }
     /**
      * Gets the header value of the key if it exists or returns the defaultValue.
