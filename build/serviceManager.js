@@ -1,14 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var invalidArgument_1 = require("@rheas/errors/invalidArgument");
-var ServiceManager = /** @class */ (function () {
+const invalidArgument_1 = require("@rheas/errors/invalidArgument");
+class ServiceManager {
     /**
      *
      * @param container
      * @param providers
      */
-    function ServiceManager(container, providers) {
-        if (providers === void 0) { providers = {}; }
+    constructor(container, providers = {}) {
         /**
          * Stores the boot status of this service provider.
          *
@@ -42,37 +41,38 @@ var ServiceManager = /** @class */ (function () {
      *
      * @param providers
      */
-    ServiceManager.prototype.setProviders = function (providers) {
+    setProviders(providers) {
         if (this.isRegistered()) {
             return;
         }
         this._services = providers;
-    };
+    }
     /**
      * @inheritdoc
      *
      * @param name
      * @param provider
      */
-    ServiceManager.prototype.newService = function (name, provider) {
+    newService(name, provider) {
         if (this.isServiceLoaded(name)) {
-            throw new invalidArgument_1.InvalidArgumentException("A service " + name + " is already loaded/registered. Check the app/request configuration files for \n                service provider list.");
+            throw new invalidArgument_1.InvalidArgumentException(`A service ${name} is already loaded/registered. Check the app/request configuration files for 
+                service provider list.`);
         }
         this._services[name] = provider;
         // No need to register the service as it will be registered and booted
         // when it is required.
         return this;
-    };
+    }
     /**
      * Registers the necessary service providers. Deferred services are
      * cached in the deferred providers list and are loaded only when a
      * binding request is made to the service.
      */
-    ServiceManager.prototype.register = function () {
+    register() {
         if (this.isRegistered()) {
             return;
         }
-        for (var alias in this._services) {
+        for (let alias in this._services) {
             // A service can be deferred to load when it is absolutely needed.
             // Such services should have a provides property that states, to which
             // alias it should be loaded.
@@ -84,13 +84,13 @@ var ServiceManager = /** @class */ (function () {
             }
         }
         this.setRegistered(true);
-    };
+    }
     /**
      * Registers a particular service of the given name.
      *
      * @param name
      */
-    ServiceManager.prototype.registerServiceByName = function (name) {
+    registerServiceByName(name) {
         // Return false if the service is already loaded or service
         // is not a class 
         if (this.isServiceLoaded(name)) {
@@ -98,7 +98,7 @@ var ServiceManager = /** @class */ (function () {
         }
         // Gets the service provider object if it is resolvable or
         // returns false.
-        var serviceProvider = this.getServiceProvider(name);
+        const serviceProvider = this.getServiceProvider(name);
         if (serviceProvider === null) {
             return false;
         }
@@ -109,54 +109,54 @@ var ServiceManager = /** @class */ (function () {
             this.bootService(serviceProvider);
         }
         return true;
-    };
+    }
     /**
      * Gets new service provider object for the service given by name.
      * Returns null if an object was not created.
      *
      * @param name
      */
-    ServiceManager.prototype.getServiceProvider = function (name) {
+    getServiceProvider(name) {
         try {
-            var service = this._services[name];
+            const service = this._services[name];
             return new service(name, this._container);
         }
         catch (err) { }
         ;
         return null;
-    };
+    }
     /**
      * Checks if a service by this name is already loaded.
      *
      * @param name
      */
-    ServiceManager.prototype.isServiceLoaded = function (name) {
+    isServiceLoaded(name) {
         return !!this._loadedServices[name];
-    };
+    }
     /**
      * Registers the necessary service providers, if it is not already
      * registered and boots each one of them. Once that is done, we will
      * update the boot status.
      */
-    ServiceManager.prototype.boot = function () {
+    boot() {
         if (this.isBooted()) {
             return;
         }
         if (!this.isRegistered()) {
             this.register();
         }
-        for (var alias in this._loadedServices) {
+        for (let alias in this._loadedServices) {
             this.bootService(this._loadedServices[alias]);
         }
         this.setBooted(true);
-    };
+    }
     /**
      * Boots a service provider. If the service is not already registered,
      * it is registered first, before performing the boot.
      *
      * @param service
      */
-    ServiceManager.prototype.bootService = function (service) {
+    bootService(service) {
         if (service.isBooted()) {
             return;
         }
@@ -165,39 +165,38 @@ var ServiceManager = /** @class */ (function () {
         }
         service.boot();
         service.setBooted(true);
-    };
+    }
     /**
      * Sets the registration status of this service provider
      *
      * @param status
      */
-    ServiceManager.prototype.setRegistered = function (status) {
+    setRegistered(status) {
         this._registered = status;
-    };
+    }
     /**
      * Sets the boot status of this service provider
      *
      * @param status
      */
-    ServiceManager.prototype.setBooted = function (status) {
+    setBooted(status) {
         this._booted = status;
-    };
+    }
     /**
      * Register status of this service provider
      *
      * @return boolean
      */
-    ServiceManager.prototype.isRegistered = function () {
+    isRegistered() {
         return this._registered;
-    };
+    }
     /**
      * Boot status of this service provider
      *
      * @return boolean
      */
-    ServiceManager.prototype.isBooted = function () {
+    isBooted() {
         return this._booted;
-    };
-    return ServiceManager;
-}());
+    }
+}
 exports.ServiceManager = ServiceManager;

@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var support_1 = require("@rheas/support");
-var RequestInput = /** @class */ (function () {
+const support_1 = require("@rheas/support");
+class RequestInput {
     /**
      *
      * @param request
      */
-    function RequestInput(request) {
+    constructor(request) {
         /**
          * All the request inputs
          *
@@ -20,28 +20,26 @@ var RequestInput = /** @class */ (function () {
      *
      * @returns
      */
-    RequestInput.prototype.all = function () {
+    all() {
         return this._inputs;
-    };
+    }
     /**
      * Replaces the request inputs with the given argument
      *
      * @param newParams
      */
-    RequestInput.prototype.merge = function (newParams) {
+    merge(newParams) {
         this._inputs = Object.assign(this._inputs, newParams);
         return this;
-    };
+    }
     /**
      * Returns the input value for the key.
      *
      * @param key
      * @param defaultValue
      */
-    RequestInput.prototype.get = function (key, defaultValue) {
-        if (defaultValue === void 0) { defaultValue = null; }
+    get(key, defaultValue = null) {
         return support_1.Obj.get(this._inputs, key, defaultValue);
-    };
-    return RequestInput;
-}());
+    }
+}
 exports.RequestInput = RequestInput;
