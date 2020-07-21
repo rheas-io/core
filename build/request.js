@@ -53,6 +53,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var url_1 = __importDefault(require("url"));
+var headers_1 = require("./headers");
 var support_1 = require("@rheas/support");
 var http_1 = require("http");
 var container_1 = require("@rheas/container");
@@ -63,7 +64,6 @@ var serviceManager_1 = require("./serviceManager");
 var uri_1 = require("@rheas/routing/uri");
 var formidable_1 = require("formidable");
 var suspicious_1 = require("@rheas/errors/suspicious");
-var headers_1 = require("./headers");
 var Request = /** @class */ (function (_super) {
     __extends(Request, _super);
     /**

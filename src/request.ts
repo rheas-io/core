@@ -1,4 +1,5 @@
 import url from "url";
+import { Headers } from "./headers";
 import { Str } from "@rheas/support";
 import { IncomingMessage } from "http";
 import { Container } from "@rheas/container";
@@ -14,7 +15,6 @@ import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { SuspiciousOperationException } from "@rheas/errors/suspicious";
 import { IRedirector, IRequestContent, IRequestInput, IHeaders } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
-import { Headers } from "./headers";
 
 interface IParsedBody {
     files: Files,
