@@ -8,12 +8,12 @@ import { config } from "@rheas/support/helpers";
 import { RequestContent } from "./requestContent";
 import { ServiceManager } from "./serviceManager";
 import { RequestComponent } from "@rheas/routing/uri";
-import { IRequest, AnyObject } from "@rheas/contracts";
+import { IRequest, AnyObject, IResponse } from "@rheas/contracts";
 import { IncomingForm, Fields, Files } from "formidable";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { SuspiciousOperationException } from "@rheas/errors/suspicious";
-import { IRedirector, IRequestContent, IRequestInput, IHeaders } from "@rheas/contracts/core";
+import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 
 interface IParsedBody {
@@ -126,8 +126,14 @@ export class Request extends IncomingMessage implements IRequest {
      * 
      * The request data like url, query and all the stuff will be available 
      * inside the boot. Process them and store in memory for faster processing
+     * 
+     * @param app
+     * @param res
      */
-    public async boot(): Promise<IRequest> {
+    public async boot(app: IApp, res: IResponse): Promise<IRequest> {
+        this.instance('app', app, true);
+        this.instance('response', res, true);
+
         await this.loadRequest();
 
         this._serviceManager.boot();

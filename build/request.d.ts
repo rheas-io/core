@@ -1,10 +1,10 @@
 /// <reference types="node" />
 import { IncomingMessage } from "http";
-import { IRequest, AnyObject } from "@rheas/contracts";
+import { IRequest, AnyObject, IResponse } from "@rheas/contracts";
 import { Fields, Files } from "formidable";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
-import { IRedirector, IRequestContent, IRequestInput, IHeaders } from "@rheas/contracts/core";
+import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
 interface IParsedBody {
     files: Files;
@@ -95,8 +95,11 @@ export declare class Request extends IncomingMessage implements IRequest {
      *
      * The request data like url, query and all the stuff will be available
      * inside the boot. Process them and store in memory for faster processing
+     *
+     * @param app
+     * @param res
      */
-    boot(): Promise<IRequest>;
+    boot(app: IApp, res: IResponse): Promise<IRequest>;
     /**
      * This function is responsible for parsing the request and obtaining
      * necessary fields like query, path, body, files etc.

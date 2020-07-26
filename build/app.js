@@ -162,7 +162,7 @@ class Application extends container_1.Container {
         const request = req;
         let response = res;
         try {
-            await request.boot();
+            await request.boot(this, response);
             response = await router.handle(request, response);
         }
         catch (err) {

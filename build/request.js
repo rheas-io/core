@@ -80,8 +80,13 @@ class Request extends http_1.IncomingMessage {
      *
      * The request data like url, query and all the stuff will be available
      * inside the boot. Process them and store in memory for faster processing
+     *
+     * @param app
+     * @param res
      */
-    async boot() {
+    async boot(app, res) {
+        this.instance('app', app, true);
+        this.instance('response', res, true);
         await this.loadRequest();
         this._serviceManager.boot();
         return this;
