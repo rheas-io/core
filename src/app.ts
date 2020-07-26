@@ -5,9 +5,10 @@ import { EnvManager } from "./envManager";
 import https, { ServerOptions } from "https";
 import { Container } from "@rheas/container";
 import { ConfigManager } from "./configManager";
-import { ServiceManager } from "./serviceManager";
 import { IApp } from "@rheas/contracts/core/app";
 import { IRouter } from "@rheas/contracts/routes";
+import { ServiceManager } from "./serviceManager";
+import { Exception } from "@rheas/errors/exception";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IManager, IServerCreator } from "@rheas/contracts/core";
 import { IRequest, IResponse, IDbConnector } from "@rheas/contracts";
@@ -21,30 +22,6 @@ export class Application extends Container implements IApp {
      * @var IApp
      */
     private static instance: IApp;
-
-    /**
-     * Application environment variables manager. Needed for loading
-     * configs.
-     * 
-     * @var IManager
-     */
-    protected _envManager: IManager;
-
-    /**
-     * Application configurations manager. Handles the parsing and retreival
-     * of configuration files.
-     * 
-     * @var IManager
-     */
-    protected _configManager: IManager;
-
-    /**
-     * Service manager that handles the registering and booting of
-     * all service providers.
-     * 
-     * @var IServiceManager
-     */
-    protected _serviceManager: IServiceManager;
 
     /**
      * Creates a new singleton Rheas Application. This class acts as a container
@@ -62,10 +39,7 @@ export class Application extends Container implements IApp {
         Application.instance = this;
 
         this.registerPaths(rootPath);
-
-        this._envManager = new EnvManager(this.path('env'));
-        this._configManager = new ConfigManager(this.path('configs'));
-        this._serviceManager = new ServiceManager(this, this.configs().get('app.providers', {}));
+        this.registerCoreServices();
     }
 
     /**
@@ -83,6 +57,37 @@ export class Application extends Container implements IApp {
             Application.instance = new Application(rootPath);
         }
         return Application.instance;
+    }
+
+    /**
+     * Registers the core services to the application container.
+     * Env, config and service managers are all core bindings required
+     * for the proper functioning of the application. These keys can be
+     * used in the providers list on config files.
+     */
+    protected registerCoreServices() {
+        this.instance('env', new EnvManager(this.path('env')), true);
+
+        const configManager = new ConfigManager(this.path('configs'));
+        this.instance('configs', configManager, true);
+
+        this.instance('services', new ServiceManager(this, configManager.get('app.providers', {})), true);
+    }
+
+    /**
+     * Returns the core service if it exists or throws an exception.
+     * 
+     * @param serviceName 
+     */
+    protected getCoreService<T>(serviceName: string): T {
+        const service: T = this.get(serviceName);
+
+        if (!service) {
+            throw new Exception(
+                `Core service, ${serviceName}, is not registered. Re-install the framework to fix it.`
+            );
+        }
+        return service;
     }
 
     /**
@@ -108,37 +113,13 @@ export class Application extends Container implements IApp {
     }
 
     /**
-     * Returns the application environment variable manager.
-     * 
-     * @returns
-     */
-    public env(): IManager {
-        return this._envManager;
-    }
-
-    /**
-     * Returns the application configs manager.
-     * 
-     * @returns
-     */
-    public configs(): IManager {
-        return this._configManager;
-    }
-
-    /**
-     * Returns the application services manager.
-     * 
-     * @returns 
-     */
-    public services(): IServiceManager {
-        return this._serviceManager;
-    }
-
-    /**
      * Middleware exception keys setter and getter. 
      * 
      * Throughout the app certain exceptions will have to be made to 
      * services/operations. These are set/get using this function.
+     * 
+     * For example, csrf should be exempt from certain routes. These 
+     * exception route list has to be set on the app instance.
      * 
      * @param key 
      * @param value 
@@ -172,7 +153,9 @@ export class Application extends Container implements IApp {
     public startApp(): void {
 
         // Boot the application services before starting the server
-        this._serviceManager.boot();
+        const serviceManager = this.getCoreService<IServiceManager>('services');
+
+        serviceManager.boot();
 
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
@@ -219,7 +202,7 @@ export class Application extends Container implements IApp {
         let response = <IResponse>res;
 
         try {
-            await request.boot();
+            await request.boot(this, response);
 
             response = await router.handle(request, response);
         } catch (err) {
@@ -239,8 +222,9 @@ export class Application extends Container implements IApp {
      * @return this
      */
     public enableHttpServer(): IApp {
-        const port = this.normalizePort(this.configs().get('app.port'));
-
+        const port = this.normalizePort(
+            this.getCoreService<IManager>('configs').get('app.port')
+        );
         this.createServer(http.createServer, port);
 
         return this;
@@ -254,8 +238,9 @@ export class Application extends Container implements IApp {
      * @return this
      */
     public enableHttpsServer(): IApp {
-        const port = this.normalizePort(this.configs().get('app.secure_port'));
-
+        const port = this.normalizePort(
+            this.getCoreService<IManager>('configs').get('app.secure_port')
+        );
         this.createServer(https.createServer, port);
 
         return this;
@@ -347,7 +332,9 @@ export class Application extends Container implements IApp {
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // Container.
-        if (service === null && this._serviceManager.registerServiceByName(key)) {
+        const serviceManager = this.getCoreService<IServiceManager>('services');
+
+        if (service === null && serviceManager.registerServiceByName(key)) {
             return super.get(key, defaultValue);
         }
         return service;
