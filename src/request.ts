@@ -4,7 +4,6 @@ import { Str } from "@rheas/support";
 import { IncomingMessage } from "http";
 import { Container } from "@rheas/container";
 import { RequestInput } from "./requestInput";
-import { config } from "@rheas/support/helpers";
 import { RequestContent } from "./requestContent";
 import { ServiceManager } from "./serviceManager";
 import { RequestComponent } from "@rheas/routing/uri";
@@ -13,8 +12,8 @@ import { IncomingForm, Fields, Files } from "formidable";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
 import { SuspiciousOperationException } from "@rheas/errors/suspicious";
-import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
+import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from "@rheas/contracts/core";
 
 interface IParsedBody {
     files: Files,

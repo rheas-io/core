@@ -4,8 +4,8 @@ import { IRequest, AnyObject, IResponse } from "@rheas/contracts";
 import { Fields, Files } from "formidable";
 import { IServiceManager } from "@rheas/contracts/services";
 import { IRequestComponent } from "@rheas/contracts/routes/uri";
-import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from "@rheas/contracts/core";
 import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
+import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from "@rheas/contracts/core";
 interface IParsedBody {
     files: Files;
     fields: Fields;
