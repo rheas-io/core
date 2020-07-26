@@ -1,6 +1,8 @@
 /// <reference types="node" />
 import { Container } from "@rheas/container";
 import { IApp } from "@rheas/contracts/core/app";
+import { IServiceManager } from "@rheas/contracts/services";
+import { IManager } from "@rheas/contracts/core";
 import { IncomingMessage, ServerResponse } from "http";
 export declare class Application extends Container implements IApp {
     /**
@@ -9,6 +11,27 @@ export declare class Application extends Container implements IApp {
      * @var IApp
      */
     private static instance;
+    /**
+     * Application environment variables manager. Needed for loading
+     * configs.
+     *
+     * @var IManager
+     */
+    protected _envManager: IManager;
+    /**
+     * Application configurations manager. Handles the parsing and retreival
+     * of configuration files.
+     *
+     * @var IManager
+     */
+    protected _configManager: IManager;
+    /**
+     * Service manager that handles the registering and booting of
+     * all service providers.
+     *
+     * @var IServiceManager
+     */
+    protected _serviceManager: IServiceManager;
     /**
      * Creates a new singleton Rheas Application. This class acts as a container
      * where other instances/objects can be mount. The rheas server has to be started
@@ -30,19 +53,6 @@ export declare class Application extends Container implements IApp {
      */
     static getInstance(rootPath?: string): IApp;
     /**
-     * Registers the core services to the application container.
-     * Env, config and service managers are all core bindings required
-     * for the proper functioning of the application. These keys can be
-     * used in the providers list on config files.
-     */
-    protected registerCoreServices(): void;
-    /**
-     * Returns the core service if it exists or throws an exception.
-     *
-     * @param serviceName
-     */
-    protected getCoreService<T>(serviceName: string): T;
-    /**
      * Registers different application paths
      *
      * @param rootPath
@@ -56,13 +66,28 @@ export declare class Application extends Container implements IApp {
      */
     path(folder?: string): string;
     /**
+     * Returns the application environment variable manager.
+     *
+     * @returns
+     */
+    env(): IManager;
+    /**
+     * Returns the application configs manager.
+     *
+     * @returns
+     */
+    configs(): IManager;
+    /**
+     * Returns the application services manager.
+     *
+     * @returns
+     */
+    services(): IServiceManager;
+    /**
      * Middleware exception keys setter and getter.
      *
      * Throughout the app certain exceptions will have to be made to
      * services/operations. These are set/get using this function.
-     *
-     * For example, csrf should be exempt from certain routes. These
-     * exception route list has to be set on the app instance.
      *
      * @param key
      * @param value

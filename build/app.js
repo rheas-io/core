@@ -11,7 +11,6 @@ const https_1 = __importDefault(require("https"));
 const container_1 = require("@rheas/container");
 const configManager_1 = require("./configManager");
 const serviceManager_1 = require("./serviceManager");
-const exception_1 = require("@rheas/errors/exception");
 const http_1 = __importDefault(require("http"));
 class Application extends container_1.Container {
     /**
@@ -28,7 +27,9 @@ class Application extends container_1.Container {
         super();
         Application.instance = this;
         this.registerPaths(rootPath);
-        this.registerCoreServices();
+        this._envManager = new envManager_1.EnvManager(this.path('env'));
+        this._configManager = new configManager_1.ConfigManager(this.path('configs'));
+        this._serviceManager = new serviceManager_1.ServiceManager(this, this.configs().get('app.providers', {}));
     }
     /**
      * Returns an application instance. If no instance is available,
@@ -44,30 +45,6 @@ class Application extends container_1.Container {
             Application.instance = new Application(rootPath);
         }
         return Application.instance;
-    }
-    /**
-     * Registers the core services to the application container.
-     * Env, config and service managers are all core bindings required
-     * for the proper functioning of the application. These keys can be
-     * used in the providers list on config files.
-     */
-    registerCoreServices() {
-        this.instance('env', new envManager_1.EnvManager(this.path('env')), true);
-        const configManager = new configManager_1.ConfigManager(this.path('configs'));
-        this.instance('configs', configManager, true);
-        this.instance('services', new serviceManager_1.ServiceManager(this, configManager.get('app.providers', {})), true);
-    }
-    /**
-     * Returns the core service if it exists or throws an exception.
-     *
-     * @param serviceName
-     */
-    getCoreService(serviceName) {
-        const service = this.get(serviceName);
-        if (!service) {
-            throw new exception_1.Exception(`Core service, ${serviceName}, is not registered. Re-install the framework to fix it.`);
-        }
-        return service;
     }
     /**
      * Registers different application paths
@@ -90,13 +67,34 @@ class Application extends container_1.Container {
         return this.get('path.' + folder) || this.get('path.root');
     }
     /**
+     * Returns the application environment variable manager.
+     *
+     * @returns
+     */
+    env() {
+        return this._envManager;
+    }
+    /**
+     * Returns the application configs manager.
+     *
+     * @returns
+     */
+    configs() {
+        return this._configManager;
+    }
+    /**
+     * Returns the application services manager.
+     *
+     * @returns
+     */
+    services() {
+        return this._serviceManager;
+    }
+    /**
      * Middleware exception keys setter and getter.
      *
      * Throughout the app certain exceptions will have to be made to
      * services/operations. These are set/get using this function.
-     *
-     * For example, csrf should be exempt from certain routes. These
-     * exception route list has to be set on the app instance.
      *
      * @param key
      * @param value
@@ -123,8 +121,7 @@ class Application extends container_1.Container {
      */
     startApp() {
         // Boot the application services before starting the server
-        const serviceManager = this.getCoreService('services');
-        serviceManager.boot();
+        this._serviceManager.boot();
         // Establish connection to the database before opening a 
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
@@ -165,7 +162,7 @@ class Application extends container_1.Container {
         const request = req;
         let response = res;
         try {
-            await request.boot(this, response);
+            await request.boot();
             response = await router.handle(request, response);
         }
         catch (err) {
@@ -183,7 +180,7 @@ class Application extends container_1.Container {
      * @return this
      */
     enableHttpServer() {
-        const port = this.normalizePort(this.getCoreService('configs').get('app.port'));
+        const port = this.normalizePort(this.configs().get('app.port'));
         this.createServer(http_1.default.createServer, port);
         return this;
     }
@@ -195,7 +192,7 @@ class Application extends container_1.Container {
      * @return this
      */
     enableHttpsServer() {
-        const port = this.normalizePort(this.getCoreService('configs').get('app.secure_port'));
+        const port = this.normalizePort(this.configs().get('app.secure_port'));
         this.createServer(https_1.default.createServer, port);
         return this;
     }
@@ -274,8 +271,7 @@ class Application extends container_1.Container {
         // If no service is found we will load any deferredServices. If the 
         // deferred service is loaded, we will try getting the value again from the
         // Container.
-        const serviceManager = this.getCoreService('services');
-        if (service === null && serviceManager.registerServiceByName(key)) {
+        if (service === null && this._serviceManager.registerServiceByName(key)) {
             return super.get(key, defaultValue);
         }
         return service;
