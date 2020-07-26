@@ -20,16 +20,16 @@ class Application extends container_1.Container {
      *
      * Before starting the app, a rootpath has to be set.
      *
-     * Registers the core app managers, ConfigManager and ServiceManager that handles configs
-     * and serviceProviders respectively.
+     * Registers the core app managers, ConfigManager and ServiceManager that handles
+     * configs and serviceProviders respectively.
      */
     constructor(rootPath) {
         super();
         Application.instance = this;
         this.registerPaths(rootPath);
-        this._envManager = new envManager_1.EnvManager(this.path('env'));
         this._configManager = new configManager_1.ConfigManager(this.path('configs'));
-        this._serviceManager = new serviceManager_1.ServiceManager(this, this.configs().get('app.providers', {}));
+        this._serviceManager = new serviceManager_1.ServiceManager(this);
+        this.registerBaseBindings();
     }
     /**
      * Returns an application instance. If no instance is available,
@@ -58,6 +58,23 @@ class Application extends container_1.Container {
         this.instance('path.assets', path_1.default.resolve(rootPath, '..', 'assets'));
     }
     /**
+     * Registers the base application managers on the container.
+     *
+     * Before reading configs, env services has to be registered. Once env
+     * and config manager is registered, we will load the service providers
+     * from the config file and inject it into serviceManager.
+     *
+     * There is no need for _envManager on this class, so we are keeping
+     * no references in this object. That's why service providers are loaded
+     * here instead of initialization in the constructor.
+     */
+    registerBaseBindings() {
+        this.instance('env', new envManager_1.EnvManager(this.path('env')), true);
+        this.instance('configs', this._configManager, true);
+        this.instance('services', this._serviceManager, true);
+        this._serviceManager.setProviders(this.configs().get('app.providers', {}));
+    }
+    /**
      * Gets the path instance for the folder. If a path for the folder
      * is not bound, then the root path is returned.
      *
@@ -65,14 +82,6 @@ class Application extends container_1.Container {
      */
     path(folder = "root") {
         return this.get('path.' + folder) || this.get('path.root');
-    }
-    /**
-     * Returns the application environment variable manager.
-     *
-     * @returns
-     */
-    env() {
-        return this._envManager;
     }
     /**
      * Returns the application configs manager.

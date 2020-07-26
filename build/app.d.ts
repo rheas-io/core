@@ -12,13 +12,6 @@ export declare class Application extends Container implements IApp {
      */
     private static instance;
     /**
-     * Application environment variables manager. Needed for loading
-     * configs.
-     *
-     * @var IManager
-     */
-    protected _envManager: IManager;
-    /**
      * Application configurations manager. Handles the parsing and retreival
      * of configuration files.
      *
@@ -39,8 +32,8 @@ export declare class Application extends Container implements IApp {
      *
      * Before starting the app, a rootpath has to be set.
      *
-     * Registers the core app managers, ConfigManager and ServiceManager that handles configs
-     * and serviceProviders respectively.
+     * Registers the core app managers, ConfigManager and ServiceManager that handles
+     * configs and serviceProviders respectively.
      */
     constructor(rootPath: string);
     /**
@@ -59,18 +52,24 @@ export declare class Application extends Container implements IApp {
      */
     protected registerPaths(rootPath: string): void;
     /**
+     * Registers the base application managers on the container.
+     *
+     * Before reading configs, env services has to be registered. Once env
+     * and config manager is registered, we will load the service providers
+     * from the config file and inject it into serviceManager.
+     *
+     * There is no need for _envManager on this class, so we are keeping
+     * no references in this object. That's why service providers are loaded
+     * here instead of initialization in the constructor.
+     */
+    protected registerBaseBindings(): void;
+    /**
      * Gets the path instance for the folder. If a path for the folder
      * is not bound, then the root path is returned.
      *
      * @param folder
      */
     path(folder?: string): string;
-    /**
-     * Returns the application environment variable manager.
-     *
-     * @returns
-     */
-    env(): IManager;
     /**
      * Returns the application configs manager.
      *

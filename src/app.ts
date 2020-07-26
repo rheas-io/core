@@ -23,14 +23,6 @@ export class Application extends Container implements IApp {
     private static instance: IApp;
 
     /**
-     * Application environment variables manager. Needed for loading
-     * configs.
-     * 
-     * @var IManager
-     */
-    protected _envManager: IManager;
-
-    /**
      * Application configurations manager. Handles the parsing and retreival
      * of configuration files.
      * 
@@ -53,8 +45,8 @@ export class Application extends Container implements IApp {
      * 
      * Before starting the app, a rootpath has to be set.
      * 
-     * Registers the core app managers, ConfigManager and ServiceManager that handles configs
-     * and serviceProviders respectively.
+     * Registers the core app managers, ConfigManager and ServiceManager that handles 
+     * configs and serviceProviders respectively.
      */
     constructor(rootPath: string) {
         super();
@@ -63,9 +55,10 @@ export class Application extends Container implements IApp {
 
         this.registerPaths(rootPath);
 
-        this._envManager = new EnvManager(this.path('env'));
         this._configManager = new ConfigManager(this.path('configs'));
-        this._serviceManager = new ServiceManager(this, this.configs().get('app.providers', {}));
+        this._serviceManager = new ServiceManager(this);
+
+        this.registerBaseBindings();
     }
 
     /**
@@ -98,6 +91,26 @@ export class Application extends Container implements IApp {
     }
 
     /**
+     * Registers the base application managers on the container.
+     * 
+     * Before reading configs, env services has to be registered. Once env
+     * and config manager is registered, we will load the service providers
+     * from the config file and inject it into serviceManager.
+     * 
+     * There is no need for _envManager on this class, so we are keeping
+     * no references in this object. That's why service providers are loaded 
+     * here instead of initialization in the constructor.
+     */
+    protected registerBaseBindings() {
+        this.instance('env', new EnvManager(this.path('env')), true);
+
+        this.instance('configs', this._configManager, true);
+        this.instance('services', this._serviceManager, true);
+
+        this._serviceManager.setProviders(this.configs().get('app.providers', {}));
+    }
+
+    /**
      * Gets the path instance for the folder. If a path for the folder
      * is not bound, then the root path is returned.
      * 
@@ -105,15 +118,6 @@ export class Application extends Container implements IApp {
      */
     public path(folder: string = "root"): string {
         return this.get('path.' + folder) || this.get('path.root');
-    }
-
-    /**
-     * Returns the application environment variable manager.
-     * 
-     * @returns
-     */
-    public env(): IManager {
-        return this._envManager;
     }
 
     /**
