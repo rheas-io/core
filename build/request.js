@@ -9,7 +9,6 @@ const support_1 = require("@rheas/support");
 const http_1 = require("http");
 const container_1 = require("@rheas/container");
 const requestInput_1 = require("./requestInput");
-const helpers_1 = require("@rheas/support/helpers");
 const requestContent_1 = require("./requestContent");
 const serviceManager_1 = require("./serviceManager");
 const uri_1 = require("@rheas/routing/uri");
@@ -73,7 +72,7 @@ class Request extends http_1.IncomingMessage {
         this._query = {};
         this._container = new container_1.Container();
         this._headers = new headers_1.Headers(this.headers);
-        this._serviceManager = new serviceManager_1.ServiceManager(this, helpers_1.config('request.providers', {}));
+        this._serviceManager = new serviceManager_1.ServiceManager(this);
     }
     /**
      * Boots request services and container.
@@ -87,6 +86,12 @@ class Request extends http_1.IncomingMessage {
     async boot(app, res) {
         this.instance('app', app, true);
         this.instance('response', res, true);
+        this.instance('services', this._serviceManager, true);
+        // Inject the service providers from the configurations.
+        // app.configs() is used to eliminate the use of helper 
+        // function configs() in this class. Moreover, it looked ideal 
+        // to load the services in the boot instead of constructor
+        this._serviceManager.setProviders(app.configs().get('request.providers', {}));
         await this.loadRequest();
         this._serviceManager.boot();
         return this;

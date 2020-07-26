@@ -118,7 +118,7 @@ export class Request extends IncomingMessage implements IRequest {
 
         this._container = new Container();
         this._headers = new Headers(this.headers);
-        this._serviceManager = new ServiceManager(this, config('request.providers', {}));
+        this._serviceManager = new ServiceManager(this);
     }
 
     /**
@@ -133,6 +133,15 @@ export class Request extends IncomingMessage implements IRequest {
     public async boot(app: IApp, res: IResponse): Promise<IRequest> {
         this.instance('app', app, true);
         this.instance('response', res, true);
+        this.instance('services', this._serviceManager, true);
+
+        // Inject the service providers from the configurations.
+        // app.configs() is used to eliminate the use of helper 
+        // function configs() in this class. Moreover, it looked ideal 
+        // to load the services in the boot instead of constructor
+        this._serviceManager.setProviders(
+            app.configs().get('request.providers', {})
+        );
 
         await this.loadRequest();
 
