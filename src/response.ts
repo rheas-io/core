@@ -1,37 +1,36 @@
-import { Headers } from "./headers";
-import { ServerResponse } from "http";
-import { config } from "@rheas/support/helpers";
-import { ICacheManager, IHeaders } from "@rheas/contracts/core";
-import { IRequest, IResponse, AnyObject } from "@rheas/contracts";
+import { Headers } from './headers';
+import { ServerResponse } from 'http';
+import { config } from '@rheas/support/helpers';
+import { ICacheManager, IHeaders } from '@rheas/contracts/core';
+import { IRequest, IResponse, AnyObject } from '@rheas/contracts';
 
 export class Response extends ServerResponse implements IResponse {
-
     /**
      * The request object to which this response was created.
-     * 
+     *
      * @var IRequest
      */
     protected _request: IRequest;
 
     /**
-     * The response header object. Responsible for querying response 
+     * The response header object. Responsible for querying response
      * headers, parses cookies etc.
-     * 
+     *
      * @var IHeaders
      */
     protected _headers: IHeaders & ICacheManager;
 
     /**
      * The content to be send as response.
-     * 
+     *
      * @var any
      */
-    protected _content: string = "";
+    protected _content: string = '';
 
     /**
      * Creates a new response for the request.
-     * 
-     * @param req 
+     *
+     * @param req
      */
     constructor(req: IRequest) {
         super(req);
@@ -44,7 +43,7 @@ export class Response extends ServerResponse implements IResponse {
      * Sends the response to the client and closes the stream. Before
      * sending the content, we will set the appropriate Content-type and
      * Content-length header.
-     * 
+     *
      * @returns IResponse
      */
     public send(): IResponse {
@@ -55,8 +54,8 @@ export class Response extends ServerResponse implements IResponse {
 
     /**
      * Alias of setContent
-     * 
-     * @param content 
+     *
+     * @param content
      */
     public set(content: any): IResponse {
         return this.setContent(content);
@@ -64,8 +63,8 @@ export class Response extends ServerResponse implements IResponse {
 
     /**
      * Sets a JSON content
-     * 
-     * @param content 
+     *
+     * @param content
      */
     public json(content: AnyObject): IResponse {
         this._request.contents().setFormat('json');
@@ -75,8 +74,8 @@ export class Response extends ServerResponse implements IResponse {
 
     /**
      * Sets the response content/body
-     * 
-     * @param content 
+     *
+     * @param content
      */
     public setContent(content: any): IResponse {
         this._content = content;
@@ -86,7 +85,7 @@ export class Response extends ServerResponse implements IResponse {
 
     /**
      * Returns the cache header manager of this response.
-     * 
+     *
      * @returns
      */
     public cache(): ICacheManager {
@@ -94,9 +93,9 @@ export class Response extends ServerResponse implements IResponse {
     }
 
     /**
-     * Sets the content to empty and removes Content-Type, Content-Length and 
+     * Sets the content to empty and removes Content-Type, Content-Length and
      * Transfer-Encoding header.
-     * 
+     *
      * @returns this
      */
     public setEmptyContent(): IResponse {
@@ -104,24 +103,23 @@ export class Response extends ServerResponse implements IResponse {
 
         this.removeHeader('Content-Type');
         this.removeHeader('Content-Length');
-        this.removeHeader('Transfer-Encoding')
+        this.removeHeader('Transfer-Encoding');
 
         return this;
     }
 
     /**
-     * Sets status as 304 and removes content and headers that are not 
+     * Sets status as 304 and removes content and headers that are not
      * needed in a non-modified response.
-     * 
+     *
      * @return this
      */
     public setNotModified(): IResponse {
-
         this.statusCode = 304;
         this.setContent('');
 
-        this.headersNotNeededInNotModified().forEach(
-            headerToRemove => this.removeHeader(headerToRemove)
+        this.headersNotNeededInNotModified().forEach((headerToRemove) =>
+            this.removeHeader(headerToRemove),
         );
 
         return this;
@@ -130,11 +128,10 @@ export class Response extends ServerResponse implements IResponse {
     /**
      * Prepare content headers before dispatching to the client. Content
      * type, content length, charsets are all updated here.
-     * 
-     * @param request 
+     *
+     * @param request
      */
     public prepareResponse(): IResponse {
-
         //this.setHeader('Content-Length', this._content.length);
 
         if (this.hasInformationalStatus() || this.hasEmptyStatus()) {
@@ -154,7 +151,7 @@ export class Response extends ServerResponse implements IResponse {
     }
 
     /**
-     * Sets the content type based on the request format or the set 
+     * Sets the content type based on the request format or the set
      * attribute _format value. If no format value is set, html format
      * is used and it's corresponding mimeType is used as content-type.
      */
@@ -191,7 +188,6 @@ export class Response extends ServerResponse implements IResponse {
      * the data is passed in chunks.
      */
     private prepareTransferEncoding() {
-
         if (this.hasHeader('Transfer-Encoding')) {
             this.removeHeader('Content-Length');
         }
@@ -202,7 +198,6 @@ export class Response extends ServerResponse implements IResponse {
      * is a HEAD request. Content length is kept as it is.
      */
     private prepareForHead() {
-
         if (this._request.getRealMethod() === 'HEAD') {
             this.setContent('');
         }
@@ -210,20 +205,24 @@ export class Response extends ServerResponse implements IResponse {
 
     /**
      * Returns the headers that are not needed in Not-Modified responses.
-     * 
+     *
      * @returns array
      */
     public headersNotNeededInNotModified(): string[] {
         return [
-            'Allow', 'Content-Encoding', 'Content-Language',
-            'Content-Length', 'Content-MD5', 'Content-Type',
-            'Last-Modified'
+            'Allow',
+            'Content-Encoding',
+            'Content-Language',
+            'Content-Length',
+            'Content-MD5',
+            'Content-Type',
+            'Last-Modified',
         ];
     }
 
     /**
      * Checks if the status given is a redirect status or not.
-     * 
+     *
      * @returns boolean
      */
     public isRedirectStatus(status: number): boolean {
@@ -241,7 +240,7 @@ export class Response extends ServerResponse implements IResponse {
 
     /**
      * Checks if the response is empty ie 204-No Content or 304-Not Modified
-     * 
+     *
      * @returns
      */
     public hasEmptyStatus(): boolean {

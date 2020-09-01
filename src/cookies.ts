@@ -1,3 +1,1 @@
-export class Cookies {
-
-}
+export class Cookies {}

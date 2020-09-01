@@ -1,5 +1,3 @@
-import { Application } from "./app";
+import { Application } from './app';
 
-export {
-    Application
-}
+export { Application };

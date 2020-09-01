@@ -1,116 +1,115 @@
-import url from "url";
-import { Headers } from "./headers";
-import { Str } from "@rheas/support";
-import { IncomingMessage } from "http";
-import { Container } from "@rheas/container";
-import { RequestInput } from "./requestInput";
-import { RequestContent } from "./requestContent";
-import { ServiceManager } from "./serviceManager";
-import { RequestComponent } from "@rheas/routing/uri";
-import { IRequest, AnyObject, IResponse } from "@rheas/contracts";
-import { IncomingForm, Fields, Files } from "formidable";
-import { IServiceManager } from "@rheas/contracts/services";
-import { IRequestComponent } from "@rheas/contracts/routes/uri";
-import { SuspiciousOperationException } from "@rheas/errors/suspicious";
-import { IContainer, InstanceHandler, IContainerInstance } from "@rheas/contracts/container";
-import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from "@rheas/contracts/core";
+import url from 'url';
+import { Headers } from './headers';
+import { Str } from '@rheas/support';
+import { IncomingMessage } from 'http';
+import { Container } from '@rheas/container';
+import { RequestInput } from './requestInput';
+import { RequestContent } from './requestContent';
+import { ServiceManager } from './serviceManager';
+import { RequestComponent } from '@rheas/routing/uri';
+import { IncomingForm, Fields, Files } from 'formidable';
+import { IServiceManager } from '@rheas/contracts/services';
+import { IRequestComponent } from '@rheas/contracts/routes/uri';
+import { IRequest, AnyObject, IResponse } from '@rheas/contracts';
+import { SuspiciousOperationException } from '@rheas/errors/suspicious';
+import { IContainer, InstanceHandler, IContainerInstance } from '@rheas/contracts/container';
+import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from '@rheas/contracts/core';
 
 interface IParsedBody {
-    files: Files,
-    fields: Fields,
+    files: Files;
+    fields: Fields;
 }
 
 export class Request extends IncomingMessage implements IRequest {
-
     /**
      * This request's container manager
-     * 
+     *
      * @var IContainer
      */
     protected _container: IContainer;
 
     /**
      * Manages all the request specific services
-     * 
+     *
      * @var IServiceManager
      */
     protected _serviceManager: IServiceManager;
 
     /**
      * Manages all the request contents
-     * 
+     *
      * @var IRequestContent
      */
     protected _contentsManager: IRequestContent | null = null;
 
     /**
      * Manages all the request inputs
-     * 
+     *
      * @var IRequestInput
      */
     protected _inputsManager: IRequestInput | null = null;
 
     /**
      * The segmented path uri components.
-     * 
+     *
      * @var array
      */
     protected _pathComponents: IRequestComponent[] | null = null;
 
     /**
      * The request method.
-     * 
+     *
      * @var string
      */
     protected _method: string | undefined;
 
     /**
      * Caches the url path
-     * 
+     *
      * @var string
      */
-    protected _path: string = "";
+    protected _path: string = '';
 
     /**
      * Caches the query string
-     * 
+     *
      * @var string
      */
-    protected _queryString: string = "";
+    protected _queryString: string = '';
 
     /**
      * Stores the POST request body contents.
-     * 
+     *
      * @var AnyObject
      */
     protected _body: AnyObject = {};
 
     /**
      * Stores the files uploaded with field names as key.
-     * 
+     *
      * @var AnyObject
      */
     protected _files: AnyObject = {};
 
     /**
      * Stores the urldecoded query parameters of this request.
-     * 
+     *
      * @var AnyObject
      */
     protected _query: AnyObject = {};
 
     /**
-     * The request header object. Responsible for querying request 
+     * The request header object. Responsible for querying request
      * headers, parses cookies etc.
-     * 
+     *
      * @var IHeaders
      */
     protected _headers: IHeaders;
 
     /**
      * Creates a new server request.
-     * 
-     * @param socket 
+     *
+     * @param socket
      */
     constructor(socket: any) {
         super(socket);
@@ -121,11 +120,11 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * Boots request services and container. 
-     * 
-     * The request data like url, query and all the stuff will be available 
+     * Boots request services and container.
+     *
+     * The request data like url, query and all the stuff will be available
      * inside the boot. Process them and store in memory for faster processing
-     * 
+     *
      * @param app
      * @param res
      */
@@ -135,12 +134,10 @@ export class Request extends IncomingMessage implements IRequest {
         this.instance('services', this._serviceManager, true);
 
         // Inject the service providers from the configurations.
-        // app.configs() is used to eliminate the use of helper 
-        // function configs() in this class. Moreover, it looked ideal 
+        // app.configs() is used to eliminate the use of helper
+        // function configs() in this class. Moreover, it looked ideal
         // to load the services in the boot instead of constructor
-        this._serviceManager.setProviders(
-            app.configs().get('request.providers', {})
-        );
+        this._serviceManager.setProviders(app.configs().get('request.providers', {}));
 
         await this.loadRequest();
 
@@ -152,17 +149,16 @@ export class Request extends IncomingMessage implements IRequest {
     /**
      * This function is responsible for parsing the request and obtaining
      * necessary fields like query, path, body, files etc.
-     * 
+     *
      * [1] The query object, req path and query string are parsed by the NodeJS
      *     url.parse module.
-     * 
-     * [2] Request body and file uploads are handled by the Formidable package. 
+     *
+     * [2] Request body and file uploads are handled by the Formidable package.
      */
     protected async loadRequest(): Promise<void> {
-
         const parsed = url.parse(this.getFullUrl(), true);
-        this._queryString = parsed.search || "";
-        this._path = Str.path(parsed.pathname || "");
+        this._queryString = parsed.search || '';
+        this._path = Str.path(parsed.pathname || '');
 
         // Load the request body contents like form post data
         // or file uploads.
@@ -177,8 +173,8 @@ export class Request extends IncomingMessage implements IRequest {
      * Loads the request body using the Formidable package. This will read
      * multipart form data, uriencoded form data and file uploads and returns
      * an object containing fields and files.
-     * 
-     * @returns 
+     *
+     * @returns
      */
     public async getContents(): Promise<IParsedBody> {
         const form = new IncomingForm();
@@ -196,7 +192,7 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the request redirect handler.
-     * 
+     *
      * @return IRedirector
      */
     public redirect(): IRedirector {
@@ -205,7 +201,7 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the header manager of this request.
-     * 
+     *
      * @returns
      */
     public reqHeaders(): IHeaders {
@@ -216,7 +212,7 @@ export class Request extends IncomingMessage implements IRequest {
      * Returns the requets content manager which is responsible for
      * reading content-type related headers and performing various checks
      * and operations.
-     * 
+     *
      * @returns
      */
     public contents(): IRequestContent {
@@ -228,7 +224,7 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the request inputs manager.
-     * 
+     *
      * @returns
      */
     public inputs(): IRequestInput {
@@ -241,8 +237,8 @@ export class Request extends IncomingMessage implements IRequest {
     /**
      * Gets the request method. This is the method value obtained after
      * checking method overrides in header, post and query. To get the original
-     * method call getRealMethod(). 
-     * 
+     * method call getRealMethod().
+     *
      * @returns string
      */
     public getMethod(): string {
@@ -255,17 +251,16 @@ export class Request extends IncomingMessage implements IRequest {
         if (method === 'POST') {
             method = this.overriddenMethod();
         }
-        return this._method = method;
+        return (this._method = method);
     }
 
     /**
      * Returns overridden method if any exists. The function will throw an
      * exception if the app
-     * 
+     *
      * @return string
      */
-    protected overriddenMethod(defaultMethod: string = "POST"): string {
-
+    protected overriddenMethod(defaultMethod: string = 'POST'): string {
         let method = <string>this.headers['X-HTTP-METHOD-OVERRIDE'];
 
         if (!method) {
@@ -286,17 +281,16 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * Returns path uri components obtained by splitting the uri by 
+     * Returns path uri components obtained by splitting the uri by
      * forward slash (/)
-     * 
+     *
      * @returns array of request uri components
      */
     public getPathComponents(): IRequestComponent[] {
-
         if (this._pathComponents === null) {
-            this._pathComponents = this.getPath().split('/').map(
-                component => new RequestComponent(component)
-            );
+            this._pathComponents = this.getPath()
+                .split('/')
+                .map((component) => new RequestComponent(component));
         }
 
         return this._pathComponents;
@@ -304,7 +298,7 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the actual request method.
-     * 
+     *
      * @returns string
      */
     public getRealMethod(): string {
@@ -313,26 +307,26 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns true if the request is a scured one.
-     * 
-     * @returns 
+     *
+     * @returns
      */
     public isSecure(): boolean {
-        return this.getSchema() === "https";
+        return this.getSchema() === 'https';
     }
 
     /**
      * Returns http or https schema used by this request.
-     * 
+     *
      * @returns string
      */
     public getSchema(): string {
         //@ts-ignore
-        return (this.socket.encrypted ? "https" : "http");
+        return this.socket.encrypted ? 'https' : 'http';
     }
 
     /**
      * Returns the request path.
-     * 
+     *
      * @returns string
      */
     public getPath(): string {
@@ -341,7 +335,7 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the request scheme/protocol
-     * 
+     *
      * @returns string
      */
     public getProtocol(): string {
@@ -349,8 +343,8 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * Get host details from the headers. 
-     * 
+     * Get host details from the headers.
+     *
      * @returns string
      */
     public getHost(): string {
@@ -360,9 +354,9 @@ export class Request extends IncomingMessage implements IRequest {
     /**
      * Returns the request full url including protocol, domain,
      * path and query string in the format
-     * 
+     *
      * https://domain.com/path?query=val
-     * 
+     *
      * @returns string
      */
     public getFullUrl(): string {
@@ -371,9 +365,9 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the querystring including the leading ? symbol.
-     * 
+     *
      * Eg: ?code=abcedfghi&value=63vd7fd8vvv8
-     * 
+     *
      * @returns string
      */
     public getQueryString(): string {
@@ -382,7 +376,7 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the request body contents as JSON object.
-     * 
+     *
      * @returns
      */
     public body(): AnyObject {
@@ -391,7 +385,7 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the uploaded request files.
-     * 
+     *
      * @returns
      */
     public files(): AnyObject {
@@ -399,7 +393,7 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * 
+     *
      * @returns
      */
     public query(): AnyObject {
@@ -407,26 +401,26 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * 
+     *
      * //TODO
      */
     public params(): string[] {
         let params: string[] = [];
 
-        this.getPathComponents().forEach(
-            components => params.push(...Object.values(components.getParam()))
+        this.getPathComponents().forEach((components) =>
+            params.push(...Object.values(components.getParam())),
         );
 
         return params;
     }
 
     /**
-     * Binds a singleton resolver to the container. Once resolved, the value 
+     * Binds a singleton resolver to the container. Once resolved, the value
      * will be used for the lifetime of the service which can either be app
      * lifetime or request lifetime.
-     * 
-     * @param name 
-     * @param resolver 
+     *
+     * @param name
+     * @param resolver
      */
     public singleton(name: string, resolver: InstanceHandler): IContainerInstance {
         return this._container.singleton(name, resolver);
@@ -435,22 +429,22 @@ export class Request extends IncomingMessage implements IRequest {
     /**
      * Binds a resolver to the container. Used mainly for non-singleton resolvers,
      * that gets resolved repeatedly when requested.
-     * 
-     * @param name 
-     * @param resolver 
-     * @param singleton 
+     *
+     * @param name
+     * @param resolver
+     * @param singleton
      */
-    public bind(name: string, resolver: InstanceHandler, singleton: boolean = false): IContainerInstance {
+    public bind(name: string, resolver: InstanceHandler, singleton: boolean = false) {
         return this._container.bind(name, resolver, singleton);
     }
 
     /**
-     * Adds an instance to this container. Any type of object can be passed as an argument 
+     * Adds an instance to this container. Any type of object can be passed as an argument
      * and returns the same after adding it to container.
-     * 
-     * @param name 
-     * @param instance 
-     * @param singleton 
+     *
+     * @param name
+     * @param instance
+     * @param singleton
      */
     public instance<T>(name: string, instance: T, singleton: boolean = false): IContainerInstance {
         return this._container.instance(name, instance, singleton);
@@ -459,14 +453,14 @@ export class Request extends IncomingMessage implements IRequest {
     /**
      * Returns the binding stored in this container. The resolved value is returned
      * if the key is assigned to a resolver.
-     * 
-     * @param key 
+     *
+     * @param key
      * @param defaultValue
      */
     public get(key: string, defaultValue: any = null) {
         const service = this._container.get(key, defaultValue);
 
-        // If no service is found we will load any deferredServices. If the 
+        // If no service is found we will load any deferredServices. If the
         // deferred service is loaded, we will try getting the value again from the
         // container.
         if (service === null && this._serviceManager.registerServiceByName(key)) {

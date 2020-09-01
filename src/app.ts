@@ -1,23 +1,22 @@
-import path from "path";
-import { Request } from "./request";
-import { Response } from "./response";
-import { EnvManager } from "./envManager";
-import https, { ServerOptions } from "https";
-import { Container } from "@rheas/container";
-import { ConfigManager } from "./configManager";
-import { ServiceManager } from "./serviceManager";
-import { IApp } from "@rheas/contracts/core/app";
-import { IRouter } from "@rheas/contracts/routes";
-import { IServiceManager } from "@rheas/contracts/services";
-import { IManager, IServerCreator } from "@rheas/contracts/core";
-import { IRequest, IResponse, IDbConnector } from "@rheas/contracts";
-import http, { Server, IncomingMessage, ServerResponse } from "http";
+import path from 'path';
+import { Request } from './request';
+import { Response } from './response';
+import { EnvManager } from './envManager';
+import https, { ServerOptions } from 'https';
+import { Container } from '@rheas/container';
+import { ConfigManager } from './configManager';
+import { ServiceManager } from './serviceManager';
+import { IApp } from '@rheas/contracts/core/app';
+import { IRouter } from '@rheas/contracts/routes';
+import { IServiceManager } from '@rheas/contracts/services';
+import { IManager, IServerCreator } from '@rheas/contracts/core';
+import { IRequest, IResponse, IDbConnector } from '@rheas/contracts';
+import http, { Server, IncomingMessage, ServerResponse } from 'http';
 
 export class Application extends Container implements IApp {
-
     /**
      * Application instance.
-     * 
+     *
      * @var IApp
      */
     private static instance: IApp;
@@ -25,7 +24,7 @@ export class Application extends Container implements IApp {
     /**
      * Application configurations manager. Handles the parsing and retreival
      * of configuration files.
-     * 
+     *
      * @var IManager
      */
     protected _configManager: IManager;
@@ -33,7 +32,7 @@ export class Application extends Container implements IApp {
     /**
      * Service manager that handles the registering and booting of
      * all service providers.
-     * 
+     *
      * @var IServiceManager
      */
     protected _serviceManager: IServiceManager;
@@ -42,10 +41,10 @@ export class Application extends Container implements IApp {
      * Creates a new singleton Rheas Application. This class acts as a container
      * where other instances/objects can be mount. The rheas server has to be started
      * using startApp method of this class.
-     * 
+     *
      * Before starting the app, a rootpath has to be set.
-     * 
-     * Registers the core app managers, ConfigManager and ServiceManager that handles 
+     *
+     * Registers the core app managers, ConfigManager and ServiceManager that handles
      * configs and serviceProviders respectively.
      */
     constructor(rootPath: string) {
@@ -65,13 +64,13 @@ export class Application extends Container implements IApp {
      * Returns an application instance. If no instance is available,
      * creates a new instance with the given root path. If no root path
      * is given, we will resolve a directory based on the location of this file.
-     * 
+     *
      * Generally, this script will be located on project_root/node_modules/rheas/core
      * Hence, we resolve it three level updwards to find the project root.
      */
-    public static getInstance(rootPath: string = "") {
+    public static getInstance(rootPath: string = '') {
         if (!Application.instance) {
-            rootPath = rootPath || path.resolve(__dirname, "../../..");
+            rootPath = rootPath || path.resolve(__dirname, '../../..');
 
             Application.instance = new Application(rootPath);
         }
@@ -80,8 +79,8 @@ export class Application extends Container implements IApp {
 
     /**
      * Registers different application paths
-     * 
-     * @param rootPath 
+     *
+     * @param rootPath
      */
     protected registerPaths(rootPath: string) {
         this.instance('path.root', rootPath);
@@ -92,13 +91,13 @@ export class Application extends Container implements IApp {
 
     /**
      * Registers the base application managers on the container.
-     * 
+     *
      * Before reading configs, env services has to be registered. Once env
      * and config manager is registered, we will load the service providers
      * from the config file and inject it into serviceManager.
-     * 
+     *
      * There is no need for _envManager on this class, so we are keeping
-     * no references in this object. That's why service providers are loaded 
+     * no references in this object. That's why service providers are loaded
      * here instead of initialization in the constructor.
      */
     protected registerBaseBindings() {
@@ -113,16 +112,16 @@ export class Application extends Container implements IApp {
     /**
      * Gets the path instance for the folder. If a path for the folder
      * is not bound, then the root path is returned.
-     * 
-     * @param folder 
+     *
+     * @param folder
      */
-    public path(folder: string = "root"): string {
+    public path(folder: string = 'root'): string {
         return this.get('path.' + folder) || this.get('path.root');
     }
 
     /**
      * Returns the application configs manager.
-     * 
+     *
      * @returns
      */
     public configs(): IManager {
@@ -131,29 +130,28 @@ export class Application extends Container implements IApp {
 
     /**
      * Returns the application services manager.
-     * 
-     * @returns 
+     *
+     * @returns
      */
     public services(): IServiceManager {
         return this._serviceManager;
     }
 
     /**
-     * Middleware exception keys setter and getter. 
-     * 
-     * Throughout the app certain exceptions will have to be made to 
+     * Middleware exception keys setter and getter.
+     *
+     * Throughout the app certain exceptions will have to be made to
      * services/operations. These are set/get using this function.
-     * 
-     * @param key 
-     * @param value 
+     *
+     * @param key
+     * @param value
      */
     public exceptions(key: string, value?: string[]): string[] {
-
         const bindKey = 'exceptions.' + key;
 
         // If value is null, act as a getter. Returns the string
-        // array for the exceptions if it exists or returns an 
-        // empty array 
+        // array for the exceptions if it exists or returns an
+        // empty array
         if (value == null) {
             return this.get(bindKey, []);
         }
@@ -174,17 +172,16 @@ export class Application extends Container implements IApp {
      * creates a database connection and listen for requests.
      */
     public startApp(): void {
-
         // Boot the application services before starting the server
         this._serviceManager.boot();
 
-        // Establish connection to the database before opening a 
+        // Establish connection to the database before opening a
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
         this.initDbConnection()
             .then(() => this.enableHttpServer())
-            .catch(error => {
-                console.error("Error connecting to database. Server not started.");
+            .catch((error) => {
+                console.error('Error connecting to database. Server not started.');
                 console.error(error);
                 process.exit(1);
             });
@@ -194,14 +191,14 @@ export class Application extends Container implements IApp {
      * Connects to the database connector bound by the keyword "db". An
      * exception is thrown if no db service is defined. Db services are core
      * part of the application, so we can't proceed without having one.
-     * 
+     *
      * @return Promise
      */
     public initDbConnection(): Promise<any> {
         const connector: IDbConnector | null = this.get('db');
 
         if (connector === null) {
-            throw new Error("No database service is registered. Fix the app providers list");
+            throw new Error('No database service is registered. Fix the app providers list');
         }
         return connector.connect();
     }
@@ -209,15 +206,15 @@ export class Application extends Container implements IApp {
     /**
      * Request handler. When a new request is received by the core http module,
      * it will send it to this handler. From here, we will pass it to the router.
-     * 
-     * @param req 
-     * @param res 
+     *
+     * @param req
+     * @param res
      */
     public async listenRequests(req: IncomingMessage, res: ServerResponse): Promise<any> {
         const router: IRouter | null = this.get('router');
 
         if (router === null) {
-            throw new Error("No router service is registered. Fix the app providers list");
+            throw new Error('No router service is registered. Fix the app providers list');
         }
         const request = req as IRequest;
         let response = res as IResponse;
@@ -227,7 +224,8 @@ export class Application extends Container implements IApp {
 
             response = await router.handle(request, response);
         } catch (err) {
-            err.message = "Status 500: Exception handler failure." + (err.message || 'Server error');
+            err.message =
+                'Status 500: Exception handler failure.' + (err.message || 'Server error');
             response.statusCode = 500;
             response.setContent(err.message);
         }
@@ -239,7 +237,7 @@ export class Application extends Container implements IApp {
     /**
      * Creates an http server and listens on the port specified in the app
      * configuration file.
-     * 
+     *
      * @return this
      */
     public enableHttpServer(): IApp {
@@ -252,9 +250,9 @@ export class Application extends Container implements IApp {
 
     /**
      * Creates an https server and listens on the secure_port defined in the
-     * app configuration. Creating an https server also requires a valid ssl 
+     * app configuration. Creating an https server also requires a valid ssl
      * certificate path on the configs.
-     * 
+     *
      * @return this
      */
     public enableHttpsServer(): IApp {
@@ -268,14 +266,14 @@ export class Application extends Container implements IApp {
     /**
      * Creates a server using the creator function and listens on the
      * given port.
-     * 
-     * @param creator 
-     * @param port 
+     *
+     * @param creator
+     * @param port
      */
     private createServer(creator: IServerCreator, port: number, options?: ServerOptions): Server {
         options = Object.assign({}, options, {
             IncomingMessage: Request,
-            ServerResponse: Response
+            ServerResponse: Response,
         });
 
         const server = creator(options, this.listenRequests.bind(this));
@@ -289,19 +287,19 @@ export class Application extends Container implements IApp {
 
     /**
      * Convert port inputs into an integer value
-     * 
+     *
      * @param val Port value
      */
     private normalizePort(val: any) {
         var port = parseInt(val, 10);
 
-        return isNaN(port) ? val : (port >= 0 ? port : false);
+        return isNaN(port) ? val : port >= 0 ? port : false;
     }
 
     /**
      * Error callback to show pretty human readable error message.
-     * 
-     * @param error 
+     *
+     * @param error
      */
     private onError(error: any, port: any) {
         if (error.syscall !== 'listen') {
@@ -324,8 +322,8 @@ export class Application extends Container implements IApp {
 
     /**
      * Server connection success callback. Log the connection success messages.
-     * 
-     * @param server 
+     *
+     * @param server
      */
     private onListening(server: http.Server) {
         const addr = server.address();
@@ -338,17 +336,17 @@ export class Application extends Container implements IApp {
 
     /**
      * @override Container getter
-     * 
+     *
      * Returns the rheas binding of the specified key. If a binding is not
      * found, we will check for any deferred services and register if one exist.
      * Then we will try to get the binding once again.
-     * 
+     *
      * @param key The binding key to retreive
      */
     public get(key: string, defaultValue?: any): any {
         const service = super.get(key, defaultValue);
 
-        // If no service is found we will load any deferredServices. If the 
+        // If no service is found we will load any deferredServices. If the
         // deferred service is loaded, we will try getting the value again from the
         // Container.
         if (service === null && this._serviceManager.registerServiceByName(key)) {

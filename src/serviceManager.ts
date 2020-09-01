@@ -1,50 +1,49 @@
-import { ClassOf, KeyValue } from "@rheas/contracts";
-import { IContainer } from "@rheas/contracts/container";
-import { InvalidArgumentException } from "@rheas/errors/invalidArgument";
-import { IServiceManager, IServiceProvider } from "@rheas/contracts/services";
+import { ClassOf, KeyValue } from '@rheas/contracts';
+import { IContainer } from '@rheas/contracts/container';
+import { InvalidArgumentException } from '@rheas/errors/invalidArgument';
+import { IServiceManager, IServiceProvider } from '@rheas/contracts/services';
 
 export class ServiceManager implements IServiceManager {
-
     /**
      * The container instance which has to be used when resolving
      * services. This can be either App or Request instance.
-     * 
+     *
      * @var IContainer
      */
     protected _container: IContainer;
 
     /**
      * Stores the boot status of this service provider.
-     * 
+     *
      * @var boolean
      */
     protected _booted: boolean = false;
 
     /**
      * Stores the registration status of this service provider.
-     * 
+     *
      * @var boolean
      */
     protected _registered: boolean = false;
 
     /**
      * Stores all the service providers of the application.
-     * 
+     *
      * @var object
      */
     protected _services: KeyValue<ClassOf<IServiceProvider>> = {};
 
     /**
      * Stores the alias of all the registered service providers.
-     * 
+     *
      * @var array
      */
     protected _loadedServices: KeyValue<IServiceProvider> = {};
 
     /**
-     * 
-     * @param container 
-     * @param providers 
+     *
+     * @param container
+     * @param providers
      */
     constructor(container: IContainer, providers: KeyValue<ClassOf<IServiceProvider>> = {}) {
         this._container = container;
@@ -54,8 +53,8 @@ export class ServiceManager implements IServiceManager {
     /**
      * Sets the service providers handled by this manager. Services are not updated
      * if the manager is already registered.
-     * 
-     * @param providers 
+     *
+     * @param providers
      */
     public setProviders(providers: KeyValue<ClassOf<IServiceProvider>>): void {
         if (this.isRegistered()) {
@@ -66,16 +65,15 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * @inheritdoc
-     * 
-     * @param name 
-     * @param provider 
+     *
+     * @param name
+     * @param provider
      */
     public newService(name: string, provider: ClassOf<IServiceProvider>): IServiceManager {
-
         if (this.isServiceLoaded(name)) {
             throw new InvalidArgumentException(
-                `A service ${name} is already loaded/registered. Check the app/request configuration files for 
-                service provider list.`
+                `A service ${name} is already loaded/registered. Check the app/request 
+                configuration files for service provider list.`,
             );
         }
         this._services[name] = provider;
@@ -87,7 +85,7 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * Registers the necessary service providers. Deferred services are
-     * cached in the deferred providers list and are loaded only when a 
+     * cached in the deferred providers list and are loaded only when a
      * binding request is made to the service.
      */
     public register(): void {
@@ -111,12 +109,12 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * Registers a particular service of the given name.
-     * 
-     * @param name 
+     *
+     * @param name
      */
     public registerServiceByName(name: string): boolean {
         // Return false if the service is already loaded or service
-        // is not a class 
+        // is not a class
         if (this.isServiceLoaded(name)) {
             return false;
         }
@@ -144,24 +142,23 @@ export class ServiceManager implements IServiceManager {
     /**
      * Gets new service provider object for the service given by name.
      * Returns null if an object was not created.
-     * 
-     * @param name 
+     *
+     * @param name
      */
     private getServiceProvider(name: string): IServiceProvider | null {
-
         try {
             const service: ClassOf<IServiceProvider> = this._services[name];
 
             return new service(name, this._container);
-        } catch (err) { };
+        } catch (err) {}
 
         return null;
     }
 
     /**
      * Checks if a service by this name is already loaded.
-     * 
-     * @param name 
+     *
+     * @param name
      */
     public isServiceLoaded(name: string): boolean {
         return !!this._loadedServices[name];
@@ -169,7 +166,7 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * Registers the necessary service providers, if it is not already
-     * registered and boots each one of them. Once that is done, we will 
+     * registered and boots each one of them. Once that is done, we will
      * update the boot status.
      */
     public boot(): void {
@@ -191,11 +188,10 @@ export class ServiceManager implements IServiceManager {
     /**
      * Boots a service provider. If the service is not already registered,
      * it is registered first, before performing the boot.
-     * 
-     * @param service 
+     *
+     * @param service
      */
     public bootService(service: IServiceProvider): void {
-
         if (service.isBooted()) {
             return;
         }
@@ -209,8 +205,8 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * Sets the registration status of this service provider
-     * 
-     * @param status 
+     *
+     * @param status
      */
     public setRegistered(status: boolean): void {
         this._registered = status;
@@ -218,8 +214,8 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * Sets the boot status of this service provider
-     * 
-     * @param status 
+     *
+     * @param status
      */
     public setBooted(status: boolean): void {
         this._booted = status;
@@ -227,7 +223,7 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * Register status of this service provider
-     * 
+     *
      * @return boolean
      */
     public isRegistered(): boolean {
@@ -236,7 +232,7 @@ export class ServiceManager implements IServiceManager {
 
     /**
      * Boot status of this service provider
-     * 
+     *
      * @return boolean
      */
     public isBooted(): boolean {
