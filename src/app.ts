@@ -22,6 +22,14 @@ export class Application extends Container implements IApp {
     private static instance: IApp;
 
     /**
+     * Application environment variable manager. Responsible for caching all the
+     * .env variables.
+     *
+     * @var IManager
+     */
+    protected _envManager: IManager;
+
+    /**
      * Application configurations manager. Handles the parsing and retreival
      * of configuration files.
      *
@@ -54,6 +62,7 @@ export class Application extends Container implements IApp {
 
         this.registerPaths(rootPath);
 
+        this._envManager = new EnvManager(this.path('env'));
         this._configManager = new ConfigManager(this.path('configs'));
         this._serviceManager = new ServiceManager(this);
 
@@ -101,8 +110,7 @@ export class Application extends Container implements IApp {
      * here instead of initialization in the constructor.
      */
     protected registerBaseBindings() {
-        this.instance('env', new EnvManager(this.path('env')), true);
-
+        this.instance('env', this._envManager, true);
         this.instance('configs', this._configManager, true);
         this.instance('services', this._serviceManager, true);
 
@@ -117,6 +125,15 @@ export class Application extends Container implements IApp {
      */
     public path(folder: string = 'root'): string {
         return this.get('path.' + folder) || this.get('path.root');
+    }
+
+    /**
+     * Returns the application env manager.
+     *
+     * @returns
+     */
+    public env(): IManager {
+        return this._envManager;
     }
 
     /**
