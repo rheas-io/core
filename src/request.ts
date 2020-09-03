@@ -23,11 +23,6 @@ import { IRequest, AnyObject, IResponse } from '@rheas/contracts';
 import { SuspiciousOperationException } from '@rheas/errors/suspicious';
 import { IContainer, InstanceHandler, IContainerInstance } from '@rheas/contracts/container';
 
-interface IParsedBody {
-    files: Files;
-    fields: Fields;
-}
-
 export class Request extends IncomingMessage implements IRequest {
     /**
      * This request's container manager
@@ -192,7 +187,7 @@ export class Request extends IncomingMessage implements IRequest {
      *
      * @returns
      */
-    public async getContents(): Promise<IParsedBody> {
+    public async getContents(): Promise<{ files: Files; fields: Fields }> {
         const form = new IncomingForm();
         form.multiples = true;
 
