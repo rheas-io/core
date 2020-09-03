@@ -72,7 +72,11 @@ export class RequestInput implements IRequestInput {
      * @returns
      */
     public all(): AnyObject {
-        return Object.assign(this.inputSource(), this._request.params(), this._merges);
+        return Object.assign(
+            this.inputSource(),
+            this._request.params().getStringObject(),
+            this._merges,
+        );
     }
 
     /**

@@ -1,9 +1,18 @@
 import url from 'url';
+import {
+    IApp,
+    IHeaders,
+    IRedirector,
+    IRequestInput,
+    IRequestParams,
+    IRequestContent,
+} from '@rheas/contracts/core';
 import { Headers } from './headers';
 import { Str } from '@rheas/support';
 import { IncomingMessage } from 'http';
 import { Container } from '@rheas/container';
 import { RequestInput } from './requestInput';
+import { RequestParams } from './requestParams';
 import { RequestContent } from './requestContent';
 import { ServiceManager } from './serviceManager';
 import { RequestComponent } from '@rheas/routing/uri';
@@ -13,7 +22,6 @@ import { IRequestComponent } from '@rheas/contracts/routes/uri';
 import { IRequest, AnyObject, IResponse } from '@rheas/contracts';
 import { SuspiciousOperationException } from '@rheas/errors/suspicious';
 import { IContainer, InstanceHandler, IContainerInstance } from '@rheas/contracts/container';
-import { IRedirector, IRequestContent, IRequestInput, IHeaders, IApp } from '@rheas/contracts/core';
 
 interface IParsedBody {
     files: Files;
@@ -99,6 +107,13 @@ export class Request extends IncomingMessage implements IRequest {
     protected _query: AnyObject = {};
 
     /**
+     * Stores the route params for this request.
+     *
+     * @var Map
+     */
+    protected _params: IRequestParams = new RequestParams();
+
+    /**
      * The request header object. Responsible for querying request
      * headers, parses cookies etc.
      *
@@ -167,6 +182,7 @@ export class Request extends IncomingMessage implements IRequest {
         this._files = Object.assign(this._files, parsedBody.files);
 
         this._query = Object.assign(this._query, parsed.query);
+        this._params.setParameters(this.getPathComponents());
     }
 
     /**
@@ -264,7 +280,7 @@ export class Request extends IncomingMessage implements IRequest {
         let method = <string>this.headers['X-HTTP-METHOD-OVERRIDE'];
 
         if (!method) {
-            //TODO
+            method = this.inputs().get('_method', 'POST');
         }
 
         if (typeof method !== 'string' || method.length === 0) {
@@ -273,7 +289,19 @@ export class Request extends IncomingMessage implements IRequest {
 
         method = method.toUpperCase();
 
-        if (!['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].includes(method)) {
+        if (
+            ![
+                'GET',
+                'HEAD',
+                'POST',
+                'PUT',
+                'PATCH',
+                'DELETE',
+                'OPTIONS',
+                'TRACE',
+                'CONNECT',
+            ].includes(method)
+        ) {
             throw new SuspiciousOperationException(`Invalid method requested: ${method}`);
         }
 
@@ -393,6 +421,8 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
+     * Returns the urldecoded query parameters of this request as an
+     * object.
      *
      * @returns
      */
@@ -401,17 +431,12 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
+     * Returns the parameter value map.
      *
-     * //TODO
+     * @returns
      */
-    public params(): string[] {
-        let params: string[] = [];
-
-        this.getPathComponents().forEach((components) =>
-            params.push(...Object.values(components.getParam())),
-        );
-
-        return params;
+    public params(): IRequestParams {
+        return this._params;
     }
 
     /**
