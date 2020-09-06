@@ -1,18 +1,11 @@
 import url from 'url';
-import {
-    IApp,
-    IHeaders,
-    IRedirector,
-    IRequestInput,
-    IRequestParams,
-    IRequestContent,
-} from '@rheas/contracts/core';
 import { Headers } from './headers';
 import { Str } from '@rheas/support';
 import { IncomingMessage } from 'http';
 import { Container } from '@rheas/container';
 import { RequestInput } from './requestInput';
 import { RequestParams } from './requestParams';
+import { IRoute } from '@rheas/contracts/routes';
 import { RequestContent } from './requestContent';
 import { ServiceManager } from './serviceManager';
 import { RequestComponent } from '@rheas/routing/uri';
@@ -20,7 +13,9 @@ import { IncomingForm, Fields, Files } from 'formidable';
 import { IServiceManager } from '@rheas/contracts/services';
 import { IRequestComponent } from '@rheas/contracts/routes/uri';
 import { IRequest, AnyObject, IResponse } from '@rheas/contracts';
+import { IApp, IHeaders, IRedirector } from '@rheas/contracts/core';
 import { SuspiciousOperationException } from '@rheas/errors/suspicious';
+import { IRequestInput, IRequestParams, IRequestContent } from '@rheas/contracts/core';
 import { IContainer, InstanceHandler, IContainerInstance } from '@rheas/contracts/container';
 
 export class Request extends IncomingMessage implements IRequest {
@@ -176,8 +171,8 @@ export class Request extends IncomingMessage implements IRequest {
         this._body = Object.assign(this._body, parsedBody.fields);
         this._files = Object.assign(this._files, parsedBody.files);
 
+        // Loads the request query.
         this._query = Object.assign(this._query, parsed.query);
-        this._params.setParameters(this.getPathComponents());
     }
 
     /**
@@ -199,6 +194,18 @@ export class Request extends IncomingMessage implements IRequest {
                 return resolve({ fields, files });
             });
         });
+    }
+
+    /**
+     * Sets the matching route of this request. The params should be loaded
+     * only when a matching route is found.
+     *
+     * @param route
+     */
+    public setRoute(route: IRoute): IRequest {
+        this._params.setParameters(this.getPathComponents());
+
+        return this;
     }
 
     /**
