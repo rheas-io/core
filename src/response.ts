@@ -16,9 +16,12 @@ export class Response extends ServerResponse implements IResponse {
      * The response header object. Responsible for querying response
      * headers, parses cookies etc.
      *
+     * We are using double underscore, as there is another property on
+     * the super class.
+     *
      * @var IHeaders
      */
-    protected _headers: IHeaders & ICacheManager;
+    protected __headers: IHeaders & ICacheManager;
 
     /**
      * The content to be send as response.
@@ -36,7 +39,7 @@ export class Response extends ServerResponse implements IResponse {
         super(req);
 
         this._request = req;
-        this._headers = new Headers();
+        this.__headers = new Headers();
     }
 
     /**
@@ -89,7 +92,7 @@ export class Response extends ServerResponse implements IResponse {
      * @returns
      */
     public cache(): ICacheManager {
-        return this._headers;
+        return this.__headers;
     }
 
     /**

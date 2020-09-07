@@ -206,7 +206,7 @@ export class RequestContent implements IAttributeManager {
      * @param defaultValue
      */
     public getAttribute(key: string, defaultValue: any = null) {
-        if (this._attributes.hasOwnProperties(key)) {
+        if (this._attributes.hasOwnProperty(key)) {
             return this._attributes[key];
         }
         return defaultValue;
