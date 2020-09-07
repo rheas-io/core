@@ -65,7 +65,7 @@ export class ConfigManager implements IManager {
     private cacheFile(filename: string): boolean {
         const filePath = this.getFilePath(filename);
 
-        this._configs[filename] = files().readJsFile(filePath);
+        this._configs[filename] = files().readJsSync(filePath);
 
         return this.isCachedFile(filename);
     }
