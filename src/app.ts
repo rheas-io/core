@@ -190,12 +190,12 @@ export class Application extends Container implements IApp {
      */
     public startApp(): void {
         // Boot the application services before starting the server
-        this._serviceManager.boot();
+        this.bootServices();
 
         // Establish connection to the database before opening a
         // port. On successfull connection, open a port and listen to
         // requests. Otherwise, log the error and exit the process.
-        this.initDbConnection()
+        this.connectToDatabase()
             .then(() => this.enableHttpServer())
             .catch((error) => {
                 console.error('Error connecting to database. Server not started.');
@@ -205,13 +205,24 @@ export class Application extends Container implements IApp {
     }
 
     /**
+     * This function boots all the application services.
+     *
+     * The application services should be booted before it starts
+     * listening to requests.
+     */
+    public bootServices(): void {
+        this._serviceManager.boot();
+    }
+
+    /**
      * Connects to the database connector bound by the keyword "db". An
      * exception is thrown if no db service is defined. Db services are core
      * part of the application, so we can't proceed without having one.
      *
-     * @return Promise
+     * Ideally the application should start listening to requests only
+     * when the promise gets resolved.
      */
-    public initDbConnection(): Promise<any> {
+    public connectToDatabase(): Promise<any> {
         const connector: IDbConnector | null = this.get('db');
 
         if (connector === null) {

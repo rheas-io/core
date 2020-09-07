@@ -1,6 +1,6 @@
+import { StringObject } from '@rheas/contracts';
 import { IRequestComponent } from '@rheas/contracts/routes/uri';
 import { IRequestParams } from '@rheas/contracts/core/requestParams';
-import { StringObject } from '@rheas/contracts';
 
 export class RequestParams extends Map<string, string> implements IRequestParams {
     /**
