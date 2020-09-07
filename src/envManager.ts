@@ -2,6 +2,7 @@ import { files } from '@rheas/support/helpers';
 import { StringObject } from '@rheas/contracts';
 import { IManager } from '@rheas/contracts/core';
 import { IFileManager } from '@rheas/contracts/files';
+import { Exception } from '@rheas/errors/exception';
 
 export class EnvManager implements IManager {
     /**
@@ -33,6 +34,23 @@ export class EnvManager implements IManager {
     constructor(envPath: string, encoding = 'utf8') {
         this._encoding = encoding;
         this._envFilePath = envPath;
+
+        this.validateEnvFile();
+    }
+
+    /**
+     * Throws an error if .env file does not exists.
+     *
+     * @returns
+     * @throws
+     */
+    private validateEnvFile(): boolean {
+        const fs: IFileManager = files();
+
+        if (!fs.fileExistsSync(this._envFilePath)) {
+            throw new Exception('.env file not found. Aborting request.');
+        }
+        return true;
     }
 
     /**
@@ -78,13 +96,12 @@ export class EnvManager implements IManager {
     protected readEnvFile(): StringObject {
         const fs: IFileManager = files();
 
-        if (fs.fileExists(this._envFilePath)) {
-            try {
-                const fileContents = fs.readFileSync(this._envFilePath, this._encoding);
+        try {
+            const fileContents = fs.readTextFileSync(this._envFilePath, this._encoding);
 
-                return this.parseContents(fileContents);
-            } catch (error) {}
-        }
+            return this.parseContents(fileContents);
+        } catch (error) {}
+
         return {};
     }
 
