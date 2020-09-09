@@ -10,6 +10,8 @@ import { RequestContent } from './requestContent';
 import { ServiceManager } from './serviceManager';
 import { RequestComponent } from '@rheas/routing/uri';
 import { IncomingForm, Fields, Files } from 'formidable';
+import { ICookieManager } from '@rheas/contracts/cookies';
+import { ISessionManager } from '@rheas/contracts/sessions';
 import { IServiceManager } from '@rheas/contracts/services';
 import { IRequestComponent } from '@rheas/contracts/routes/uri';
 import { IRequest, AnyObject, IResponse } from '@rheas/contracts';
@@ -17,6 +19,7 @@ import { IApp, IHeaders, IRedirector } from '@rheas/contracts/core';
 import { SuspiciousOperationException } from '@rheas/errors/suspicious';
 import { IRequestInput, IRequestParams, IRequestContent } from '@rheas/contracts/core';
 import { IContainer, InstanceHandler, IContainerInstance } from '@rheas/contracts/container';
+import { Exception } from '@rheas/errors/exception';
 
 export class Request extends IncomingMessage implements IRequest {
     /**
@@ -209,12 +212,50 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * Returns the request redirect handler.
+     * Returns the request redirect handler. Throws an exception
+     * if the service is not registered.
      *
      * @return IRedirector
      */
     public redirect(): IRedirector {
-        return this.get('redirect');
+        return this.getServiceOrThrow('redirect');
+    }
+
+    /**
+     * Returns the cookies manager service. Throws an exception if
+     * the cookies service is not registered.
+     *
+     * @returns
+     */
+    public cookies(): ICookieManager {
+        return this.getServiceOrThrow('cookies');
+    }
+
+    /**
+     * Returns the session manager service. Throws an exception if
+     * the sessions service is not registered.
+     *
+     * @returns
+     */
+    public sessions(): ISessionManager {
+        return this.getServiceOrThrow('session');
+    }
+
+    /**
+     * Returns a service registered in the given name. If no service is
+     * found, an exception is thrown.
+     *
+     * @param name
+     */
+    private getServiceOrThrow(name: string): any {
+        const service = this.get(name);
+
+        if (null === service) {
+            throw new Exception(
+                `${name} service is not registered. Fix the request providers list on config file. Aborting request.`,
+            );
+        }
+        return service;
     }
 
     /**
