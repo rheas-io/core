@@ -526,7 +526,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @param defaultValue
      */
     public get(key: string, defaultValue: any = null) {
-        const service = this._container.get(key, defaultValue);
+        const service = this._container.get(key);
 
         // If no service is found we will load any deferredServices. If the
         // deferred service is loaded, we will try getting the value again from the
@@ -534,6 +534,6 @@ export class Request extends IncomingMessage implements IRequest {
         if (service === null && this._serviceManager.registerServiceByName(key)) {
             return this._container.get(key, defaultValue);
         }
-        return service;
+        return service ?? defaultValue;
     }
 }

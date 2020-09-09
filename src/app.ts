@@ -372,7 +372,7 @@ export class Application extends Container implements IApp {
      * @param key The binding key to retreive
      */
     public get(key: string, defaultValue?: any): any {
-        const service = super.get(key, defaultValue);
+        const service = super.get(key);
 
         // If no service is found we will load any deferredServices. If the
         // deferred service is loaded, we will try getting the value again from the
@@ -380,6 +380,6 @@ export class Application extends Container implements IApp {
         if (service === null && this._serviceManager.registerServiceByName(key)) {
             return super.get(key, defaultValue);
         }
-        return service;
+        return service ?? defaultValue;
     }
 }
