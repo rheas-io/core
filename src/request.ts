@@ -8,6 +8,7 @@ import { RequestParams } from './requestParams';
 import { IRoute } from '@rheas/contracts/routes';
 import { RequestContent } from './requestContent';
 import { ServiceManager } from './serviceManager';
+import { Exception } from '@rheas/errors/exception';
 import { RequestComponent } from '@rheas/routing/uri';
 import { IncomingForm, Fields, Files } from 'formidable';
 import { ICookieManager } from '@rheas/contracts/cookies';
@@ -19,7 +20,6 @@ import { IApp, IHeaders, IRedirector } from '@rheas/contracts/core';
 import { SuspiciousOperationException } from '@rheas/errors/suspicious';
 import { IRequestInput, IRequestParams, IRequestContent } from '@rheas/contracts/core';
 import { IContainer, InstanceHandler, IContainerInstance } from '@rheas/contracts/container';
-import { Exception } from '@rheas/errors/exception';
 
 export class Request extends IncomingMessage implements IRequest {
     /**
@@ -265,6 +265,30 @@ export class Request extends IncomingMessage implements IRequest {
      */
     public reqHeaders(): IHeaders {
         return this._headers;
+    }
+
+    /**
+     * Returns true if the request method is one of HEAD, GET
+     * and OPTIONS.
+     *
+     * @returns
+     */
+    public isReadRequest(): boolean {
+        return ['HEAD', 'GET', 'OPTIONS'].includes(this.getMethod());
+    }
+
+    /**
+     * Returns a single string value from the given header
+     *
+     * @param header
+     */
+    public stringFromHeader(header: string): string {
+        let value = this.headers[header];
+
+        if (value && typeof value !== 'string') {
+            value = value[0];
+        }
+        return value || '';
     }
 
     /**
