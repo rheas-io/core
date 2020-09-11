@@ -278,6 +278,35 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
+     * Returns true if the request uri is exempted in the app exemption list
+     * for the given exemptKey.
+     *
+     * @param exemptKey
+     */
+    public isExemptedIn(exemptKey: string): boolean {
+        const app: IApp = this.get('app');
+
+        if (!app) {
+            return false;
+        }
+
+        const exceptions = app.exceptions(exemptKey);
+
+        for (let exception of exceptions) {
+            // Check for full url match
+            if (Str.matches(this.getFullUrl(), exception)) {
+                return true;
+            }
+            // Check for path match if full url match failed
+            if (Str.matches(this.getPath(), exception)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns a single string value from the given header
      *
      * @param header
@@ -544,20 +573,31 @@ export class Request extends IncomingMessage implements IRequest {
 
     /**
      * Returns the binding stored in this container. The resolved value is returned
-     * if the key is assigned to a resolver.
+     * if the key is assigned to a resolver. If the binding is not found in this
+     * container, we will check the same on the app container.
      *
      * @param key
      * @param defaultValue
      */
     public get(key: string, defaultValue: any = null) {
-        const service = this._container.get(key);
+        let service = this._container.get(key);
 
         // If no service is found we will load any deferredServices. If the
         // deferred service is loaded, we will try getting the value again from the
         // container.
         if (service === null && this._serviceManager.registerServiceByName(key)) {
-            return this._container.get(key, defaultValue);
+            service = this._container.get(key);
         }
+
+        // Check the presence of the binding on the app container/lifecycle
+        // This will allow us to bypass the get('app') on request cycle whenever
+        // we want something from the app lifecycle.
+        if (service === null) {
+            const app: IApp = this._container.get('app');
+
+            service = app && app.get(key);
+        }
+
         return service ?? defaultValue;
     }
 }
