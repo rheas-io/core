@@ -12,7 +12,7 @@ import { Exception } from '@rheas/errors/exception';
 import { RequestComponent } from '@rheas/routing/uri';
 import { IncomingForm, Fields, Files } from 'formidable';
 import { ICookieManager } from '@rheas/contracts/cookies';
-import { ISessionManager } from '@rheas/contracts/sessions';
+import { ISession, ISessionManager } from '@rheas/contracts/sessions';
 import { IServiceManager } from '@rheas/contracts/services';
 import { IRequestComponent } from '@rheas/contracts/routes/uri';
 import { IRequest, AnyObject, IResponse } from '@rheas/contracts';
@@ -304,6 +304,30 @@ export class Request extends IncomingMessage implements IRequest {
         }
 
         return false;
+    }
+
+    /**
+     * Checks if this request is CSRF protected or not.
+     *
+     * @returns
+     */
+    public isCsrfProtected(): ISession | false {
+        const sessionManager = this.sessions();
+        const session = sessionManager.getSession();
+
+        if (!session) {
+            return false;
+        }
+        // Read different headers and determine if token matches. _csrf field in the
+        // GET or POST takes higher precedence, followed by X-CSRF-TOKEN header and
+        // finally X-XSRF-TOKEN header.
+        let token = this.inputs().get('_csrf');
+
+        if (token == null || token === '') {
+            token = this.stringFromHeader('X-CSRF-TOKEN') || this.stringFromHeader('X-XSRF-TOKEN');
+        }
+
+        return session.getCsrf() === token ? session : false;
     }
 
     /**
