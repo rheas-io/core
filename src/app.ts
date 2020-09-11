@@ -155,33 +155,36 @@ export class Application extends Container implements IApp {
     }
 
     /**
-     * Middleware exception keys setter and getter.
+     * Middleware exception keys setter.
      *
-     * Throughout the app certain exceptions will have to be made to
-     * services/operations. These are set/get using this function.
+     * Throughout the application, certain exceptions have to be made
+     * while performing different operations. These are set using this
+     * function.
      *
      * @param key
      * @param value
      */
-    public exceptions(key: string, value?: string[]): string[] {
+    public setExceptions(key: string, value: string[]): IApp {
         const bindKey = 'exceptions.' + key;
-
-        // If value is null, act as a getter. Returns the string
-        // array for the exceptions if it exists or returns an
-        // empty array
-        if (value == null) {
-            return this.get(bindKey, []);
-        }
-
-        // If value is undefined, set it to an empty array and
-        // proceed with binding to the container.
-        value = value || [];
 
         // Non singleton binding, so can be updated with new values
         // from anywhere.
         this.instance(bindKey, value);
 
-        return value;
+        return this;
+    }
+
+    /**
+     * Middleware exception keys getter. Gets the exceptions set on
+     * the given key. An empty array is returned if no exception has been
+     * set for the key.
+     *
+     * @param key
+     */
+    public exceptions(key: string): string[] {
+        const bindKey = 'exceptions.' + key;
+
+        return this.get(bindKey, []);
     }
 
     /**
