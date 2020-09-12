@@ -2,9 +2,9 @@ import path from 'path';
 import { Obj } from '@rheas/support';
 import { AnyObject } from '@rheas/contracts';
 import { files } from '@rheas/support/helpers';
-import { IManager } from '@rheas/contracts/core';
+import { IGetter } from '@rheas/contracts/core';
 
-export class ConfigManager implements IManager {
+export class ConfigManager implements IGetter {
     /**
      * Configuration folder path
      *
