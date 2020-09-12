@@ -9,7 +9,7 @@ import { ServiceManager } from './serviceManager';
 import { IApp } from '@rheas/contracts/core/app';
 import { IRouter } from '@rheas/contracts/routes';
 import { IServiceManager } from '@rheas/contracts/services';
-import { IManager, IServerCreator } from '@rheas/contracts/core';
+import { IGetter, IServerCreator } from '@rheas/contracts/core';
 import { IRequest, IResponse, IDbConnector } from '@rheas/contracts';
 import http, { Server, IncomingMessage, ServerResponse } from 'http';
 
@@ -27,7 +27,7 @@ export class Application extends Container implements IApp {
      *
      * @var IManager
      */
-    protected _envManager: IManager;
+    protected _envManager: IGetter;
 
     /**
      * Application configurations manager. Handles the parsing and retreival
@@ -35,7 +35,7 @@ export class Application extends Container implements IApp {
      *
      * @var IManager
      */
-    protected _configManager: IManager;
+    protected _configManager: IGetter;
 
     /**
      * Service manager that handles the registering and booting of
@@ -132,7 +132,7 @@ export class Application extends Container implements IApp {
      *
      * @returns
      */
-    public env(): IManager {
+    public env(): IGetter {
         return this._envManager;
     }
 
@@ -141,7 +141,7 @@ export class Application extends Container implements IApp {
      *
      * @returns
      */
-    public configs(): IManager {
+    public configs(): IGetter {
         return this._configManager;
     }
 
@@ -184,7 +184,14 @@ export class Application extends Container implements IApp {
     public exceptions(key: string): string[] {
         const bindKey = 'exceptions.' + key;
 
-        return this.get(bindKey, []);
+        try {
+            return this.get(bindKey);
+        } catch (error) {
+            // Possible binding not found excepion. We will return
+            // an empty array if an exception is thrown.
+        }
+
+        return [];
     }
 
     /**
@@ -368,21 +375,15 @@ export class Application extends Container implements IApp {
     /**
      * @override Container getter
      *
-     * Returns the rheas binding of the specified key. If a binding is not
-     * found, we will check for any deferred services and register if one exist.
-     * Then we will try to get the binding once again.
+     * Initially we will load any deferred service with the given name. After
+     * that we will try to fetch the binding from the container. If no binding
+     * is found, an exception will be thrown by the container.
      *
      * @param key The binding key to retreive
      */
-    public get(key: string, defaultValue?: any): any {
-        const service = super.get(key);
+    public get(key: string): any {
+        this._serviceManager.registerServiceByName(key);
 
-        // If no service is found we will load any deferredServices. If the
-        // deferred service is loaded, we will try getting the value again from the
-        // Container.
-        if (service === null && this._serviceManager.registerServiceByName(key)) {
-            return super.get(key, defaultValue);
-        }
-        return service ?? defaultValue;
+        return super.get(key);
     }
 }

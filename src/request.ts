@@ -12,12 +12,13 @@ import { Exception } from '@rheas/errors/exception';
 import { RequestComponent } from '@rheas/routing/uri';
 import { IncomingForm, Fields, Files } from 'formidable';
 import { ICookieManager } from '@rheas/contracts/cookies';
-import { ISession, ISessionManager } from '@rheas/contracts/sessions';
 import { IServiceManager } from '@rheas/contracts/services';
 import { IRequestComponent } from '@rheas/contracts/routes/uri';
 import { IRequest, AnyObject, IResponse } from '@rheas/contracts';
 import { IApp, IHeaders, IRedirector } from '@rheas/contracts/core';
+import { ISession, ISessionManager } from '@rheas/contracts/sessions';
 import { SuspiciousOperationException } from '@rheas/errors/suspicious';
+import { BindingNotFoundException } from '@rheas/errors/bindingNotFound';
 import { IRequestInput, IRequestParams, IRequestContent } from '@rheas/contracts/core';
 import { IContainer, InstanceHandler, IContainerInstance } from '@rheas/contracts/container';
 
@@ -596,32 +597,32 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
-     * Returns the binding stored in this container. The resolved value is returned
-     * if the key is assigned to a resolver. If the binding is not found in this
-     * container, we will check the same on the app container.
+     * Returns the binding stored in this container/request lifecyle. The resolved
+     * value is returned if the key is assigned to a resolver. If the binding is not
+     * found in this container, we will check the same on the app container.
+     *
+     * If the binding is not found in app level container, then a BindingNotFound
+     * exception is thrown.
      *
      * @param key
-     * @param defaultValue
      */
-    public get(key: string, defaultValue: any = null) {
-        let service = this._container.get(key);
+    public get(key: string) {
+        this._serviceManager.registerServiceByName(key);
 
-        // If no service is found we will load any deferredServices. If the
-        // deferred service is loaded, we will try getting the value again from the
-        // container.
-        if (service === null && this._serviceManager.registerServiceByName(key)) {
-            service = this._container.get(key);
-        }
-
-        // Check the presence of the binding on the app container/lifecycle
-        // This will allow us to bypass the get('app') on request cycle whenever
-        // we want something from the app lifecycle.
-        if (service === null) {
+        try {
+            return this._container.get(key);
+        } catch (error) {
+            // Only BindingNotFoundException should proceed to check
+            // the app level bindings.
+            if (!(error instanceof BindingNotFoundException)) {
+                throw error;
+            }
+            // Check the presence of the binding on the app container/lifecycle
+            // This will allow us to bypass the get('app') on request cycle whenever
+            // we want something from the app lifecycle.
             const app: IApp = this._container.get('app');
 
-            service = app && app.get(key);
+            return app.get(key);
         }
-
-        return service ?? defaultValue;
     }
 }
