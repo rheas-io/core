@@ -34,23 +34,6 @@ export class EnvManager implements IGetter {
     constructor(envPath: string, encoding = 'utf8') {
         this._encoding = encoding;
         this._envFilePath = envPath;
-
-        this.validateEnvFile();
-    }
-
-    /**
-     * Throws an error if .env file does not exists.
-     *
-     * @returns
-     * @throws
-     */
-    private validateEnvFile(): boolean {
-        const fs: IFileManager = files();
-
-        if (!fs.fileExistsSync(this._envFilePath)) {
-            throw new Exception('.env file not found. Aborting request.');
-        }
-        return true;
     }
 
     /**
