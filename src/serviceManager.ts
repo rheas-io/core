@@ -146,11 +146,13 @@ export class ServiceManager implements IServiceManager {
      * @param name
      */
     private getServiceProvider(name: string): IServiceProvider | null {
-        try {
-            const service: ClassOf<IServiceProvider> = this._services[name];
+        if (this._services.hasOwnProperty(name)) {
+            try {
+                const service: ClassOf<IServiceProvider> = this._services[name];
 
-            return new service(name, this._container);
-        } catch (err) {}
+                return new service(name, this._container);
+            } catch (err) {}
+        }
 
         return null;
     }
