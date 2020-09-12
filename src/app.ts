@@ -62,9 +62,9 @@ export class Application extends Container implements IApp {
 
         this.registerPaths(rootPath);
 
+        this._serviceManager = new ServiceManager(this);
         this._envManager = new EnvManager(this.path('env'));
         this._configManager = new ConfigManager(this.path('configs'));
-        this._serviceManager = new ServiceManager(this);
 
         this.registerBaseBindings();
     }
@@ -124,7 +124,7 @@ export class Application extends Container implements IApp {
      * @param folder
      */
     public path(folder: string = 'root'): string {
-        return this.get('path.' + folder) || this.get('path.root');
+        return this.get('path.' + folder);
     }
 
     /**
