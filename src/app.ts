@@ -67,6 +67,8 @@ export class Application extends Container implements IApp {
         this._configManager = new ConfigManager(this.path('configs'));
 
         this.registerBaseBindings();
+
+        this.registerExitEvents();
     }
 
     /**
@@ -115,6 +117,32 @@ export class Application extends Container implements IApp {
         this.instance('services', this._serviceManager, true);
 
         this._serviceManager.setProviders(this.configs().get('app.providers', {}));
+    }
+
+    /**
+     * Registers process listeners for application exit events. We will
+     * close all the database connections when an exit signal is triggered.
+     */
+    protected registerExitEvents() {
+        const listener = async () => {
+            try {
+                const db: IDbConnector<any> = this.get('db');
+
+                await db.closeConnections();
+
+                return process.exit(0);
+            } catch (err) {
+                console.log(err);
+            }
+
+            console.log('Error closing all the database connections.');
+            return process.exit(1);
+        };
+        process.on('SIGINT', listener);
+        process.on('SIGUSR1', listener);
+        process.on('SIGUSR2', listener);
+        process.on('SIGTERM', listener);
+        process.on('uncaughtException', listener);
     }
 
     /**
@@ -233,7 +261,7 @@ export class Application extends Container implements IApp {
      * when the promise gets resolved.
      */
     public connectToDatabase(): Promise<any> {
-        const connector: IDbConnector | null = this.get('db');
+        const connector: IDbConnector<any> | null = this.get('db');
 
         if (connector === null) {
             throw new Error('No database service is registered. Fix the app providers list');
