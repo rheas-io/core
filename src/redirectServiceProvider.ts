@@ -1,10 +1,10 @@
 import { Redirector } from './redirector';
 import { IRequest } from '@rheas/contracts';
+import { ServiceProvider } from '@rheas/services';
 import { IUrlGenerator } from '@rheas/contracts/routes';
-import { DeferredServiceProvider } from '@rheas/services';
 import { InstanceHandler } from '@rheas/contracts/container';
 
-export class RedirectServiceProvider extends DeferredServiceProvider {
+export class RedirectServiceProvider extends ServiceProvider {
     /**
      * Returns the redirector service resolver.
      *

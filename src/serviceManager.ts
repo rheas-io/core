@@ -64,7 +64,8 @@ export class ServiceManager implements IServiceManager {
     }
 
     /**
-     * @inheritdoc
+     * Creates a new service on the manager. If a provider already exists and is not registered
+     * yet, we will replace it or we will throw an error.
      *
      * @param name
      * @param provider
@@ -84,25 +85,14 @@ export class ServiceManager implements IServiceManager {
     }
 
     /**
-     * Registers the necessary service providers. Deferred services are
-     * cached in the deferred providers list and are loaded only when a
-     * binding request is made to the service.
+     * Services are lazy loaded, ie, whenever a service is requested by their
+     * name, we will register it. So there is nothing to do in this register call.
+     *
+     * Just set the registered status to true and return.
      */
     public register(): void {
         if (this.isRegistered()) {
             return;
-        }
-
-        for (let alias in this._services) {
-            // A service can be deferred to load when it is absolutely needed.
-            // Such services should have a provides property that states, to which
-            // alias it should be loaded.
-            //
-            // If the service doesn't has to be deferred, we will register
-            // them immediately.
-            if (!('provide' in this._services[alias])) {
-                this.registerServiceByName(alias);
-            }
         }
         this.setRegistered(true);
     }
