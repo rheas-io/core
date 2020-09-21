@@ -1,6 +1,7 @@
 import { Headers } from './headers';
 import { ServerResponse } from 'http';
 import { config } from '@rheas/support/helpers';
+import { IViewFactory } from '@rheas/contracts/views';
 import { ICacheManager, IHeaders } from '@rheas/contracts/core';
 import { IRequest, IResponse, AnyObject } from '@rheas/contracts';
 
@@ -73,6 +74,21 @@ export class Response extends ServerResponse implements IResponse {
         this._request.contents().setFormat('json');
 
         return this.setContent(JSON.stringify(content));
+    }
+
+    /**
+     * Sets an html view as the content.
+     * 
+     * @param viewPath
+     * @param data
+     */
+    public view(viewPath: string, data: AnyObject = {}): IResponse {
+        const viewFactory: IViewFactory = this._request.get('view');
+        const view = viewFactory.createNewView();
+
+        this.setContent(view.render(viewPath, data));
+
+        return this;
     }
 
     /**
