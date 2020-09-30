@@ -1,9 +1,10 @@
+import { EventEmitter } from 'events';
 import { ClassOf, KeyValue } from '@rheas/contracts';
 import { IContainer } from '@rheas/contracts/container';
 import { InvalidArgumentException } from '@rheas/errors/invalidArgument';
 import { IServiceManager, IServiceProvider } from '@rheas/contracts/services';
 
-export class ServiceManager implements IServiceManager {
+export class ServiceManager extends EventEmitter implements IServiceManager {
     /**
      * The container instance which has to be used when resolving
      * services. This can be either App or Request instance.
@@ -46,6 +47,8 @@ export class ServiceManager implements IServiceManager {
      * @param providers
      */
     constructor(container: IContainer, providers: KeyValue<ClassOf<IServiceProvider>> = {}) {
+        super();
+
         this._container = container;
         this._services = providers;
     }
@@ -95,6 +98,8 @@ export class ServiceManager implements IServiceManager {
             return;
         }
         this.setRegistered(true);
+
+        this.emit('registered');
     }
 
     /**
@@ -175,6 +180,8 @@ export class ServiceManager implements IServiceManager {
         }
 
         this.setBooted(true);
+
+        this.emit('booted');
     }
 
     /**
