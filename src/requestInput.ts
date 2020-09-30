@@ -1,4 +1,4 @@
-import { Obj } from '@rheas/support';
+import { Obj } from '@rheas/support/obj';
 import { IRequestInput } from '@rheas/contracts/core';
 import { IRequest, AnyObject } from '@rheas/contracts';
 

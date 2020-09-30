@@ -1,7 +1,7 @@
 import url from 'url';
 import { Headers } from './headers';
-import { Str } from '@rheas/support';
 import { IncomingMessage } from 'http';
+import { Str } from '@rheas/support/str';
 import { Container } from '@rheas/container';
 import { RequestInput } from './requestInput';
 import { RequestParams } from './requestParams';
@@ -287,10 +287,6 @@ export class Request extends IncomingMessage implements IRequest {
     public isExemptedIn(exemptKey: string): boolean {
         const app: IApp = this.get('app');
 
-        if (!app) {
-            return false;
-        }
-
         const exceptions = app.exceptions(exemptKey);
 
         for (let exception of exceptions) {
@@ -303,7 +299,6 @@ export class Request extends IncomingMessage implements IRequest {
                 return true;
             }
         }
-
         return false;
     }
 

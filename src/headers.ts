@@ -1,4 +1,4 @@
-import { Str } from '@rheas/support';
+import { Str } from '@rheas/support/str';
 import { AnyObject } from '@rheas/contracts';
 import { IHeaders, ICacheManager } from '@rheas/contracts/core';
 

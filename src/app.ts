@@ -6,12 +6,11 @@ import https, { ServerOptions } from 'https';
 import { Container } from '@rheas/container';
 import { ConfigManager } from './configManager';
 import { ServiceManager } from './serviceManager';
-import { IApp } from '@rheas/contracts/core/app';
-import { IRouter } from '@rheas/contracts/routes';
 import { IServiceManager } from '@rheas/contracts/services';
-import { IGetter, IServerCreator } from '@rheas/contracts/core';
 import { IRequest, IResponse, IDbConnector } from '@rheas/contracts';
 import http, { Server, IncomingMessage, ServerResponse } from 'http';
+import { IApp, InternalAppBindings } from '@rheas/contracts/core/app';
+import { IGetter, IKernal, IServerCreator } from '@rheas/contracts/core';
 
 export class Application extends Container implements IApp {
     /**
@@ -54,6 +53,8 @@ export class Application extends Container implements IApp {
      *
      * Registers the core app managers, ConfigManager and ServiceManager that handles
      * configs and serviceProviders respectively.
+     *
+     * @param rootPath project root directory
      */
     constructor(rootPath: string) {
         super();
@@ -66,8 +67,8 @@ export class Application extends Container implements IApp {
         this._envManager = new EnvManager(this.path('env'));
         this._configManager = new ConfigManager(this.path('configs'));
 
-        this.registerBaseBindings();
-
+        this.registerCoreBindings();
+        this.registerCoreServices();
         this.registerExitEvents();
     }
 
@@ -111,12 +112,22 @@ export class Application extends Container implements IApp {
      * no references in this object. That's why service providers are loaded
      * here instead of initialization in the constructor.
      */
-    protected registerBaseBindings() {
+    protected registerCoreBindings() {
         this.instance('env', this._envManager, true);
         this.instance('configs', this._configManager, true);
         this.instance('services', this._serviceManager, true);
+    }
 
+    /**
+     * Loads the services on to the application service manager and also
+     * registers core services like error, which takes care of exception
+     * handling, and middlewares, which is important for accepting requests.
+     */
+    protected registerCoreServices() {
         this._serviceManager.setProviders(this.configs().get('app.providers', {}));
+
+        this._serviceManager.registerServiceByName('error');
+        this._serviceManager.registerServiceByName('middlewares');
     }
 
     /**
@@ -124,25 +135,31 @@ export class Application extends Container implements IApp {
      * close all the database connections when an exit signal is triggered.
      */
     protected registerExitEvents() {
-        const listener = async () => {
-            try {
-                const db: IDbConnector<any> = this.get('db');
+        const listener = this.terminate.bind(this);
 
-                await db.closeConnections();
-
-                return process.exit(0);
-            } catch (err) {
-                console.log(err);
-            }
-
-            console.log('Error closing all the database connections.');
-            return process.exit(1);
-        };
         process.on('SIGINT', listener);
         process.on('SIGUSR1', listener);
         process.on('SIGUSR2', listener);
         process.on('SIGTERM', listener);
         process.on('uncaughtException', listener);
+    }
+
+    /**
+     * Initiates the application termination. All the database connections
+     * are closed first to gracefully terminate the application.
+     */
+    public async terminate() {
+        try {
+            const db: IDbConnector<any> = this.get('db');
+
+            await db.closeConnections();
+
+            return process.exit(0);
+        } catch (err) {
+            console.log('Error closing all the database connections.');
+            console.log(err);
+        }
+        return process.exit(1);
     }
 
     /**
@@ -218,7 +235,6 @@ export class Application extends Container implements IApp {
             // Possible binding not found excepion. We will return
             // an empty array if an exception is thrown.
         }
-
         return [];
     }
 
@@ -277,18 +293,15 @@ export class Application extends Container implements IApp {
      * @param res
      */
     public async listenRequests(req: IncomingMessage, res: ServerResponse): Promise<any> {
-        const router: IRouter | null = this.get('router');
-
-        if (router === null) {
-            throw new Error('No router service is registered. Fix the app providers list');
-        }
         const request = req as IRequest;
         let response = res as IResponse;
 
         try {
+            const kernal: IKernal = this.get('kernal');
+
             await request.boot(this, response);
 
-            response = await router.handle(request, response);
+            response = await kernal.handle(request, response);
         } catch (err) {
             err.message =
                 'Status 500: Exception handler failure.' + (err.message || 'Server error');
@@ -401,7 +414,7 @@ export class Application extends Container implements IApp {
     }
 
     /**
-     * @override Container getter
+     * @override
      *
      * Initially we will load any deferred service with the given name. After
      * that we will try to fetch the binding from the container. If no binding
@@ -409,7 +422,7 @@ export class Application extends Container implements IApp {
      *
      * @param key The binding key to retreive
      */
-    public get(key: string): any {
+    public get(key: InternalAppBindings | string): any {
         this._serviceManager.registerServiceByName(key);
 
         return super.get(key);

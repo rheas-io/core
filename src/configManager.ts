@@ -1,5 +1,5 @@
 import path from 'path';
-import { Obj } from '@rheas/support';
+import { Obj } from '@rheas/support/obj';
 import { AnyObject } from '@rheas/contracts';
 import { files } from '@rheas/support/helpers';
 import { IGetter } from '@rheas/contracts/core';
