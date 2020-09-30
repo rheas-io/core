@@ -1,17 +1,16 @@
 import path from 'path';
 import { Request } from './request';
 import { Response } from './response';
-import { EventEmitter } from 'events';
 import { EnvManager } from './envManager';
 import https, { ServerOptions } from 'https';
 import { Container } from '@rheas/container';
 import { ConfigManager } from './configManager';
-import { ServiceManager } from './serviceManager';
-import { IServiceManager } from '@rheas/contracts/services';
+import { ServiceManager } from '@rheas/services';
 import { IRequest, IResponse, IDbConnector } from '@rheas/contracts';
 import http, { Server, IncomingMessage, ServerResponse } from 'http';
 import { IApp, InternalAppBindings } from '@rheas/contracts/core/app';
 import { IGetter, IKernal, IServerCreator } from '@rheas/contracts/core';
+import { IServiceManager, IServiceListener } from '@rheas/contracts/services';
 
 export class Application extends Container implements IApp {
     /**
@@ -43,7 +42,7 @@ export class Application extends Container implements IApp {
      *
      * @var IServiceManager
      */
-    protected _serviceManager: IServiceManager & EventEmitter;
+    protected _serviceManager: IServiceManager & IServiceListener;
 
     /**
      * Creates a new singleton Rheas Application. This class acts as a container
@@ -129,6 +128,25 @@ export class Application extends Container implements IApp {
 
         this._serviceManager.registerServiceByName('error');
         this._serviceManager.registerServiceByName('middlewares');
+    }
+
+    /**
+     * Registers a callback that has to be executed after registering.
+     *
+     * @param callback
+     */
+    public registered(callback: () => any): void {
+        this._serviceManager.registered(callback);
+    }
+
+    /**
+     * Registers a callback that has to be executed after booting all the
+     * application services.
+     *
+     * @param callback
+     */
+    public booted(callback: () => any): void {
+        this._serviceManager.booted(callback);
     }
 
     /**
@@ -267,16 +285,6 @@ export class Application extends Container implements IApp {
      */
     public bootServices(): void {
         this._serviceManager.boot();
-    }
-
-    /**
-     * Registers a callback that has to be executed after booting all the
-     * application services.
-     *
-     * @param callback
-     */
-    public booted(callback: () => any): void {
-        this._serviceManager.on('booted', callback);
     }
 
     /**
