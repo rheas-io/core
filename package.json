@@ -12,6 +12,9 @@
     "server",
     "library"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "tsc": "tsc",
     "test": "jest",
@@ -27,6 +30,12 @@
     "mime-types": "^2.1.27"
   },
   "devDependencies": {
+    "@rheas/container": "^0.0.1",
+    "@rheas/contracts": "^0.0.1",
+    "@rheas/services": "^0.0.1",
+    "@rheas/routing": "^0.0.1",
+    "@rheas/support": "^0.0.1",
+    "@rheas/errors": "^0.0.1",
     "@types/accepts": "^1.3.5",
     "@types/formidable": "^1.0.31",
     "@types/jest": "^25.2.1",

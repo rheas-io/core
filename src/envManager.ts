@@ -1,6 +1,6 @@
-import { files } from '@rheas/support/helpers';
 import { IGetter } from '@rheas/contracts/core';
 import { StringObject } from '@rheas/contracts';
+import { files } from '@rheas/support/helpers/files';
 import { IFileManager } from '@rheas/contracts/files';
 
 export class EnvManager implements IGetter {
