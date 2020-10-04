@@ -5,8 +5,8 @@ import { IApp, IKernal } from '@rheas/contracts/core';
 import { IFileManager } from '@rheas/contracts/files';
 import { IRequest, IResponse } from '@rheas/contracts';
 import { RequestPipeline } from '@rheas/routing/requestPipeline';
+import { IMiddlewareManager } from '@rheas/contracts/middlewares';
 import { IException, IExceptionHandler } from '@rheas/contracts/errors';
-import { IMiddleware, IMiddlewareManager } from '@rheas/contracts/middlewares';
 
 export class Kernal implements IKernal {
     /**
@@ -59,13 +59,13 @@ export class Kernal implements IKernal {
 
             // Sends request through the middlewares of this class, which are
             // global middlewares. Final destination will be the router handle function
-            // which will continue the request flow through the route middleware pipeline, 
+            // which will continue the request flow through the route middleware pipeline,
             // if a matching route is found, or an exception will be thrown.
             if (!servedFile) {
                 const router: IRouter = this._app.get('router');
 
                 return await new RequestPipeline()
-                    .through(this.globalMiddlewarePipeline())
+                    .through(this._middlewares.globalMiddlewares())
                     .sendTo(router.handle.bind(router), request, response);
             }
         } catch (err) {
@@ -75,25 +75,6 @@ export class Kernal implements IKernal {
             response = this.responseFromError(err, request, response);
         }
         return response;
-    }
-
-    /**
-     * Returns a list of global middleware functions. All the request, except
-     * static file request, should flow through the global middlewares before
-     * dispatched to the router.
-     *
-     * @returns
-     */
-    public globalMiddlewarePipeline(): IMiddleware[] {
-        return this._middlewares
-            .globalMiddlewares()
-            .reduce((prev: IMiddleware[], current: string) => {
-                const nameParam = this._middlewares.middlewareNameParams(current);
-
-                prev.push(this._middlewares.resolveMiddleware(nameParam));
-
-                return prev;
-            }, []);
     }
 
     /**
