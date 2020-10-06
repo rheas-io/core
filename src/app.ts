@@ -351,9 +351,9 @@ export class Application extends Container implements IApp {
             response = await kernal.handle(request, response);
         } catch (err) {
             err.message =
-                'Status 500: Exception handler failure.' + (err.message || 'Server error');
+                'Status 500: Exception handler failure. ' + (err.message || 'Server error');
             response.statusCode = 500;
-            response.setContent(err.message);
+            response.setContent(err.message + '\n\n' + err.stack);
         }
         response = response.prepareResponse();
 

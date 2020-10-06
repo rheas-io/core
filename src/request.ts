@@ -229,7 +229,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @returns
      */
     public cookies(): ICookieManager {
-        return this.getServiceOrThrow('cookies');
+        return this.getServiceOrThrow('cookie');
     }
 
     /**
