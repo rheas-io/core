@@ -123,7 +123,7 @@ export class Request extends IncomingMessage implements IRequest {
     constructor(socket: any) {
         super(socket);
 
-        this._container = new Container();
+        this._container = new Container(this);
         this._headers = new Headers(this.headers);
         this._serviceManager = new ServiceManager(this);
     }
@@ -575,8 +575,8 @@ export class Request extends IncomingMessage implements IRequest {
      * @param resolver
      * @param singleton
      */
-    public bind(name: string, resolver: InstanceHandler, singleton: boolean = false) {
-        return this._container.bind(name, resolver, singleton);
+    public tie(name: string, resolver: InstanceHandler, singleton: boolean = false) {
+        return this._container.tie(name, resolver, singleton);
     }
 
     /**
