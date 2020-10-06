@@ -10,7 +10,7 @@ import { IRequest, IResponse, IDbConnector } from '@rheas/contracts';
 import http, { Server, IncomingMessage, ServerResponse } from 'http';
 import { IApp, InternalAppBindings } from '@rheas/contracts/core/app';
 import { IGetter, IKernal, IServerCreator } from '@rheas/contracts/core';
-import { IServiceManager, IServiceListener } from '@rheas/contracts/services';
+import { IServiceManager, IServiceListener, IDriverManager } from '@rheas/contracts/services';
 
 export class Application extends Container implements IApp {
     /**
@@ -19,6 +19,13 @@ export class Application extends Container implements IApp {
      * @var IApp
      */
     private static instance: IApp;
+
+    /**
+     * Flag is set to true if the application is loaded via CLI.
+     *
+     * @var boolean
+     */
+    protected _runningInConsole: boolean = false;
 
     /**
      * Application environment variable manager. Responsible for caching all the
@@ -90,6 +97,26 @@ export class Application extends Container implements IApp {
     }
 
     /**
+     * Sets the running in console flag to true.
+     *
+     * @returns
+     */
+    public setRunningInConsole(): IApp {
+        this._runningInConsole = true;
+
+        return this;
+    }
+
+    /**
+     * Returns true if the application is running in console.
+     *
+     * @returns
+     */
+    public isRunningInConsole(): boolean {
+        return this._runningInConsole;
+    }
+
+    /**
      * Registers different application paths
      *
      * @param rootPath
@@ -99,6 +126,7 @@ export class Application extends Container implements IApp {
         this.instance('path.env', path.resolve(rootPath, '..', '.env'));
         this.instance('path.configs', path.resolve(rootPath, 'configs'));
         this.instance('path.assets', path.resolve(rootPath, '..', 'assets'));
+        this.instance('path.sessions', path.resolve(rootPath, '..', 'storage', 'sessions'));
     }
 
     /**
@@ -160,7 +188,7 @@ export class Application extends Container implements IApp {
         process.on('SIGUSR1', listener);
         process.on('SIGUSR2', listener);
         process.on('SIGTERM', listener);
-        process.on('uncaughtException', listener);
+        //process.on('uncaughtException', listener);
     }
 
     /**
@@ -169,9 +197,9 @@ export class Application extends Container implements IApp {
      */
     public async terminate() {
         try {
-            const db: IDbConnector<any> = this.get('db');
+            const db: IDriverManager<IDbConnector<any>> = this.get('db');
 
-            await db.closeConnections();
+            await db.getDriver().closeConnections();
 
             return process.exit(0);
         } catch (err) {
@@ -296,12 +324,12 @@ export class Application extends Container implements IApp {
      * when the promise gets resolved.
      */
     public connectToDatabase(): Promise<any> {
-        const connector: IDbConnector<any> | null = this.get('db');
+        const connector: IDriverManager<IDbConnector<any>> = this.get('db');
 
         if (connector === null) {
             throw new Error('No database service is registered. Fix the app providers list');
         }
-        return connector.connect();
+        return connector.getDriver().connect();
     }
 
     /**
