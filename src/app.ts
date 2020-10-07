@@ -155,6 +155,7 @@ export class Application extends Container implements IApp {
     protected registerCoreServices() {
         this._serviceManager.setProviders(this.configs().get('app.providers', {}));
 
+        this._serviceManager.registerServiceByName('core');
         this._serviceManager.registerServiceByName('error');
         this._serviceManager.registerServiceByName('middlewares');
     }
