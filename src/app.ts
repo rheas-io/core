@@ -126,6 +126,7 @@ export class Application extends Container implements IApp {
         this.instance('path.env', path.resolve(rootPath, '..', '.env'));
         this.instance('path.configs', path.resolve(rootPath, 'configs'));
         this.instance('path.assets', path.resolve(rootPath, '..', 'assets'));
+        this.instance('path.views', path.resolve(rootPath, '..', 'resources', 'views'));
         this.instance('path.sessions', path.resolve(rootPath, '..', 'storage', 'sessions'));
     }
 
@@ -164,6 +165,9 @@ export class Application extends Container implements IApp {
      * @param callback
      */
     public registered(callback: () => any): void {
+        if (this._serviceManager.isRegistered()) {
+            return callback();
+        }
         this._serviceManager.registered(callback);
     }
 
@@ -174,6 +178,9 @@ export class Application extends Container implements IApp {
      * @param callback
      */
     public booted(callback: () => any): void {
+        if (this._serviceManager.isBooted()) {
+            return callback();
+        }
         this._serviceManager.booted(callback);
     }
 

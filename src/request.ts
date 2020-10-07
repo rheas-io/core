@@ -219,7 +219,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @return IRedirector
      */
     public redirect(): IRedirector {
-        return this.getServiceOrThrow('redirect');
+        return this.get('redirect');
     }
 
     /**
@@ -229,7 +229,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @returns
      */
     public cookies(): ICookieManager {
-        return this.getServiceOrThrow('cookie');
+        return this.get('cookie');
     }
 
     /**
@@ -239,24 +239,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @returns
      */
     public sessions(): ISessionManager {
-        return this.getServiceOrThrow('session');
-    }
-
-    /**
-     * Returns a service registered in the given name. If no service is
-     * found, an exception is thrown.
-     *
-     * @param name
-     */
-    private getServiceOrThrow(name: string): any {
-        const service = this.get(name);
-
-        if (null === service) {
-            throw new Exception(
-                `${name} service is not registered. Fix the request providers list on config file. Aborting request.`,
-            );
-        }
-        return service;
+        return this.get('session');
     }
 
     /**
