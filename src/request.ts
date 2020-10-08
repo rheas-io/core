@@ -8,7 +8,6 @@ import { RequestParams } from './requestParams';
 import { IRoute } from '@rheas/contracts/routes';
 import { ServiceManager } from '@rheas/services';
 import { RequestContent } from './requestContent';
-import { Exception } from '@rheas/errors/exception';
 import { RequestComponent } from '@rheas/routing/uri';
 import { IncomingForm, Fields, Files } from 'formidable';
 import { ICookieManager } from '@rheas/contracts/cookies';
