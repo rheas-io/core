@@ -1,6 +1,6 @@
 {
   "name": "@rheas/core",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Rheas framework's core server module",
   "main": "index.js",
   "keywords": [
@@ -34,10 +34,10 @@
   },
   "devDependencies": {
     "@rheas/container": "^0.0.2",
-    "@rheas/contracts": "^0.0.5",
+    "@rheas/contracts": "^0.0.6",
     "@rheas/errors": "^0.0.3",
     "@rheas/files": "^0.0.1",
-    "@rheas/routing": "^0.0.2",
+    "@rheas/routing": "^0.0.3",
     "@rheas/services": "^0.0.1",
     "@rheas/support": "^0.0.4",
     "@types/jest": "^25.2.1",
