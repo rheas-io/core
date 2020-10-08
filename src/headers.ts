@@ -4,6 +4,25 @@ import { IHeaders, ICacheManager } from '@rheas/contracts/core';
 
 export class Headers implements IHeaders, ICacheManager {
     /**
+     * The cache-control keys allowed to be set in the `_cacheControls`
+     * object.
+     *
+     * @var array
+     */
+    public static _cacheControlProperties = [
+        'public',
+        'private',
+        'max-age',
+        's-maxage',
+        'no-cache',
+        'no-store',
+        'no-transform',
+        'must-revalidate',
+        'proxy-revalidate',
+        'immutable',
+    ];
+
+    /**
      * All the headers.
      *
      * @var AnyObject
@@ -224,19 +243,24 @@ export class Headers implements IHeaders, ICacheManager {
      * @param value
      */
     public addCacheControl(key: string, value: string | boolean = true) {
-        this._cacheControls[key] = value;
+        key = this.cleanKey(key);
+
+        if (Headers._cacheControlProperties.includes(key)) {
+            this._cacheControls[key] = value;
+        }
 
         return this;
     }
 
     /**
-     * Removes the cache-control by setting it to false. Keys with false
-     * as value won't be added on the header.
+     * Removes the cache-control key.
      *
      * @param key
      */
     public removeCacheControl(key: string) {
-        this._cacheControls[key] = false;
+        key = this.cleanKey(key);
+
+        delete this._cacheControls[key];
 
         return this;
     }
@@ -248,6 +272,8 @@ export class Headers implements IHeaders, ICacheManager {
      * @param key
      */
     public hasCacheControl(key: string): boolean {
+        key = this.cleanKey(key);
+
         return this._cacheControls[key] !== undefined && this._cacheControls[key] !== false;
     }
 
@@ -259,6 +285,8 @@ export class Headers implements IHeaders, ICacheManager {
      * @param key
      */
     public getCacheControl(key: string, defaultValue: any = null): string {
+        key = this.cleanKey(key);
+
         if (this.hasCacheControl(key)) {
             return this._cacheControls[key];
         }
@@ -354,5 +382,36 @@ export class Headers implements IHeaders, ICacheManager {
      */
     protected cleanKey(key: string): string {
         return Str.replace(key, '_', '-').toLowerCase();
+    }
+
+    /**
+     * Returns a string value that can be used to set cache-control header on the
+     * response.
+     *
+     * @returns
+     */
+    public computedCacheControl(): string {
+        if (this.hasCacheControl('no-store')) {
+            return 'no-store';
+        }
+        let cacheHeader = Object.keys(this._cacheControls).reduce((prev, current) => {
+            // Don't add the cache-control
+            if (this._cacheControls[current] === false) {
+                return prev;
+            }
+            // Add the property only without any value. For properties like,
+            // public, private, immutable etc
+            if (this._cacheControls[current] === true) {
+                return prev + current + ', ';
+            }
+
+            // Add the property name and also the value. For properties like,
+            // max-age, s-maxage etc.
+            return prev + current + '=' + this._cacheControls[current] + ', ';
+        }, '');
+
+        cacheHeader = Str.trimEnd(cacheHeader.trim(), ',');
+
+        return cacheHeader || 'private, no-cache';
     }
 }

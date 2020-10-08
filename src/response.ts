@@ -78,7 +78,7 @@ export class Response extends ServerResponse implements IResponse {
 
     /**
      * Sets an html view as the content.
-     * 
+     *
      * @param viewPath
      * @param data
      */
@@ -107,7 +107,7 @@ export class Response extends ServerResponse implements IResponse {
      *
      * @returns
      */
-    public cache(): ICacheManager {
+    public cache(): IHeaders & ICacheManager {
         return this.__headers;
     }
 
@@ -151,8 +151,6 @@ export class Response extends ServerResponse implements IResponse {
      * @param request
      */
     public prepareResponse(): IResponse {
-        //this.setHeader('Content-Length', this._content.length);
-
         if (this.hasInformationalStatus() || this.hasEmptyStatus()) {
             this.setEmptyContent();
         }
@@ -164,6 +162,24 @@ export class Response extends ServerResponse implements IResponse {
             this.prepareCharset();
             this.prepareTransferEncoding();
             this.prepareForHead();
+
+            // Add expires header.
+            if (this.cache().has('Expires')) {
+                this.setHeader('Expires', this.cache().get('Expires'));
+            }
+
+            // Add Last-Modified header.
+            if (this.cache().has('Last-Modified')) {
+                this.setHeader('Last-Modified', this.cache().get('Last-Modified'));
+            }
+
+            // Add ETag header.
+            if (this.cache().has('ETag')) {
+                this.setHeader('ETag', this.cache().get('ETag'));
+            }
+
+            // Add the cache-control header.
+            this.setHeader('Cache-Control', this.cache().computedCacheControl());
         }
 
         return this;
