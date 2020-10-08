@@ -1,5 +1,5 @@
+import { AnyObject } from '@rheas/contracts';
 import { IGetter } from '@rheas/contracts/core';
-import { StringObject } from '@rheas/contracts';
 import { files } from '@rheas/support/helpers/files';
 import { IFileManager } from '@rheas/contracts/files';
 
@@ -21,9 +21,9 @@ export class EnvManager implements IGetter {
     /**
      * Caches environment variables
      *
-     * @var StringObject
+     * @var AnyObject
      */
-    protected _envVariables: StringObject | null = null;
+    protected _envVariables: AnyObject | null = null;
 
     /**
      * Creates a new environment variable handler.
@@ -54,7 +54,7 @@ export class EnvManager implements IGetter {
      *
      * @returns
      */
-    public getEnvVariables(): StringObject {
+    public getEnvVariables(): AnyObject {
         if (this._envVariables === null) {
             this._envVariables = this.readEnvFile();
         }
@@ -75,7 +75,7 @@ export class EnvManager implements IGetter {
      *
      * @return object
      */
-    protected readEnvFile(): StringObject {
+    protected readEnvFile(): AnyObject {
         const fs: IFileManager = files();
 
         try {
@@ -97,8 +97,8 @@ export class EnvManager implements IGetter {
      *
      * @param contents
      */
-    private parseContents(contents: string): StringObject {
-        const parsed: StringObject = {};
+    private parseContents(contents: string): AnyObject {
+        const parsed: AnyObject = {};
 
         const RE_KEY_VAL_MATCH = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/;
         const RE_NEWLINES = /\\n/g;
@@ -137,8 +137,9 @@ export class EnvManager implements IGetter {
                 if (isSingleQuoted || isDoubleQuoted) {
                     val = val.substring(1, end).replace(RE_NEWLINES, '\n');
                 }
+                const valLower = val.toLowerCase();
 
-                parsed[key] = val;
+                parsed[key] = valLower === 'true' ? true : valLower === 'false' ? false : val;
             });
 
         return parsed;
