@@ -88,11 +88,8 @@ export class Kernal implements IKernal {
         const staticFilePath = await this.staticFileExistsForRequest(request);
 
         if (staticFilePath) {
-            const mimeType = request.contents().getMimeType(staticFilePath);
-
-            if (mimeType) {
-                request.contents().setFormat(mimeType);
-            }
+            request.contents().setFormat(staticFilePath);
+            
             return response.setContent(await this._fileManager.readFile(staticFilePath));
         }
         return false;
