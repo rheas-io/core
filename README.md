@@ -207,7 +207,7 @@ Dependency injection is an essential design pattern to follow when we have to wo
 
 Because, our exposed API of controllers and middlewares are pure functions and they have a strict definition which accepts the `request` container as a parameter.
 
-As mentioned in the Lifecycle section, Rheas framework has two lifecycles - an application level lifecycle and a request level lifecycle. To facilitate this, we have designed our `Application` instance as a container and each Request object is also a container.
+As mentioned in the Lifecycle section, Rheas framework has two lifecycles - an application lifecycle and a request lifecycle. To facilitate this, we have designed our `Application` instance as a container and each Request object is also a container.
 
 When a request lifecycle begins, Rheas automatically registers the application container as a binding on the request container. This gives the request container access to all the services/bindings registered on the application container also.
 
@@ -299,7 +299,7 @@ Rheas frameworks' in-built cookie service provider is shown above. As you can se
 
 **What this service provider do?**
 
-Say, you register this on the request lifecycle with the alias `cookie`. When you executes `request.get('cookie')` for the first time in the current lifecycle, the framework will create a singleton binding on the request container for the key `cookie` and maps it to the `CookieManager` object created above. The parameter of the `serviceResolver` is the the container in which the service has to be registered, in this case `request`.
+Say, you register this on the request lifecycle with the alias `cookie`. When you executes `request.get('cookie')` for the first time in the current lifecycle, the framework will create a singleton binding on the request container for the `CookieManager` object and maps it to the key `cookie`. The parameter of the `serviceResolver` is the the container in which the service has to be registered, in this case `request`.
 
 The underlying `register` function of the base `ServiceProvider` class is 
 
