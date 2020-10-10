@@ -1,4 +1,4 @@
-<p align='center'><img src="https://www.kaysy.io/assets/images/rheas-full.svg"></p>
+<p align='center'><img src="https://www.kaysy.io/images/rheas-full.svg"></p>
 
 ## About Rheas
 
@@ -322,6 +322,15 @@ If you don't want to use a singleton, override the `register` function on your s
 - Move CPU intensive operations like encryption and decryption to worker threads.
 - Add error view files before release.
 - Add logging module before release.
+
+## Sponsor
+
+[Kaysy LLC](https://www.kaysy.io/) sponsors the development of this framework. Kaysy is an internet company working on SaaS products and Open-Source softwares.
+
+## Community
+
+**Author -** [Kalesh Kaladharan](https://twitter.com/kalesh_13/)  
+**Twitter -** [Kaysy LLC](https://twitter.com/kaysyio/)
 
 ## License
 
