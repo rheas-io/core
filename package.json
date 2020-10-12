@@ -1,6 +1,6 @@
 {
   "name": "@rheas/core",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Rheas framework's core server module",
   "main": "index.js",
   "keywords": [
