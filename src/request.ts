@@ -3,22 +3,25 @@ import { Headers } from './headers';
 import { IncomingMessage } from 'http';
 import { Str } from '@rheas/support/str';
 import { Container } from '@rheas/container';
+import { Validator } from '@rheas/validation';
 import { RequestInput } from './requestInput';
 import { RequestParams } from './requestParams';
 import { IRoute } from '@rheas/contracts/routes';
 import { ServiceManager } from '@rheas/services';
 import { RequestContent } from './requestContent';
 import { RequestComponent } from '@rheas/routing/uri';
+import { IValidator } from '@rheas/contracts/validators';
 import { IncomingForm, Fields, Files } from 'formidable';
 import { ICookieManager } from '@rheas/contracts/cookies';
 import { IServiceManager } from '@rheas/contracts/services';
+import { ValidationException } from '@rheas/errors/validation';
 import { IRequestComponent } from '@rheas/contracts/routes/uri';
-import { IRequest, AnyObject, IResponse } from '@rheas/contracts';
 import { IApp, IHeaders, IRedirector } from '@rheas/contracts/core';
 import { ISession, ISessionManager } from '@rheas/contracts/sessions';
 import { SuspiciousOperationException } from '@rheas/errors/suspicious';
 import { BindingNotFoundException } from '@rheas/errors/bindingNotFound';
 import { IRequestInput, IRequestParams, IRequestContent } from '@rheas/contracts/core';
+import { IRequest, AnyObject, IResponse, StringObject, KeyValue } from '@rheas/contracts';
 import { IContainer, InstanceHandler, IContainerInstance } from '@rheas/contracts/container';
 
 export class Request extends IncomingMessage implements IRequest {
@@ -209,6 +212,26 @@ export class Request extends IncomingMessage implements IRequest {
         this._params.setParameters(this.getPathComponents());
 
         return this;
+    }
+
+    /**
+     * Validates a request for the given rules. If it does not pass, throws a
+     * validation exception.
+     *
+     * @param rules
+     * @param messages
+     * @param aliases
+     */
+    public validate(
+        rules: StringObject,
+        messages: KeyValue<StringObject> = {},
+        aliases: StringObject = {},
+    ) {
+        const validator: IValidator = new Validator(this.inputs().all(), rules, messages, aliases);
+
+        if (validator.fails()) {
+            throw new ValidationException(validator);
+        }
     }
 
     /**
