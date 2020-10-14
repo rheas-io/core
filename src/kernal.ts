@@ -90,6 +90,9 @@ export class Kernal implements IKernal {
         if (staticFilePath) {
             request.contents().setFormat(staticFilePath);
             
+            // TODO
+            response.cache().setPublic().setMaxAge(86400);
+
             return response.setContent(await this._fileManager.readFile(staticFilePath));
         }
         return false;
