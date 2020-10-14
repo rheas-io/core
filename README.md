@@ -1,4 +1,4 @@
-<p align='center'><img src="https://www.kaysy.io/images/rheas-full.svg"></p>
+<p align='center'><img src="http://www.kaysy.io/images/rheas-full.svg"></p>
 
 ## About Rheas
 
