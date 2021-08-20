@@ -4,6 +4,7 @@ import { Response } from './response';
 import { EnvManager } from './envManager';
 import https, { ServerOptions } from 'https';
 import { Container } from '@rheas/container';
+import { CliServiceProvider } from '@rheas/cli';
 import { ConfigManager } from './configManager';
 import { ServiceManager } from '@rheas/services';
 import { IRequest, IResponse, IDbConnector } from '@rheas/contracts';
@@ -154,6 +155,7 @@ export class Application extends Container implements IApp {
      */
     protected registerCoreServices() {
         this._serviceManager.setProviders(this.configs().get('app.providers', {}));
+        this._serviceManager.newService('cli', CliServiceProvider);
 
         this._serviceManager.registerServiceByName('core');
         this._serviceManager.registerServiceByName('error');
