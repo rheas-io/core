@@ -189,8 +189,7 @@ export class Request extends IncomingMessage implements IRequest {
      * @returns
      */
     public async getContents(): Promise<{ files: Files; fields: Fields }> {
-        const form = new IncomingForm();
-        form.multiples = true;
+        const form = new IncomingForm({ multiples: true });
 
         return await new Promise((resolve, reject) => {
             form.parse(this, (err, fields, files) => {
