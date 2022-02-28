@@ -273,6 +273,17 @@ export class Request extends IncomingMessage implements IRequest {
     }
 
     /**
+     * Returns the bearer token from the request
+     *
+     * @returns
+     */
+    public bearerToken(): string {
+        const header = this.reqHeaders().get('Authorization', '');
+
+        return Str.trimStart(header, 'Bearer ');
+    }
+
+    /**
      * Returns true if the request method is one of HEAD, GET
      * and OPTIONS.
      *
